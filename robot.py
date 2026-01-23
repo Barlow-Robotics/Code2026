@@ -2,25 +2,28 @@
 import commands2
 import wpilib
 
+from controller import Controller
+
+
 class Robot(wpilib.TimedRobot):
     def robotInit(self) -> None:
         """Robot initialization function"""
 
+        self.controller = Controller()
         self.scheduler = commands2.CommandScheduler.getInstance()
 
     def robotPeriodic(self):
         try:
-            print("I am a robot")
             self.scheduler.run()
         except Exception as e:
-            self.log.error(e)
-            self.nt.getTable("errors").putString("command scheduler", str(e))
+            print(e)
+            # self.nt.getTable("errors").putString("command scheduler", str(e))
 
     def autonomousPeriodic(self) -> None:
         pass
 
     def teleopInit(self):
-        pass
+        self.controller.setupTeleop()
 
     def teleopPeriodic(self) -> None:
         pass
