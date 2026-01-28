@@ -1,3 +1,26 @@
+[project]
+name = "barlow-code-2026"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+
+# This controls the libraries installed in the HOST environment
+# This is important for simulation and local debugging
+dependencies = [
+    # The host environment needs these tools for development, debugging, etc.
+    "debugpy",
+    "ruff",
+
+    # This list should match the `tool.robotpy.robotpy_extras` or `uv sync` will remove the packages again
+    "robotpy[apriltag,commands2,pathplannerlib,phoenix6,rev,sim]",
+
+    # This list should match the `tool.robotpy.requires`
+    "numpy",
+    "phoenix6",
+    #"photonlibpy",
+]
+
 #
 # Use this configuration file to control what RobotPy packages are installed
 # on your RoboRIO
@@ -6,12 +29,12 @@
 [tool.robotpy]
 
 # Version of robotpy this project depends on
-robotpy_version = "2026.1.1"
+robotpy_version = "2026.2.1"
 
-# Which core WPILib components should be installed
+# Which optional robotpy components should be installed?
 # -> equivalent to `pip install robotpy[extra1, ...]
 components = [
-    # "all",
+    #"all",
     # "apriltag",
     "commands2",
     # "cscore",
@@ -20,13 +43,6 @@ components = [
     # "xrp",
 ]
 
-# Other pip packages to install (including vendor packages)
-requires = [
-    "phoenix6~=26.1",
-    # "photonlibpy",
-    # "robotpy-ctre",  # Phoenix 5
-    # "robotpy-navx",
-    # "robotpy-pathplannerlib",
-    # "robotpy-playingwithfusion",
-    # "robotpy-rev",
-]
+# Other pip packages to install, such as vendor packages (each element
+# is equivalent to a line in requirements.txt)
+requires = ["numpy", "phoenix6"]
