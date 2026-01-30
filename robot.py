@@ -3,13 +3,14 @@ import commands2
 import wpilib
 
 from controller import Controller
+from subsystems.Shooter import Shooter
 
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self) -> None:
         """Robot initialization function"""
-
-        self.controller = Controller()
+        self.shooterSubsystem = Shooter()
+        self.controller = Controller(self.shooterSubsystem)
         self.scheduler = commands2.CommandScheduler.getInstance()
 
     def robotPeriodic(self):
@@ -24,6 +25,7 @@ class Robot(wpilib.TimedRobot):
 
     def teleopInit(self):
         self.controller.setupTeleop()
+        
 
     def teleopPeriodic(self) -> None:
         pass
