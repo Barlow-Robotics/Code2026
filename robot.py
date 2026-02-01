@@ -3,7 +3,7 @@ import commands2
 import wpilib
 
 from controller import Controller
-from subsystems.Shooter import Shooter
+from subsystems import Shooter
 
 
 class Robot(wpilib.TimedRobot):

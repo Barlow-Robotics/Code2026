@@ -1,6 +1,5 @@
 from commands2 import button, cmd
-from subsystems.Shooter import Shooter
-from pynput import keyboard  # Import the keyboard listener
+from subsystems import Shooter
 from wpilib.simulation import JoystickSim
 
 
