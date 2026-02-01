@@ -19,6 +19,7 @@ class Shooter(commands2.Subsystem):
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(0, enable_foc=False)
         self.target_velocity = -1
         self.set_velocity_command = cmd.runOnce(self.set_velocity)
+        self.stop_command = cmd.runOnce(self.stop)
 
     def init(self):
         pass
@@ -41,7 +42,7 @@ class Shooter(commands2.Subsystem):
         self.motor.set_control(
             self._motion_magic_velocity_voltage.with_velocity(
                 0
-            ).with_acceleration(0)
+            ).with_acceleration(0.1)
         )
         
     def update_table(self):
