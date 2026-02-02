@@ -31,6 +31,7 @@ class Controller:
     def setupTeleop(self):
         self.DRIVER.button(1).onTrue(self.test_controller.trigger_cmd)
         self.DRIVER.button(2).onTrue(self.shooterSub.set_velocity_command)
+        self.DRIVER.button(3).onTrue(self.shooterSub.stop_command)
         # self.joystick_sim.axisGreaterThan(0, 0).onTrue(cmd.runOnce(self.shooterSub.set_velocity(1))).onFalse(cmd.runOnce(self.shooterSub.stop()))
         
         # def handle_simulated_input(self, key):
