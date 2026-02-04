@@ -36,7 +36,7 @@ class Shooter(commands2.Subsystem):
         )
 
         INTAKE_CONFIG_BOTTOM._apply_settings(self.motor_leader_bottom, inverted=False)
-        INTAKE_CONFIG_BOTTOM._apply_settings(self.motor_leader_top, inverted=False)
+        INTAKE_CONFIG_TOP._apply_settings(self.motor_leader_top, inverted=False)
 
         self.motor_follower_bottom.set_control(controls.Follower(motor_id_leader_bottom, motor_alignment=MotorAlignmentValue.ALIGNED))
         self.motor_follower_top.set_control(controls.Follower(motor_id_leader_top, motor_alignment=MotorAlignmentValue.ALIGNED))
@@ -76,7 +76,7 @@ class Shooter(commands2.Subsystem):
                 velocity
             ).with_acceleration(0.1)
         )
-        # print("B")
+        
         self.target_velocity = velocity
 
     def stop(self):
