@@ -20,7 +20,7 @@ class PhysicsEngine:
         self.physics_controller = physics_controller
 
         # Get the shooter motor from the robot
-        self.shooter_motor: TalonFX = robot.shooterSubsystem.motor
+        self.shooter_motor: TalonFX = robot.shooterSubsystem.motor_leader_top
 
         # Flywheel physics model
         # Using a Falcon 500 motor with a 1:1 gear ratio
