@@ -29,10 +29,10 @@ class Shooter(commands2.Subsystem):
         )
 
         self.motor_leader_bottom: TalonFX = TalonFX(
-            motor_id_leader_bottom,
+            motor_id_leader_top,
         )
         self.motor_follower_bottom: TalonFX = TalonFX(
-            motor_id_follower_bottom,
+            motor_id_follower_top,
         )
 
         INTAKE_CONFIG_BOTTOM._apply_settings(self.motor_leader_bottom, inverted=False)
