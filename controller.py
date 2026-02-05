@@ -1,5 +1,5 @@
 from commands2 import button, cmd
-from subsystems import Shooter
+from subsystems import Intake
 from wpilib.simulation import JoystickSim
 
 
@@ -17,8 +17,8 @@ class TestController:
 
 
 class Controller:
-    def __init__(self, shooterSub: Shooter):
-        self.shooterSub = shooterSub
+    def __init__(self, intakeSub: Intake):
+        self.intakeSub = intakeSub
         self.OPERATOR = button.CommandJoystick(0)
         self.DRIVER = button.CommandJoystick(1)
 
@@ -30,9 +30,9 @@ class Controller:
 
     def setupTeleop(self):
         self.DRIVER.button(1).onTrue(self.test_controller.trigger_cmd)
-        self.DRIVER.button(2).onTrue(self.shooterSub.set_velocity_command)
-        self.DRIVER.button(3).onTrue(self.shooterSub.stop_command)
-        # self.joystick_sim.axisGreaterThan(0, 0).onTrue(cmd.runOnce(self.shooterSub.set_velocity(1))).onFalse(cmd.runOnce(self.shooterSub.stop()))
+        self.DRIVER.button(2).onTrue(self.intakeSub.set_velocity_command)
+        self.DRIVER.button(3).onTrue(self.intakeSub.stop_command)
+        # self.joystick_sim.axisGreaterThan(0, 0).onTrue(cmd.runOnce(self.intakeSub.set_velocity(1))).onFalse(cmd.runOnce(self.intakeSub.stop()))
         
         # def handle_simulated_input(self, key):
     #     """Handle keyboard input in simulation."""

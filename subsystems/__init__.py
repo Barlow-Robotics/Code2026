@@ -1,1 +1,1 @@
-from .shooter import Shooter as Shooter
+from .intake import Intake as Intake
