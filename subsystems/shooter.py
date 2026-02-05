@@ -41,7 +41,7 @@ class Shooter(commands2.Subsystem):
         self.motor_follower_bottom.set_control(controls.Follower(motor_id_leader_bottom, motor_alignment=MotorAlignmentValue.ALIGNED))
         self.motor_follower_top.set_control(controls.Follower(motor_id_leader_top, motor_alignment=MotorAlignmentValue.ALIGNED))
 
-        self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(0, enable_foc=False)
+        self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(0, enable_foc=foc_active)
         self.target_velocity = -1
         self.set_velocity_command = cmd.runOnce(self.set_velocity)
         self.stop_command = cmd.runOnce(self.stop)
