@@ -45,7 +45,7 @@ class Intake(commands2.Subsystem):
         INTAKE_CONFIG_ROLLER_TOP._apply_settings(self.motor_roller_top, inverted=True)
         INTAKE_CONFIG_ROLLER_BOTTOM._apply_settings(self.motor_roller_bottom, inverted=False)
 
-        self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(0, enable_foc=False)
+        self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(0, enable_foc=foc_active)
         self.target_velocity = -1
         self.set_velocity_command = cmd.runOnce(self.set_velocity)
         self.stop_command = cmd.runOnce(self.stop)
