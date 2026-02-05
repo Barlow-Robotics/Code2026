@@ -1,5 +1,5 @@
 from commands2 import button, cmd
-from subsystems import Intake
+from subsystems import Intake, IntakePositions
 from wpilib.simulation import JoystickSim
 
 
@@ -32,6 +32,9 @@ class Controller:
         self.DRIVER.button(1).onTrue(self.test_controller.trigger_cmd)
         self.DRIVER.button(2).onTrue(self.intakeSub.set_velocity_command)
         self.DRIVER.button(3).onTrue(self.intakeSub.stop_command)
+        self.DRIVER.button(4).onTrue(self.intakeSub.goto_position_cmmand[IntakePositions.DEPLOYED])
+        self.DRIVER.button(5).onTrue(self.intakeSub.goto_position_cmmand[IntakePositions.STOWED])
+        self.DRIVER.button(6).onTrue(self.intakeSub.goto_position_cmmand[IntakePositions.HOME])
         # self.joystick_sim.axisGreaterThan(0, 0).onTrue(cmd.runOnce(self.intakeSub.set_velocity(1))).onFalse(cmd.runOnce(self.intakeSub.stop()))
         
         # def handle_simulated_input(self, key):
