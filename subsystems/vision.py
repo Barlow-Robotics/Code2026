@@ -6,7 +6,7 @@ from photonlibpy.photonPoseEstimator import PhotonPoseEstimator, PoseStrategy
 from robotpy_apriltag import AprilTagFieldLayout, AprilTagField
 from wpimath.geometry import Transform3d, Pose3d, Translation2d
 from wpilib import TimedRobot
-
+from utils.field_constants import _layout
 
 class PhotonCamCustom:
     def __init__(self, name: str, robot_to_camera: Transform3d):
@@ -14,12 +14,12 @@ class PhotonCamCustom:
         self.name = name
         self.robot_to_camera = robot_to_camera
         self.estimator = PhotonPoseEstimator(
-            AprilTagFieldLayout.loadField(AprilTagField.k2025ReefscapeAndyMark),
-            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+            _layout,
+            # PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
             self.cam,
             self.robot_to_camera,
         )
-        self.estimator.multiTagFallbackStrategy = PoseStrategy.LOWEST_AMBIGUITY
+        # self.estimator.multiTagFallbackStrategy = PoseStrategy.LOWEST_AMBIGUITY
         self.table = (
             ntcore.NetworkTableInstance.getDefault()
             .getTable("Cameras")
@@ -32,14 +32,12 @@ class PhotonCamCustom:
     def update_tables(self):
         if not TimedRobot.isSimulation():
             result = self.cam.getLatestResult()
-            # multitagPose = result.multiTagResult.estimatedPose.best
-            pose = self.estimator.update(result)
             camEstPose = self.estimator.estimateCoprocMultiTagPose(result)
             if camEstPose is None:
-                camEstPose = self.camPoseEst.estimateLowestAmbiguityPose(result)
+                camEstPose = self.estimator.estimateLowestAmbiguityPose(result)
 
-            if pose:
-                estimatedPose = pose.estimatedPose.toPose2d()
+            if camEstPose:
+                estimatedPose = camEstPose.estimatedPose.toPose2d()
                 self.table.putNumberArray(
                     "estimated pose",
                     [
@@ -66,13 +64,23 @@ class PhotonCamCustom:
         """
         Returns a Pose3d of the estimated robot position
         """
-        return self.estimator.update(self.cam.getLatestResult()).estimatedPose
+        result = self.cam.getLatestResult()
+        camEstPose = self.estimator.estimateCoprocMultiTagPose(result)
+        if camEstPose is None:
+            camEstPose = self.estimator.estimateLowestAmbiguityPose(result)
+
+        return camEstPose.estimatedPose
 
     def get_result(self) -> EstimatedRobotPose | None:
         """
         Returns an EstimatedRobotPose, which includes pose, timestamp, tags, and strategy
         """
-        return self.estimator.update(self.cam.getLatestResult())
+        result = self.cam.getLatestResult()
+        camEstPose = self.estimator.estimateCoprocMultiTagPose(result)
+        if camEstPose is None:
+            camEstPose = self.estimator.estimateLowestAmbiguityPose(result)
+
+        return camEstPose
 
 
 class PhotonController:
