@@ -15,11 +15,10 @@ class PhotonCamCustom:
         self.robot_to_camera = robot_to_camera
         self.estimator = PhotonPoseEstimator(
             _layout,
-            # PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
             self.cam,
             self.robot_to_camera,
         )
-        # self.estimator.multiTagFallbackStrategy = PoseStrategy.LOWEST_AMBIGUITY
+
         self.table = (
             ntcore.NetworkTableInstance.getDefault()
             .getTable("Cameras")
