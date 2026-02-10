@@ -16,7 +16,7 @@ from robotcontainer import RobotContainer
 from phoenix6 import HootAutoReplay
 
 
-class MyRobot(commands2.TimedCommandRobot):
+class Robot(commands2.TimedCommandRobot):
     """
     Command v2 robots are encouraged to inherit from TimedCommandRobot, which
     has an implementation of robotPeriodic which runs the scheduler for you
@@ -97,4 +97,4 @@ class MyRobot(commands2.TimedCommandRobot):
         commands2.CommandScheduler.getInstance().cancelAll()
 
 if __name__ == "__main__":
-    wpilib.run(MyRobot)
+    wpilib.run(Robot)
