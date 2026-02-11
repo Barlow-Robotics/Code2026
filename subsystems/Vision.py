@@ -32,10 +32,11 @@ class Vision(commands2.Subsystem):
         self.drive_sub = drive_sub
         
         # BW PhotonVision cameras
-        self.elevator_camera = PhotonCamera(elevator_camera_name)
-        self.climb_camera = PhotonCamera(climb_camera_name)
-        self.right_climb_cam = PhotonCamera(right_climb_cam_name)
-        
+        self.back_left_swerve_cam = PhotonCamera(elevator_camera_name)
+        self.back_right_swerve_cam = PhotonCamera(climb_camera_name)
+        self.front_left_swerve_cam = PhotonCamera(right_climb_cam_name)
+        self.front_right_swerve_cam = PhotonCamera(right_climb_cam_name)
+
         self.april_tag_field_layout = AprilTagFieldLayout.loadField(
             AprilTagField.k2026RebuiltAndyMark
         )
@@ -60,7 +61,15 @@ class Vision(commands2.Subsystem):
         
         # NetworkTables for logging
         self.nt = ntcore.NetworkTableInstance.getDefault().getTable("Vision")
+    
+    def periodic(self):
+        """Called periodically by the scheduler"""
+        if not self.disabled_vision:
+            current_pose = self.drive_sub.get_pose()
+            self.update_vision_localization(current_pose)
         
+        self.advantage_kit_logging()
+      
     def get_layout(self) -> AprilTagFieldLayout:
         """Returns the AprilTag field layout"""
         return self.april_tag_field_layout
@@ -68,13 +77,15 @@ class Vision(commands2.Subsystem):
     def disable_the_vision(self, val: bool):
         """Enable or disable vision processing"""
         self.disabled_vision = val
-    
+
+
     def update_vision_localization(self, drive_pose: Pose2d):
         """Update pose estimation using vision measurements"""
         # BW: Update from elevator camera
         vision_est = self.get_estimated_global_pose(
-            drive_pose, self.elevator_camera, self.elevator_photon_estimator
+            drive_pose, self.back_left_swerve_cam, self.elevator_photon_estimator
         )
+        
         if vision_est is not None:
             self.add_vision_measure(vision_est, "ElevatorCamera")
             self.nt.putNumberArray(
@@ -88,7 +99,7 @@ class Vision(commands2.Subsystem):
         
         # BW: Update from right climb camera
         vision_est = self.get_estimated_global_pose(
-            drive_pose, self.right_climb_cam, self.right_climb_photon_estimator
+            drive_pose, self.front_left_swerve_cam, self.right_climb_photon_estimator
         )
         if vision_est is not None:
             self.add_vision_measure(vision_est, "RightClimbCamera")
@@ -101,16 +112,7 @@ class Vision(commands2.Subsystem):
                 ],
             )
     
-    def periodic(self):
-        """Called periodically by the scheduler"""
-        if not self.disabled_vision:
-            current_pose = self.drive_sub.get_pose()
-            self.update_vision_localization(current_pose)
-        
-        self.advantage_kit_logging()
-    
-    
-    def get_camera_vision_est(self, result: PhotonPipelineResult, camera: PhotonCamera, estimator: PhotonPoseEstimator) -> EstimatedRobotPose | None:
+    def get_camera_vision_est(self, result: PhotonPipelineResult, estimator: PhotonPoseEstimator) -> EstimatedRobotPose | None:
         """
         Returns an EstimatedRobotPose, which includes pose, timestamp, tags, and strategy
         """
@@ -144,7 +146,7 @@ class Vision(commands2.Subsystem):
         
         # BW: Process all unread results
         vision_est = None
-        for result in camera.getAllUnreadResults():
+        for result in camera.getAllUnreadResults(): #BW: Note why are we listing out this object 
             vision_est = self.get_camera_vision_est(result, camera, pose_estimator)
             # OR UPDATE STD DEVS
             # self.update_estimation_std_devs(vision_est, result.getTargets(), pose_estimator)
