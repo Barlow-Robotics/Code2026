@@ -16,6 +16,7 @@ from phoenix6 import swerve
 from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
 from wpimath.units import rotationsToRadians
+from subsystems import Vision
 
 
 class RobotContainer:
@@ -53,6 +54,7 @@ class RobotContainer:
         self._joystick = CommandXboxController(0)
 
         self.drivetrain = TunerConstants.create_drivetrain()
+        self.visionSub = Vision(drive_sub=self.drivetrain)
 
         # Configure the button bindings
         self.configureButtonBindings()

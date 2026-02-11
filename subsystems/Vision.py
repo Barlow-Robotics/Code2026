@@ -37,19 +37,19 @@ class Vision(commands2.Subsystem):
         self.right_climb_cam = PhotonCamera(right_climb_cam_name)
         
         self.april_tag_field_layout = AprilTagFieldLayout.loadField(
-            AprilTagField.k2026
+            AprilTagField.k2026RebuiltAndyMark
         )
         
-        self.elevator_photon_estimator = PhotonPoseEstimator(
+        self.elevator_photon_estimator = PhotonPoseEstimator( #BW: Don't need camera, TODO check out. 
             self.april_tag_field_layout,
-            self.elevator_camera,
-            elevator_cam_to_robot,
+            # self.elevator_camera,
+            elevator_cam_to_robot
         )
         
-        self.right_climb_photon_estimator = PhotonPoseEstimator(
+        self.right_climb_photon_estimator = PhotonPoseEstimator( # BW: Don't need camera, TODO check out. 
             self.april_tag_field_layout,
-            self.right_climb_cam,
-            right_climb_cam_to_robot,
+            # self.right_climb_cam,
+            right_climb_cam_to_robot
         )
 
         self.disabled_vision = False
