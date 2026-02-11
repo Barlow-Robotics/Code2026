@@ -14,7 +14,7 @@ class VisionConstants:
     
     # Camera configuration
     CAMERA_LIGHT_ID = 0  # NEED TO FIX/CHANGE
-    CLIMB_CAMERA_NAME = "Climb_Camera"
+    CLIMB_CAMERA_NAME = "Climb_Camera" 
     ELEVATOR_CAMERA_NAME = "Reef_Camera"
     RIGHT_CLIMB_CAM_NAME = "Side_Climb_Camera"
     K_SINGLE_TAG_STD_DEVS = [4.0, 4.0, 8.0]
