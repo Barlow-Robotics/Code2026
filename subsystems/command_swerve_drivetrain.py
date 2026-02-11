@@ -322,7 +322,7 @@ class CommandSwerveDrivetrain(Subsystem, TunerSwerveDrivetrain):
             vision_measurement_std_devs
         )
 
-    def get_pose(self) -> Pose2d | None:
+    def get_pose_at_timestamp(self) -> Pose2d | None:
         
         """
         Return the pose at a given timestamp, if the buffer is not empty.
@@ -334,6 +334,10 @@ class CommandSwerveDrivetrain(Subsystem, TunerSwerveDrivetrain):
         """
         timestamp = CommandSwerveDrivetrain.get_timestamp()
         return TunerSwerveDrivetrain.sample_pose_at(self, utils.fpga_to_current_time(timestamp))
+
+    def get_pose(self) -> Pose2d | None:
+        return self.get_state().pose
+
     
     @staticmethod
     def get_timestamp():
