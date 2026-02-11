@@ -17,3 +17,7 @@ We use ruff for formatting code. This ensures consistency and minimizes white-sp
     uv run ruff format
     uv run ruff check
     ```
+
+
+TODO at comp:
+AprilTagField.k2026RebuiltAndyMark or AprilTagField.k2026RebuiltWelded depending on comp. 

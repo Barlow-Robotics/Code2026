@@ -10,19 +10,14 @@ from wpimath.geometry import Transform3d, Pose2d, Pose3d, Translation2d
 from wpimath import units
 from wpilib import TimedRobot, DriverStation, RobotBase
 import numpy as np
-
-# Assuming you have a constants module with VisionConstants
 from utils import DriveConstants, VisionConstants
-from subsystems import Drivetrain  # Your Drive subsystem
+from subsystems import Drivetrain 
 import commands2
 
 class Vision(commands2.Subsystem):
     """
     Vision subsystem for AprilTag-based pose estimation using PhotonVision
     """
-    
-    # Standard deviations for vision measurements
-    # (Fake values. Experiment and determine estimation noise on an actual robot.)
     
     def __init__(
         self,
@@ -41,33 +36,22 @@ class Vision(commands2.Subsystem):
         self.climb_camera = PhotonCamera(climb_camera_name)
         self.right_climb_cam = PhotonCamera(right_climb_cam_name)
         
-        # Load field layout
         self.april_tag_field_layout = AprilTagFieldLayout.loadField(
-            AprilTagField.k2026RebuiltAndyMark
+            AprilTagField.k2026
         )
         
-        # Create pose estimators
         self.elevator_photon_estimator = PhotonPoseEstimator(
             self.april_tag_field_layout,
-            # VisionConstants.PRIMARY_VISION_STRATEGY,
             self.elevator_camera,
             elevator_cam_to_robot,
         )
-        # self.elevator_photon_estimator.multiTagFallbackStrategy = (
-        #     VisionConstants.FALLBACK_VISION_STRATEGY
-        # )
         
         self.right_climb_photon_estimator = PhotonPoseEstimator(
             self.april_tag_field_layout,
-            # VisionConstants.PRIMARY_VISION_STRATEGY,
             self.right_climb_cam,
             right_climb_cam_to_robot,
         )
-        # self.right_climb_photon_estimator.multiTagFallbackStrategy = (
-        #     VisionConstants.FALLBACK_VISION_STRATEGY
-        # )
-        
-        # State variables
+
         self.disabled_vision = False
         self.all_detected_targets: List[PhotonTrackedTarget] = []
         self.april_tag_detected = False
