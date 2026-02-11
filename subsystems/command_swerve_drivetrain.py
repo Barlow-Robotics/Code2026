@@ -322,7 +322,7 @@ class CommandSwerveDrivetrain(Subsystem, TunerSwerveDrivetrain):
             vision_measurement_std_devs
         )
 
-    def sample_pose_at(self, timestamp: units.second) -> Pose2d | None:
+    def get_pose(self, timestamp: units.second) -> Pose2d | None:
         """
         Return the pose at a given timestamp, if the buffer is not empty.
 
