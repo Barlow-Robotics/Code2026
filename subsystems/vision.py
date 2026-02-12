@@ -120,7 +120,7 @@ class Vision(commands2.Subsystem):
         robot_pose: Pose2d,
         camera: PhotonCamera,
         pose_estimator: PhotonPoseEstimator,
-    ) -> Optional[EstimatedRobotPose]:
+    ) -> List[EstimatedRobotPose]:
         """
         Get estimated global pose from camera
         
