@@ -9,9 +9,9 @@ import wpilib
 import commands2
 import typing
 
-from controller import Controller
+from core.controller import Controller
 from subsystems import Intake
-from robotcontainer import RobotContainer
+from core.robotcontainer import RobotContainer
 
 from phoenix6 import HootAutoReplay
 

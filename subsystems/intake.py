@@ -3,7 +3,7 @@ from phoenix6 import controls
 from phoenix6.hardware import TalonFX
 import commands2
 
-from utils.TalonConfig import TalonConfig
+from utils import TalonConfig
 from commands2 import button, cmd
 import math
 from phoenix6.signals.spn_enums import *

@@ -7,7 +7,7 @@ from wpilib import DriverStation, Notifier, RobotController
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Pose2d, Rotation2d
 
-from generated.tuner_constants import TunerSwerveDrivetrain
+from utils import TunerSwerveDrivetrain
 
 
 class CommandSwerveDrivetrain(Subsystem, TunerSwerveDrivetrain):
@@ -337,6 +337,7 @@ class CommandSwerveDrivetrain(Subsystem, TunerSwerveDrivetrain):
 
     def get_pose(self) -> Pose2d | None:
         return self.get_state().pose
+
 
     
     @staticmethod
