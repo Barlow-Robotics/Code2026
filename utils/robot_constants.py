@@ -14,15 +14,17 @@ class VisionConstants:
     
     # Camera configuration
     CAMERA_LIGHT_ID = 0  # NEED TO FIX/CHANGE
-    CLIMB_CAMERA_NAME = "Climb_Camera" 
-    ELEVATOR_CAMERA_NAME = "Reef_Camera"
-    RIGHT_CLIMB_CAM_NAME = "Side_Climb_Camera"
+    BACK_LEFT_SWERVE_NAME = "Back_Left_Swerve" 
+    FRONT_LEFT_SWERVE_NAME = "Front_Left_Swerve"
+    BACK_RIGHT_SWERVE_NAME = "Back_Right_Swerve"
+    FRONT_RIGHT_SWERVE_NAME = "Front_Right_Swerve"
+
     K_SINGLE_TAG_STD_DEVS = [4.0, 4.0, 8.0]
     K_MULTI_TAG_STD_DEVS = [0.5, 0.5, 1.0]
 
     # Vision strategies
         
-    CLIMB_CAMERA_TO_ROBOT = Transform3d( # BW: NEED TO FIX
+    BACK_LEFT_SWERVE_TO_ROBOT = Transform3d( # BW: NEED TO FIX
         Translation3d(
             units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2 - 12.625),
             units.inchesToMeters((-1.0 * (DriveConstants.TOTAL_WIDTH_INCHES / 2) + 2.5)),
@@ -31,7 +33,7 @@ class VisionConstants:
         Rotation3d(0, units.degreesToRadians(0), 0)
     )
     
-    ELEVATOR_CAM_TO_ROBOT = Transform3d( # BW: NEED TO FIX
+    BACK_RIGHT_SWERVE_TO_ROBOT = Transform3d( # BW: NEED TO FIX
         Translation3d(
             units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2 - 2.5),
             units.inchesToMeters((DriveConstants.TOTAL_WIDTH_INCHES / 2 - 9.25)),
@@ -39,15 +41,24 @@ class VisionConstants:
         ),
         Rotation3d(0, units.degreesToRadians(0), 0)
     )
-    
-    RIGHT_CLIMB_CAM_TO_ROBOT = Transform3d( # BW: NEED TO FIX
+    FRONT_LEFT_SWERVE_TO_ROBOT = Transform3d( # BW: NEED TO FIX
         Translation3d(
-            units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2 - 10.25),
-            units.inchesToMeters(-1.0 * (DriveConstants.TOTAL_WIDTH_INCHES / 2) + 1.875),
+            units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2 - 2.5),
+            units.inchesToMeters((DriveConstants.TOTAL_WIDTH_INCHES / 2 - 9.25)),
             units.inchesToMeters(12.625)
         ),
         Rotation3d(0, units.degreesToRadians(0), 0)
-    )  
+    )
+    FRONT_RIGHT_SWERVE_TO_ROBOT = Transform3d( # BW: NEED TO FIX
+        Translation3d(
+            units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2 - 2.5),
+            units.inchesToMeters((DriveConstants.TOTAL_WIDTH_INCHES / 2 - 9.25)),
+            units.inchesToMeters(12.625)
+        ),
+        Rotation3d(0, units.degreesToRadians(0), 0)
+    )
+
+    
     
     # Look at, call Vision.filter_april_tag_field() 
         

@@ -22,35 +22,35 @@ class Vision(commands2.Subsystem):
     def __init__(
         self,
         drive_sub: Drivetrain,
-        elevator_camera_name: str = VisionConstants.ELEVATOR_CAMERA_NAME,
-        climb_camera_name: str = VisionConstants.CLIMB_CAMERA_NAME,
-        right_climb_cam_name: str = VisionConstants.RIGHT_CLIMB_CAM_NAME,
-        elevator_cam_to_robot: Transform3d = VisionConstants.ELEVATOR_CAM_TO_ROBOT,
-        climb_camera_to_robot: Transform3d = VisionConstants.CLIMB_CAMERA_TO_ROBOT,
-        right_climb_cam_to_robot: Transform3d = VisionConstants.RIGHT_CLIMB_CAM_TO_ROBOT,
     ):
         self.drive_sub = drive_sub
         
         # BW PhotonVision cameras
-        self.back_left_swerve_cam = PhotonCamera(elevator_camera_name)
-        self.back_right_swerve_cam = PhotonCamera(climb_camera_name)
-        self.front_left_swerve_cam = PhotonCamera(right_climb_cam_name)
-        self.front_right_swerve_cam = PhotonCamera(right_climb_cam_name)
+        self.back_left_swerve_cam = PhotonCamera(VisionConstants.BACK_LEFT_SWERVE_NAME)
+        self.back_right_swerve_cam = PhotonCamera(VisionConstants.BACK_RIGHT_SWERVE_NAME)
+        self.front_left_swerve_cam = PhotonCamera(VisionConstants.FRONT_LEFT_SWERVE_NAME)
+        self.front_right_swerve_cam = PhotonCamera(VisionConstants.FRONT_RIGHT_SWERVE_NAME)
 
         self.april_tag_field_layout = AprilTagFieldLayout.loadField(
             AprilTagField.k2026RebuiltAndyMark
         )
         
-        self.elevator_photon_estimator = PhotonPoseEstimator( #BW: Don't need camera, TODO check out. 
+        self.front_right_photon_estimator = PhotonPoseEstimator( 
             self.april_tag_field_layout,
-            # self.elevator_camera,
-            elevator_cam_to_robot
+            VisionConstants.FRONT_RIGHT_SWERVE_TO_ROBOT
         )
         
-        self.right_climb_photon_estimator = PhotonPoseEstimator( # BW: Don't need camera, TODO check out. 
+        self.front_left_photon_estimator = PhotonPoseEstimator(
             self.april_tag_field_layout,
-            # self.right_climb_cam,
-            right_climb_cam_to_robot
+            VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT
+        )
+        self.back_right_photon_estimator = PhotonPoseEstimator( 
+            self.april_tag_field_layout,
+            VisionConstants.BACK_RIGHT_SWERVE_TO_ROBOT
+        )
+        self.back_left_photon_estimator = PhotonPoseEstimator( 
+            self.april_tag_field_layout,
+            VisionConstants.BACK_LEFT_SWERVE_TO_ROBOT
         )
 
         self.disabled_vision = False
@@ -78,16 +78,13 @@ class Vision(commands2.Subsystem):
         """Enable or disable vision processing"""
         self.disabled_vision = val
 
-
-    def update_vision_localization(self, drive_pose: Pose2d):
-        """Update pose estimation using vision measurements"""
-        # BW: Update from elevator camera
+    def update_vision_localization_camera(self, drive_pose: Pose2d, swerve_cam: PhotonCamera, photon_estimator: PhotonPoseEstimator):
         vision_est = self.get_estimated_global_pose(
-            drive_pose, self.back_left_swerve_cam, self.elevator_photon_estimator
+            drive_pose, swerve_cam, photon_estimator
         )
         
         if vision_est is not None:
-            self.add_vision_measure(vision_est, "ElevatorCamera")
+            self.add_vision_measure(vision_est, swerve_cam.getName())
             self.nt.putNumberArray(
                 "ElevatorCameraPoseEstimate",
                 [
@@ -96,21 +93,14 @@ class Vision(commands2.Subsystem):
                     vision_est.estimatedPose.toPose2d().rotation().radians(),
                 ],
             )
+
+    def update_vision_localization(self, drive_pose: Pose2d):
+        """Update pose estimation using vision measurements"""
+        self.update_vision_localization_camera(drive_pose, self.front_left_swerve_cam, self.front_left_photon_estimator)
+        self.update_vision_localization_camera(drive_pose, self.front_right_swerve_cam, self.front_right_photon_estimator)
+        self.update_vision_localization_camera(drive_pose, self.back_left_swerve_cam, self.back_left_photon_estimator)
+        self.update_vision_localization_camera(drive_pose, self.back_right_swerve_cam, self.back_right_photon_estimator)
         
-        # BW: Update from right climb camera
-        vision_est = self.get_estimated_global_pose(
-            drive_pose, self.front_left_swerve_cam, self.right_climb_photon_estimator
-        )
-        if vision_est is not None:
-            self.add_vision_measure(vision_est, "RightClimbCamera")
-            self.nt.putNumberArray(
-                "RightClimbPoseEstimate",
-                [
-                    vision_est.estimatedPose.toPose2d().X(),
-                    vision_est.estimatedPose.toPose2d().Y(),
-                    vision_est.estimatedPose.toPose2d().rotation().radians(),
-                ],
-            )
     
     def get_camera_vision_est(self, result: PhotonPipelineResult, estimator: PhotonPoseEstimator) -> EstimatedRobotPose | None:
         """
