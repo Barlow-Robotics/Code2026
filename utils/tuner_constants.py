@@ -3,7 +3,7 @@ from phoenix6 import CANBus, configs, hardware, signals, swerve, units
 from wpimath.units import inchesToMeters
 
 if TYPE_CHECKING:
-    from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
+    from subsystems.drivetrain import Drivetrain
 
 
 class TunerConstants:
@@ -228,14 +228,14 @@ class TunerConstants:
     )
 
     @classmethod
-    def create_drivetrain(cls) -> "CommandSwerveDrivetrain":
+    def create_drivetrain(cls) -> "Drivetrain":
         """
         Creates a CommandSwerveDrivetrain instance.
         This should only be called once in your robot program.
         """
-        from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
+        from subsystems.drivetrain import Drivetrain
 
-        return CommandSwerveDrivetrain(
+        return Drivetrain(
             cls.drivetrain_constants,
             [
                 cls.front_left,

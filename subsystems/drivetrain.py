@@ -10,7 +10,7 @@ from wpimath.geometry import Pose2d, Rotation2d
 from utils import TunerSwerveDrivetrain
 
 
-class CommandSwerveDrivetrain(Subsystem, TunerSwerveDrivetrain):
+class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     """
     Class that extends the Phoenix 6 SwerveDrivetrain class and implements
     Subsystem so it can easily be used in command-based projects.
@@ -332,13 +332,11 @@ class CommandSwerveDrivetrain(Subsystem, TunerSwerveDrivetrain):
         :returns: The pose at the given timestamp (or None if the buffer is empty).
         :rtype: Pose2d | None
         """
-        timestamp = CommandSwerveDrivetrain.get_timestamp()
+        timestamp = Drivetrain.get_timestamp()
         return TunerSwerveDrivetrain.sample_pose_at(self, utils.fpga_to_current_time(timestamp))
 
     def get_pose(self) -> Pose2d | None:
         return self.get_state().pose
-
-
     
     @staticmethod
     def get_timestamp():
