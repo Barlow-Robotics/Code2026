@@ -13,6 +13,7 @@ import numpy as np
 from utils import DriveConstants, VisionConstants
 from subsystems import Drivetrain 
 import commands2
+from photonlibpy.estimatedRobotPose import EstimatedRobotPose
 
 class Vision(commands2.Subsystem):
     """
@@ -79,20 +80,20 @@ class Vision(commands2.Subsystem):
         self.disabled_vision = val
 
     def update_vision_localization_camera(self, drive_pose: Pose2d, swerve_cam: PhotonCamera, photon_estimator: PhotonPoseEstimator):
-        vision_est = self.get_estimated_global_pose(
+        vision_poses = self.get_unprocessed_poses(
             drive_pose, swerve_cam, photon_estimator
         )
-        
-        if vision_est is not None:
-            self.add_vision_measure(vision_est, swerve_cam.getName())
-            self.nt.putNumberArray(
-                "ElevatorCameraPoseEstimate",
-                [
-                    vision_est.estimatedPose.toPose2d().X(),
-                    vision_est.estimatedPose.toPose2d().Y(),
-                    vision_est.estimatedPose.toPose2d().rotation().radians(),
-                ],
-            )
+        if vision_poses is not None:
+            for vision_pose in vision_poses:
+                self.add_vision_measure(vision_pose, swerve_cam.getName())
+                self.nt.putNumberArray(
+                    f"ElevatorCameraPoseEstimate",
+                    [
+                        vision_pose.estimatedPose.toPose2d().X(),
+                        vision_pose.estimatedPose.toPose2d().Y(),
+                        vision_pose.estimatedPose.toPose2d().rotation().radians(),
+                    ],
+                )
 
     def update_vision_localization(self, drive_pose: Pose2d):
         """Update pose estimation using vision measurements"""
@@ -114,7 +115,7 @@ class Vision(commands2.Subsystem):
         return camEstPose
 
 
-    def get_estimated_global_pose(
+    def get_unprocessed_poses(
         self,
         robot_pose: Pose2d,
         camera: PhotonCamera,
@@ -132,16 +133,18 @@ class Vision(commands2.Subsystem):
             EstimatedRobotPose if available, None otherwise
         """
         if not camera.isConnected():
-            return None
+            return []
         
         # BW: Process all unread results
         vision_est = None
+        vision_poses: List[EstimatedRobotPose] = []
         for result in camera.getAllUnreadResults(): # BW: What do we want to do with old camera information if there is multiple frames? If robot is moving not rlly relv. 
             vision_est = self.get_camera_vision_est(result, camera, pose_estimator)
+            vision_poses.append(vision_est)
             # OR UPDATE STD DEVS
             # self.update_estimation_std_devs(vision_est, result.getTargets(), pose_estimator)
         
-        return vision_est
+        return vision_poses
         
     def update_estimation_std_devs(
         self,
