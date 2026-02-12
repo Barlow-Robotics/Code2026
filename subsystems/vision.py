@@ -136,7 +136,7 @@ class Vision(commands2.Subsystem):
         
         # BW: Process all unread results
         vision_est = None
-        for result in camera.getAllUnreadResults(): #BW: Note why are we listing out this object 
+        for result in camera.getAllUnreadResults(): # BW: What do we want to do with old camera information if there is multiple frames? If robot is moving not rlly relv. 
             vision_est = self.get_camera_vision_est(result, camera, pose_estimator)
             # OR UPDATE STD DEVS
             # self.update_estimation_std_devs(vision_est, result.getTargets(), pose_estimator)
