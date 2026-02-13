@@ -21,3 +21,4 @@ We use ruff for formatting code. This ensures consistency and minimizes white-sp
 
 TODO at comp:
 AprilTagField.k2026RebuiltAndyMark or AprilTagField.k2026RebuiltWelded depending on comp. 
+Change motors from L2 to L1 or L3
