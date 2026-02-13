@@ -1,4 +1,4 @@
-from field_constants import *
+from field_constants import FIELD_WIDTH, FIELD_LENGTH
 from wpimath.geometry import Translation2d, Translation3d, Pose2d, Pose3d, Rotation2d
 from wpilib import DriverStation
 import math
@@ -43,14 +43,14 @@ def get_alliance(translation: Translation2d) -> Translation2d:
     )
 
 
-def get_alliance(rotation: Rotation2d) -> Rotation2d:
+def get_alliance_rotation(rotation: Rotation2d) -> Rotation2d:
     """
     If should_flip is true here, it makes the angle turn 180 degrees
     """
     return rotation.rotateBy(Rotation2d(math.pi)) if should_flip() else rotation
 
 
-def get_alliance(pose: Pose2d) -> Pose2d:
+def get_alliance_pose2d(pose: Pose2d) -> Pose2d:
     return (
         Pose2d(get_alliance(pose.translation()), get_alliance(pose.rotation()))
         if should_flip()
@@ -58,13 +58,13 @@ def get_alliance(pose: Pose2d) -> Pose2d:
     )
 
 
-def get_alliance(translation: Translation3d) -> Translation3d:
+def get_alliance_translation(translation: Translation3d) -> Translation3d:
     return Translation3d(
         get_x(translation.X()), get_y(translation.Y()), translation.Z()
     )
 
 
-def get_alliance(pose: Pose3d) -> Pose3d:
+def get_alliance_pose3d(pose: Pose3d) -> Pose3d:
     return (
         Pose3d(get_alliance(pose.translation()), get_alliance(pose.rotation()))
         if should_flip()

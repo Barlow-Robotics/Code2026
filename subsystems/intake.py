@@ -6,7 +6,7 @@ import commands2
 from utils import TalonConfig
 from commands2 import cmd
 import math
-from phoenix6.signals.spn_enums import *
+from enum import Enum
 
 
 class IntakePositions(Enum):
