@@ -121,9 +121,9 @@ class RobotContainer:
                 self.drivetrain.runOnce(self.drivetrain.seed_field_centric)
             )
 
-            self.drivetrain.register_telemetry(
-                lambda state: self._logger.telemeterize(state)
-            )
+        self.drivetrain.register_telemetry(
+            lambda state: self._logger.telemeterize(state)
+        )
 
     def getAutonomousCommand(self) -> commands2.Command:
         """
