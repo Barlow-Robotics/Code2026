@@ -1,5 +1,5 @@
 from commands2 import button, cmd
-from subsystems import Intake, IntakePositions
+from subsystems import Intake, IntakePositions, Spindex
 from wpilib.simulation import JoystickSim
 
 
@@ -17,8 +17,9 @@ class TestController:
 
 
 class Controller:
-    def __init__(self, intakeSub: Intake):
+    def __init__(self, intakeSub: Intake, spindexSub: Spindex):
         self.intakeSub = intakeSub
+        self.spindexSub = spindexSub
         self.OPERATOR = button.CommandJoystick(0)
         self.DRIVER = button.CommandJoystick(1)
 

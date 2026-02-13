@@ -10,9 +10,8 @@ import commands2
 import typing
 
 from core import Controller
-from subsystems import Intake
+from subsystems import Intake, Spindex
 from core import RobotContainer
-
 from phoenix6 import HootAutoReplay
 
 
@@ -35,8 +34,10 @@ class Robot(commands2.TimedCommandRobot):
         # autonomous chooser on the dashboard.
         self.container = RobotContainer()
         self.intakeSubsystem = Intake()
+        self.spindexSubsystem = Spindex()
         self.controller = Controller(self.intakeSubsystem)
         self.scheduler = commands2.CommandScheduler.getInstance()
+
 
         # log and replay timestamp and joystick data
         self._time_and_joystick_replay = (
