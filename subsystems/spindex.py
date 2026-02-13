@@ -23,9 +23,6 @@ class Spindex(commands2.Subsystem):
         self.set_velocity_command = cmd.runOnce(self.move_spindex)
         self.stop_velocity_command = cmd.runOnce(self.stop)
         
-    def periodic():
-        pass
-
     def move_spindex(self, velocity: float = 1):
         """
         Args:

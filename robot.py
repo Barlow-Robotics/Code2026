@@ -35,7 +35,7 @@ class Robot(commands2.TimedCommandRobot):
         self.container = RobotContainer()
         self.intakeSubsystem = Intake()
         self.spindexSubsystem = Spindex()
-        self.controller = Controller(self.intakeSubsystem)
+        self.controller = Controller(self.intakeSubsystem, self.spindexSubsystem)
         self.scheduler = commands2.CommandScheduler.getInstance()
 
 
