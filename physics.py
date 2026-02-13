@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from robot import Robot
 
+
 class IntakeSim:
     def __init__(self, physics_controller: PhysicsInterface, robot: "Robot"):
         # Get the shooter motor from the robot
@@ -35,11 +36,19 @@ class IntakeSim:
         self.motor_model_roller_bottom = DCMotor.krakenX60(1)
 
         # Create the flywheel simulation
-        roller_top_plant = LinearSystemId.flywheelSystem(self.motor_model_roller_top, self.moi, self.gearing)
-        self.roller_top_flywheel_sim = FlywheelSim(roller_top_plant, self.motor_model_roller_top)
+        roller_top_plant = LinearSystemId.flywheelSystem(
+            self.motor_model_roller_top, self.moi, self.gearing
+        )
+        self.roller_top_flywheel_sim = FlywheelSim(
+            roller_top_plant, self.motor_model_roller_top
+        )
 
-        roller_bottom_plant = LinearSystemId.flywheelSystem(self.motor_model_roller_bottom, self.moi, self.gearing)
-        self.roller_bottom_flywheel_sim = FlywheelSim(roller_bottom_plant, self.motor_model_roller_bottom)
+        roller_bottom_plant = LinearSystemId.flywheelSystem(
+            self.motor_model_roller_bottom, self.moi, self.gearing
+        )
+        self.roller_bottom_flywheel_sim = FlywheelSim(
+            roller_bottom_plant, self.motor_model_roller_bottom
+        )
 
         # Track position by integrating velocity
         self.roller_top_position_rot = 0.0
@@ -50,7 +59,6 @@ class IntakeSim:
         self.roller_bottom_sim = self.motor_roller_bottom.sim_state
 
     def update_sim(self, now: float, tm_diff: float) -> None:
-
         # Set supply voltage (battery voltage)
         self.roller_top_sim.set_supply_voltage(12.0)
         self.roller_bottom_sim.set_supply_voltage(12.0)
@@ -66,20 +74,27 @@ class IntakeSim:
         self.roller_bottom_flywheel_sim.setInputVoltage(motor_voltage_bottom)
         self.roller_bottom_flywheel_sim.update(tm_diff)
         # Get the simulated velocity (rad/s) and convert to rotations/s
-        velocity_rps_top = radiansToRotations(self.roller_top_flywheel_sim.getAngularVelocity())
-        velocity_rps_bottom = radiansToRotations(self.roller_bottom_flywheel_sim.getAngularVelocity())
+        velocity_rps_top = radiansToRotations(
+            self.roller_top_flywheel_sim.getAngularVelocity()
+        )
+        velocity_rps_bottom = radiansToRotations(
+            self.roller_bottom_flywheel_sim.getAngularVelocity()
+        )
 
         # Integrate velocity to get position
         self.roller_top_position_rot += velocity_rps_top * tm_diff
         self.roller_bottom_position_rot += velocity_rps_bottom * tm_diff
 
         # Feed the simulated values back to the TalonFX sim state
-        self.motor_roller_top.sim_state.set_raw_rotor_position(self.roller_top_position_rot)
+        self.motor_roller_top.sim_state.set_raw_rotor_position(
+            self.roller_top_position_rot
+        )
         self.motor_roller_top.sim_state.set_rotor_velocity(velocity_rps_top)
 
-        self.motor_roller_bottom.sim_state.set_raw_rotor_position(self.roller_bottom_position_rot)
+        self.motor_roller_bottom.sim_state.set_raw_rotor_position(
+            self.roller_bottom_position_rot
+        )
         self.motor_roller_bottom.sim_state.set_rotor_velocity(velocity_rps_bottom)
-
 
 
 class PhysicsEngine:
@@ -87,8 +102,6 @@ class PhysicsEngine:
         self.physics_controller = physics_controller
 
         self.intake_sim = IntakeSim(physics_controller, robot)
-
-
 
     def update_sim(self, now: float, tm_diff: float) -> None:
         """

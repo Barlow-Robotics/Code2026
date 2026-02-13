@@ -15,11 +15,9 @@ NOTE: All constants are defined relative to the field coordinate system, and fro
 perspective of the blue alliance station
 """
 
-from wpimath.geometry import Translation2d, Translation3d, Pose2d, Rotation2d
+from wpimath.geometry import Translation2d, Translation3d
 from wpimath.units import inchesToMeters
 from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
-import math
-from wpilib import DriverStation
 
 
 # Load the AprilTag layout (equivalent to AprilTagLayoutType.OFFICIAL.getLayout())
@@ -33,6 +31,7 @@ APRILTAG_WIDTH = inchesToMeters(6.5)
 FIELD_LENGTH = _layout.getFieldLength()
 FIELD_WIDTH = _layout.getFieldWidth()
 
+
 class Hub:
     """Hub related constants"""
 
@@ -44,54 +43,40 @@ class Hub:
 
     # Relevant reference points on alliance side
     TOP_CENTER_POINT = Translation3d(
-        _layout.getTagPose(26).X() + WIDTH / 2.0,
-        FIELD_WIDTH / 2.0,
-        HEIGHT
+        _layout.getTagPose(26).X() + WIDTH / 2.0, FIELD_WIDTH / 2.0, HEIGHT
     )
     INNER_CENTER_POINT = Translation3d(
-        _layout.getTagPose(26).X() + WIDTH / 2.0,
-        FIELD_WIDTH / 2.0,
-        INNER_HEIGHT
+        _layout.getTagPose(26).X() + WIDTH / 2.0, FIELD_WIDTH / 2.0, INNER_HEIGHT
     )
 
     NEAR_LEFT_CORNER = Translation2d(
-        TOP_CENTER_POINT.X() - WIDTH / 2.0,
-        FIELD_WIDTH / 2.0 + WIDTH / 2.0
+        TOP_CENTER_POINT.X() - WIDTH / 2.0, FIELD_WIDTH / 2.0 + WIDTH / 2.0
     )
     NEAR_RIGHT_CORNER = Translation2d(
-        TOP_CENTER_POINT.X() - WIDTH / 2.0,
-        FIELD_WIDTH / 2.0 - WIDTH / 2.0
+        TOP_CENTER_POINT.X() - WIDTH / 2.0, FIELD_WIDTH / 2.0 - WIDTH / 2.0
     )
     FAR_LEFT_CORNER = Translation2d(
-        TOP_CENTER_POINT.X() + WIDTH / 2.0,
-        FIELD_WIDTH / 2.0 + WIDTH / 2.0
+        TOP_CENTER_POINT.X() + WIDTH / 2.0, FIELD_WIDTH / 2.0 + WIDTH / 2.0
     )
     FAR_RIGHT_CORNER = Translation2d(
-        TOP_CENTER_POINT.X() + WIDTH / 2.0,
-        FIELD_WIDTH / 2.0 - WIDTH / 2.0
+        TOP_CENTER_POINT.X() + WIDTH / 2.0, FIELD_WIDTH / 2.0 - WIDTH / 2.0
     )
 
     # Relevant reference points on the opposite side
     OPP_TOP_CENTER_POINT = Translation3d(
-        _layout.getTagPose(4).X() + WIDTH / 2.0,
-        FIELD_WIDTH / 2.0,
-        HEIGHT
+        _layout.getTagPose(4).X() + WIDTH / 2.0, FIELD_WIDTH / 2.0, HEIGHT
     )
     OPP_NEAR_LEFT_CORNER = Translation2d(
-        OPP_TOP_CENTER_POINT.X() - WIDTH / 2.0,
-        FIELD_WIDTH / 2.0 + WIDTH / 2.0
+        OPP_TOP_CENTER_POINT.X() - WIDTH / 2.0, FIELD_WIDTH / 2.0 + WIDTH / 2.0
     )
     OPP_NEAR_RIGHT_CORNER = Translation2d(
-        OPP_TOP_CENTER_POINT.X() - WIDTH / 2.0,
-        FIELD_WIDTH / 2.0 - WIDTH / 2.0
+        OPP_TOP_CENTER_POINT.X() - WIDTH / 2.0, FIELD_WIDTH / 2.0 - WIDTH / 2.0
     )
     OPP_FAR_LEFT_CORNER = Translation2d(
-        OPP_TOP_CENTER_POINT.X() + WIDTH / 2.0,
-        FIELD_WIDTH / 2.0 + WIDTH / 2.0
+        OPP_TOP_CENTER_POINT.X() + WIDTH / 2.0, FIELD_WIDTH / 2.0 + WIDTH / 2.0
     )
     OPP_FAR_RIGHT_CORNER = Translation2d(
-        OPP_TOP_CENTER_POINT.X() + WIDTH / 2.0,
-        FIELD_WIDTH / 2.0 - WIDTH / 2.0
+        OPP_TOP_CENTER_POINT.X() + WIDTH / 2.0, FIELD_WIDTH / 2.0 - WIDTH / 2.0
     )
 
     # Hub faces
@@ -130,25 +115,21 @@ class LeftBump:
 
     # Relevant reference points on alliance side
     NEAR_LEFT_CORNER = Translation2d(
-        LinesVertical.HUB_CENTER - WIDTH / 2,
-        inchesToMeters(255)
+        LinesVertical.HUB_CENTER - WIDTH / 2, inchesToMeters(255)
     )
     NEAR_RIGHT_CORNER = Hub.NEAR_LEFT_CORNER
     FAR_LEFT_CORNER = Translation2d(
-        LinesVertical.HUB_CENTER + WIDTH / 2,
-        inchesToMeters(255)
+        LinesVertical.HUB_CENTER + WIDTH / 2, inchesToMeters(255)
     )
     FAR_RIGHT_CORNER = Hub.FAR_LEFT_CORNER
 
     # Relevant reference points on opposing side
     OPP_NEAR_LEFT_CORNER = Translation2d(
-        LinesVertical.HUB_CENTER - WIDTH / 2,
-        inchesToMeters(255)
+        LinesVertical.HUB_CENTER - WIDTH / 2, inchesToMeters(255)
     )
     OPP_NEAR_RIGHT_CORNER = Hub.OPP_NEAR_LEFT_CORNER
     OPP_FAR_LEFT_CORNER = Translation2d(
-        LinesVertical.HUB_CENTER + WIDTH / 2,
-        inchesToMeters(255)
+        LinesVertical.HUB_CENTER + WIDTH / 2, inchesToMeters(255)
     )
     OPP_FAR_RIGHT_CORNER = Hub.OPP_FAR_LEFT_CORNER
 
@@ -163,25 +144,21 @@ class RightBump:
 
     # Relevant reference points on alliance side
     NEAR_LEFT_CORNER = Translation2d(
-        LinesVertical.HUB_CENTER + WIDTH / 2,
-        inchesToMeters(255)
+        LinesVertical.HUB_CENTER + WIDTH / 2, inchesToMeters(255)
     )
     NEAR_RIGHT_CORNER = Hub.NEAR_LEFT_CORNER
     FAR_LEFT_CORNER = Translation2d(
-        LinesVertical.HUB_CENTER - WIDTH / 2,
-        inchesToMeters(255)
+        LinesVertical.HUB_CENTER - WIDTH / 2, inchesToMeters(255)
     )
     FAR_RIGHT_CORNER = Hub.FAR_LEFT_CORNER
 
     # Relevant reference points on opposing side
     OPP_NEAR_LEFT_CORNER = Translation2d(
-        LinesVertical.HUB_CENTER + WIDTH / 2,
-        inchesToMeters(255)
+        LinesVertical.HUB_CENTER + WIDTH / 2, inchesToMeters(255)
     )
     OPP_NEAR_RIGHT_CORNER = Hub.OPP_NEAR_LEFT_CORNER
     OPP_FAR_LEFT_CORNER = Translation2d(
-        LinesVertical.HUB_CENTER - WIDTH / 2,
-        inchesToMeters(255)
+        LinesVertical.HUB_CENTER - WIDTH / 2, inchesToMeters(255)
     )
     OPP_FAR_RIGHT_CORNER = Hub.OPP_FAR_LEFT_CORNER
 
@@ -220,7 +197,9 @@ class LeftTrench:
     OPENING_HEIGHT = inchesToMeters(22.25)
 
     # Relevant reference points on alliance side
-    OPENING_TOP_LEFT = Translation3d(LinesVertical.HUB_CENTER, FIELD_WIDTH, OPENING_HEIGHT)
+    OPENING_TOP_LEFT = Translation3d(
+        LinesVertical.HUB_CENTER, FIELD_WIDTH, OPENING_HEIGHT
+    )
     OPENING_TOP_RIGHT = Translation3d(
         LinesVertical.HUB_CENTER, FIELD_WIDTH - OPENING_WIDTH, OPENING_HEIGHT
     )
@@ -245,14 +224,18 @@ class RightTrench:
     OPENING_HEIGHT = inchesToMeters(22.25)
 
     # Relevant reference points on alliance side
-    OPENING_TOP_LEFT = Translation3d(LinesVertical.HUB_CENTER, OPENING_WIDTH, OPENING_HEIGHT)
+    OPENING_TOP_LEFT = Translation3d(
+        LinesVertical.HUB_CENTER, OPENING_WIDTH, OPENING_HEIGHT
+    )
     OPENING_TOP_RIGHT = Translation3d(LinesVertical.HUB_CENTER, 0, OPENING_HEIGHT)
 
     # Relevant reference points on opposing side
     OPP_OPENING_TOP_LEFT = Translation3d(
         LinesVertical.OPP_HUB_CENTER, OPENING_WIDTH, OPENING_HEIGHT
     )
-    OPP_OPENING_TOP_RIGHT = Translation3d(LinesVertical.OPP_HUB_CENTER, 0, OPENING_HEIGHT)
+    OPP_OPENING_TOP_RIGHT = Translation3d(
+        LinesVertical.OPP_HUB_CENTER, 0, OPENING_HEIGHT
+    )
 
 
 class Tower:
@@ -276,22 +259,24 @@ class Tower:
     CENTER_POINT = Translation2d(FRONT_FACE_X, _layout.getTagPose(31).Y())
     LEFT_UPRIGHT = Translation2d(
         FRONT_FACE_X,
-        _layout.getTagPose(31).Y() + INNER_OPENING_WIDTH / 2 + inchesToMeters(0.75)
+        _layout.getTagPose(31).Y() + INNER_OPENING_WIDTH / 2 + inchesToMeters(0.75),
     )
     RIGHT_UPRIGHT = Translation2d(
         FRONT_FACE_X,
-        _layout.getTagPose(31).Y() - INNER_OPENING_WIDTH / 2 - inchesToMeters(0.75)
+        _layout.getTagPose(31).Y() - INNER_OPENING_WIDTH / 2 - inchesToMeters(0.75),
     )
 
     # Relevant reference points on opposing side
-    OPP_CENTER_POINT = Translation2d(FIELD_LENGTH - FRONT_FACE_X, _layout.getTagPose(15).Y())
+    OPP_CENTER_POINT = Translation2d(
+        FIELD_LENGTH - FRONT_FACE_X, _layout.getTagPose(15).Y()
+    )
     OPP_LEFT_UPRIGHT = Translation2d(
         FIELD_LENGTH - FRONT_FACE_X,
-        _layout.getTagPose(15).Y() + INNER_OPENING_WIDTH / 2 + inchesToMeters(0.75)
+        _layout.getTagPose(15).Y() + INNER_OPENING_WIDTH / 2 + inchesToMeters(0.75),
     )
     OPP_RIGHT_UPRIGHT = Translation2d(
         FIELD_LENGTH - FRONT_FACE_X,
-        _layout.getTagPose(15).Y() - INNER_OPENING_WIDTH / 2 - inchesToMeters(0.75)
+        _layout.getTagPose(15).Y() - INNER_OPENING_WIDTH / 2 - inchesToMeters(0.75),
     )
 
 
@@ -305,7 +290,9 @@ class Depot:
     DISTANCE_FROM_CENTER_Y = inchesToMeters(75.93)
 
     # Relevant reference points on alliance side
-    DEPOT_CENTER = Translation3d(DEPTH, (FIELD_WIDTH / 2) + DISTANCE_FROM_CENTER_Y, HEIGHT)
+    DEPOT_CENTER = Translation3d(
+        DEPTH, (FIELD_WIDTH / 2) + DISTANCE_FROM_CENTER_Y, HEIGHT
+    )
     LEFT_CORNER = Translation3d(
         DEPTH, (FIELD_WIDTH / 2) + DISTANCE_FROM_CENTER_Y + (WIDTH / 2), HEIGHT
     )

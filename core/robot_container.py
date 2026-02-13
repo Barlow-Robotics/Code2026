@@ -146,8 +146,7 @@ class RobotContainer:
                     .with_velocity_y(0)
                     .with_rotational_rate(0)
                 )
-            )
-            .withTimeout(5.0),
+            ).withTimeout(5.0),
             # Finally idle for the rest of auton
-            self.drivetrain.apply_request(lambda: idle)
+            self.drivetrain.apply_request(lambda: idle),
         )

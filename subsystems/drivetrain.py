@@ -319,11 +319,10 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             self,
             vision_robot_pose,
             utils.fpga_to_current_time(timestamp),
-            vision_measurement_std_devs
+            vision_measurement_std_devs,
         )
 
     def get_pose_at_timestamp(self) -> Pose2d | None:
-        
         """
         Return the pose at a given timestamp, if the buffer is not empty.
 
@@ -333,11 +332,13 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         :rtype: Pose2d | None
         """
         timestamp = Drivetrain.get_timestamp()
-        return TunerSwerveDrivetrain.sample_pose_at(self, utils.fpga_to_current_time(timestamp))
+        return TunerSwerveDrivetrain.sample_pose_at(
+            self, utils.fpga_to_current_time(timestamp)
+        )
 
     def get_pose(self) -> Pose2d | None:
         return self.get_state().pose
-    
+
     @staticmethod
     def get_timestamp():
         return utils.get_current_time_seconds()

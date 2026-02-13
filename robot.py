@@ -38,12 +38,9 @@ class Robot(commands2.TimedCommandRobot):
         self.controller = Controller(self.intakeSubsystem, self.spindexSubsystem)
         self.scheduler = commands2.CommandScheduler.getInstance()
 
-
         # log and replay timestamp and joystick data
         self._time_and_joystick_replay = (
-            HootAutoReplay()
-            .with_timestamp_replay()
-            .with_joystick_replay()
+            HootAutoReplay().with_timestamp_replay().with_joystick_replay()
         )
 
     def robotPeriodic(self) -> None:
@@ -79,7 +76,6 @@ class Robot(commands2.TimedCommandRobot):
         """This function is called periodically during autonomous"""
         pass
 
-        
     def teleopInit(self) -> None:
         # This makes sure that the autonomous stops running when
         # teleop starts running. If you want the autonomous to
@@ -96,6 +92,7 @@ class Robot(commands2.TimedCommandRobot):
     def testInit(self) -> None:
         # Cancels all running commands at the start of test mode
         commands2.CommandScheduler.getInstance().cancelAll()
+
 
 if __name__ == "__main__":
     wpilib.run(Robot)

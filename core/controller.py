@@ -10,7 +10,7 @@ class TestController:
         self.count = 0
 
         self.trigger_cmd = cmd.runOnce(self.onTrigger)
-        
+
     def onTrigger(self):
         self.count += 1
         print(f"TRIGGER {self.count}")
@@ -28,20 +28,26 @@ class Controller:
         # self.listener.start()
         self.joystick_sim = JoystickSim(0)  # Simulate joystick ID 0
 
-
     def setupTeleop(self):
         self.DRIVER.button(1).onTrue(self.test_controller.trigger_cmd)
         self.DRIVER.button(2).onTrue(self.intakeSub.set_velocity_command)
         self.DRIVER.button(3).onTrue(self.intakeSub.stop_command)
-        self.DRIVER.button(4).onTrue(self.intakeSub.goto_position_cmmand[IntakePositions.DEPLOYED])
-        self.DRIVER.button(5).onTrue(self.intakeSub.goto_position_cmmand[IntakePositions.STOWED])
-        self.DRIVER.button(6).onTrue(self.intakeSub.goto_position_cmmand[IntakePositions.HOME])
+        self.DRIVER.button(4).onTrue(
+            self.intakeSub.goto_position_cmmand[IntakePositions.DEPLOYED]
+        )
+        self.DRIVER.button(5).onTrue(
+            self.intakeSub.goto_position_cmmand[IntakePositions.STOWED]
+        )
+        self.DRIVER.button(6).onTrue(
+            self.intakeSub.goto_position_cmmand[IntakePositions.HOME]
+        )
         self.DRIVER.button(7).onTrue(self.spindexSub.set_velocity_command)
         self.DRIVER.button(8).onTrue(self.spindexSub.stop_velocity_command)
 
         # self.joystick_sim.axisGreaterThan(0, 0).onTrue(cmd.runOnce(self.intakeSub.set_velocity(1))).onFalse(cmd.runOnce(self.intakeSub.stop()))
-        
+
         # def handle_simulated_input(self, key):
+
     #     """Handle keyboard input in simulation."""
     #     if key == "w":
     #         # Simulate pressing button 1 on the joystick
