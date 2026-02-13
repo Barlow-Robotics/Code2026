@@ -35,6 +35,9 @@ class Controller:
         self.DRIVER.button(4).onTrue(self.intakeSub.goto_position_cmmand[IntakePositions.DEPLOYED])
         self.DRIVER.button(5).onTrue(self.intakeSub.goto_position_cmmand[IntakePositions.STOWED])
         self.DRIVER.button(6).onTrue(self.intakeSub.goto_position_cmmand[IntakePositions.HOME])
+        self.DRIVER.button(7).onTrue(self.spindexSub.set_velocity_command)
+        self.DRIVER.button(8).onTrue(self.spindexSub.stop_velocity_command)
+
         # self.joystick_sim.axisGreaterThan(0, 0).onTrue(cmd.runOnce(self.intakeSub.set_velocity(1))).onFalse(cmd.runOnce(self.intakeSub.stop()))
         
         # def handle_simulated_input(self, key):
