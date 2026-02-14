@@ -6,7 +6,7 @@ All dependencies are managed via [uv](https://docs.astral.sh/uv/).
 
 Once you have uv installed, you only need to run:
 ```
-uv run robotpy sync
+uv run frc sync
 ```
 
 ## Best Practices
@@ -17,6 +17,16 @@ We use ruff for formatting code. This ensures consistency and minimizes white-sp
     uv run ruff format
     uv run ruff check
     ```
+
+## To deploy to the robot
+```
+uv run frc deploy
+```
+
+If you want to skip running the tests
+```
+uf run frc deploy --skip-tests
+```
 
 
 TODO at comp:
