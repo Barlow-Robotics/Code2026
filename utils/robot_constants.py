@@ -4,6 +4,22 @@ from wpimath import units
 # from photonlibpy.photonPoseEstimator import PoseStrategy
 
 
+class MotorIDs:
+    foc_active = False
+
+    # INTAKE
+    motor_id_arm = 51
+    motor_id_head = 52
+    motor_id_roller_top = 53
+    motor_id_roller_bottom = 54
+    
+    # SPINDEX
+    motor_id_motor_spindex = 55
+
+
+
+
+
 class DriveConstants:
     TOTAL_WIDTH_INCHES = 27.0
     TOTAL_WIDTH_INCHES_BUMPERS = 34.5

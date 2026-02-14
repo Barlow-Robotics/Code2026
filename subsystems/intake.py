@@ -7,6 +7,7 @@ from utils import TalonConfig
 from commands2 import cmd
 import math
 from enum import Enum
+from utils import MotorIDs
 
 
 class IntakePositions(Enum):
@@ -41,26 +42,19 @@ class Intake(commands2.Subsystem):
             kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True
         )
 
-        foc_active = False
-
-        motor_id_arm = 51
-        motor_id_head = 52
-        motor_id_roller_top = 53
-        motor_id_roller_bottom = 54
-
         self.motor_head: TalonFX = TalonFX(
-            motor_id_head,
+            MotorIDs.motor_id_head,
         )
         self.motor_arm: TalonFX = TalonFX(
-            motor_id_arm,
+            MotorIDs.motor_id_arm,
         )
 
         self.motor_roller_top: TalonFX = TalonFX(
-            motor_id_roller_top,
+            MotorIDs.motor_id_roller_top,
         )
 
         self.motor_roller_bottom: TalonFX = TalonFX(
-            motor_id_roller_bottom,
+            MotorIDs.motor_id_roller_bottom,
         )
 
         INTAKE_CONFIG_ARM._apply_settings(self.motor_arm, inverted=False)
@@ -71,10 +65,10 @@ class Intake(commands2.Subsystem):
         )
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
-            0, enable_foc=foc_active
+            0, enable_foc=MotorIDs.foc_active
         )
         self._motion_magic_position_voltage = controls.MotionMagicVoltage(
-            0, enable_foc=foc_active
+            0, enable_foc=MotorIDs.foc_active
         )
 
         self.target_velocity = -1

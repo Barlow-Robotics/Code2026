@@ -3,21 +3,18 @@ from phoenix6 import controls
 from commands2 import cmd
 import commands2
 from utils import TalonConfig
-
+from utils import MotorIDs
 
 class Spindex(commands2.Subsystem):
     def __init__(self):
         SPINDEX_CONFIG = TalonConfig(kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True)
 
-        motor_id_motor_spindex = 55
-        foc_active = False
-
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
-            0, enable_foc=foc_active
+            0, enable_foc=MotorIDs.foc_active
         )
 
         self.motor_spindex: TalonFX = TalonFX(
-            motor_id_motor_spindex,
+            MotorIDs.motor_id_motor_spindex,
         )
 
         SPINDEX_CONFIG._apply_settings(self.motor_spindex, inverted=False)
