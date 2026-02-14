@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "barlow-code-2026"
 version = "0.1.0"
@@ -12,37 +16,17 @@ dependencies = [
     "debugpy",
     "ruff",
 
-    # This list should match the `tool.robotpy.robotpy_extras` or `uv sync` will remove the packages again
+    # This list should match the robotpy components in src/pyproject.toml
     "robotpy[apriltag,commands2,pathplannerlib,phoenix6,rev,sim]",
 
-    # This list should match the `tool.robotpy.requires`
+    # This list should match the requires in src/pyproject.toml
     "numpy",
     "phoenix6",
     "photonlibpy",
 ]
 
-#
-# Use this configuration file to control what RobotPy packages are installed
-# on your RoboRIO
-#
+[project.scripts]
+frc = "_frc_cli:main"
 
-[tool.robotpy]
-
-# Version of robotpy this project depends on
-robotpy_version = "2026.2.1"
-
-# Which optional robotpy components should be installed?
-# -> equivalent to `pip install robotpy[extra1, ...]
-components = [
-    #"all",
-    # "apriltag",
-    "commands2",
-    # "cscore",
-    # "romi",
-    # "sim",
-    # "xrp",
-]
-
-# Other pip packages to install, such as vendor packages (each element
-# is equivalent to a line in requirements.txt)
-requires = ["numpy", "phoenix6"]
+[tool.hatch.build.targets.wheel]
+only-include = ["_frc_cli.py"]
