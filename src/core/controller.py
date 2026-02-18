@@ -1,66 +1,80 @@
-from commands2 import button, cmd
-from subsystems import Intake, IntakePositions, Spindex
-from wpilib.simulation import JoystickSim
+from __future__ import annotations
 
+from typing import TYPE_CHECKING
 
-class TestController:
-    """Small example to test controller bindings."""
+from commands2.button import CommandXboxController, CommandJoystick, Trigger
 
-    def __init__(self):
-        self.count = 0
+from phoenix6 import swerve
+from wpilib import DriverStation
+from wpimath.geometry import Rotation2d
+from subsystems import IntakePositions
 
-        self.trigger_cmd = cmd.runOnce(self.onTrigger)
-
-    def onTrigger(self):
-        self.count += 1
-        print(f"TRIGGER {self.count}")
+if TYPE_CHECKING:
+    from core import RobotContainer
 
 
 class Controller:
-    def __init__(self, intakeSub: Intake, spindexSub: Spindex):
-        self.intakeSub = intakeSub
-        self.spindexSub = spindexSub
-        self.OPERATOR = button.CommandJoystick(0)
-        self.DRIVER = button.CommandJoystick(1)
-
-        self.test_controller = TestController()
-        # self.listener = keyboard.Listener()
-        # self.listener.start()
-        self.joystick_sim = JoystickSim(0)  # Simulate joystick ID 0
+    def __init__(self, container: RobotContainer):
+        self.container = container
+        self._joystick = CommandXboxController(0)
+        self._driver = CommandJoystick(1)
+        self._configured = False
 
     def setupTeleop(self):
-        self.DRIVER.button(1).onTrue(self.test_controller.trigger_cmd)
-        self.DRIVER.button(2).onTrue(self.intakeSub.set_velocity_command)
-        self.DRIVER.button(3).onTrue(self.intakeSub.stop_command)
-        self.DRIVER.button(4).onTrue(
-            self.intakeSub.goto_position_cmmand[IntakePositions.DEPLOYED]
-        )
-        self.DRIVER.button(5).onTrue(
-            self.intakeSub.goto_position_cmmand[IntakePositions.STOWED]
-        )
-        self.DRIVER.button(6).onTrue(
-            self.intakeSub.goto_position_cmmand[IntakePositions.HOME]
-        )
-        self.DRIVER.button(7).onTrue(self.spindexSub.set_velocity_command)
-        self.DRIVER.button(8).onTrue(self.spindexSub.stop_velocity_command)
+        if self._configured:
+            return
+        self._configured = True
 
-        # self.joystick_sim.axisGreaterThan(0, 0).onTrue(cmd.runOnce(self.intakeSub.set_velocity(1))).onFalse(cmd.runOnce(self.intakeSub.stop()))
+        container = self.container
 
-        # def handle_simulated_input(self, key):
+        # Drivetrain default command (field-centric drive)
+        # Note that X is forward and Y is left per WPILib convention.
+        container.drivetrain.setDefaultCommand(
+            container.drivetrain.apply_request(
+                lambda: (
+                    container.drive.with_velocity_x(
+                        -self._joystick.getLeftY() * container.max_speed
+                    )
+                    .with_velocity_y(
+                        -self._joystick.getLeftX() * container.max_speed
+                    )
+                    .with_rotational_rate(
+                        -self._joystick.getRightX() * container.max_angular_rate
+                    )
+                )
+            )
+        )
 
-    #     """Handle keyboard input in simulation."""
-    #     if key == "w":
-    #         # Simulate pressing button 1 on the joystick
-    #         self.joystick_sim.setRawButton(1, True)
-    #     else:
-    #         # Release the button for other keys
-    #         self.joystick_sim.setRawButton(1, False)
-    # def on_key_press(self, key):
-    #     try:
-    #         # Check if the 'W' key is pressed
-    #         if key.char == 'w':
-    #             # Run the command to set the shooter velocity
-    #             cmd.runOnce(lambda: self.shooterSub.set_velocity(1)).schedule()
-    #     except AttributeError:
-    #         # Handle special keys (e.g., arrow keys, function keys)
-    #         pass
+        # Idle while the robot is disabled. This ensures the configured
+        # neutral mode is applied to the drive motors while disabled.
+        idle = swerve.requests.Idle()
+        Trigger(DriverStation.isDisabled).whileTrue(
+            container.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
+        )
+
+        # Drivetrain button bindings (xbox controller)
+        self._joystick.a().whileTrue(
+            container.drivetrain.apply_request(lambda: container.brake)
+        )
+        self._joystick.b().whileTrue(
+            container.drivetrain.apply_request(
+                lambda: container.point.with_module_direction(
+                    Rotation2d(-self._joystick.getLeftY(), -self._joystick.getLeftX())
+                )
+            )
+        )
+
+        # Intake and spindex bindings (driver joystick)
+        self._driver.button(2).onTrue(container.intake.set_velocity_command)
+        self._driver.button(3).onTrue(container.intake.stop_command)
+        self._driver.button(4).onTrue(
+            container.intake.goto_position_cmmand[IntakePositions.DEPLOYED]
+        )
+        self._driver.button(5).onTrue(
+            container.intake.goto_position_cmmand[IntakePositions.STOWED]
+        )
+        self._driver.button(6).onTrue(
+            container.intake.goto_position_cmmand[IntakePositions.HOME]
+        )
+        self._driver.button(7).onTrue(container.spindex.set_velocity_command)
+        self._driver.button(8).onTrue(container.spindex.stop_velocity_command)
