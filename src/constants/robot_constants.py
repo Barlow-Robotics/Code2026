@@ -1,7 +1,6 @@
 from wpimath.geometry import Transform3d, Translation3d, Rotation3d
 from wpimath import units
-
-# from photonlibpy.photonPoseEstimator import PoseStrategy
+from wpimath.system.plant import DCMotor
 
 
 class MotorIDs:
@@ -15,6 +14,30 @@ class MotorIDs:
 
     # SPINDEX
     motor_id_motor_spindex = 55
+
+
+class IntakeConstants:
+    ROLLER_MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
+    ROLLER_GEARING = 4.0  # TODO: measure actual gear ratio
+    ROLLER_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
+    ROLLER_CIRCUMFERENCE = 1.374 * 3.14159  # TODO: measure actual roller diameter (inches)
+
+    ARM_HOME_ROTATIONS = 0  # TODO: calibrate
+    ARM_DEPLOYED_ROTATIONS = 10  # TODO: gear-ratio * target-angle
+    ARM_STOWED_ROTATIONS = 5  # TODO: calibrate
+    HEAD_HOME_ROTATIONS = 0  # TODO: calibrate
+    HEAD_DEPLOYED_ROTATIONS = 20  # TODO: calibrate
+    HEAD_STOWED_ROTATIONS = 7  # TODO: calibrate
+
+    PID = {"kP": 0.11, "kI": 0, "kD": 0, "kF": 0, "kA": 0}  # TODO: tune PID
+
+
+class SpindexConstants:
+    MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
+    GEARING = 4.0  # TODO: measure actual gear ratio
+    MOI = 0.005  # TODO: calculate from mechanism mass/geometry (kg*m^2)
+
+    PID = {"kP": 0.11, "kI": 0, "kD": 0, "kF": 0, "kA": 0}  # TODO: tune PID
 
 
 class DriveConstants:

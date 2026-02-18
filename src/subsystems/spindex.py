@@ -3,7 +3,7 @@ from phoenix6 import controls
 from commands2 import cmd
 import commands2
 from utils import TalonConfig
-from utils import MotorIDs
+from constants import MotorIDs
 
 
 class Spindex(commands2.Subsystem):

@@ -8,7 +8,7 @@ from photonlibpy.targeting.photonTrackedTarget import PhotonTrackedTarget
 from robotpy_apriltag import AprilTagFieldLayout, AprilTagField
 from wpimath.geometry import Transform3d, Pose2d, Translation2d
 from wpilib import DriverStation
-from utils import VisionConstants
+from constants import VisionConstants
 from subsystems import Drivetrain
 import commands2
 

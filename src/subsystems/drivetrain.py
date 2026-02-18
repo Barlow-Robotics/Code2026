@@ -7,7 +7,7 @@ from wpilib import DriverStation
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Pose2d, Rotation2d
 
-from utils import TunerSwerveDrivetrain
+from constants import TunerSwerveDrivetrain
 
 
 class Drivetrain(Subsystem, TunerSwerveDrivetrain):

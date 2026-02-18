@@ -4,10 +4,9 @@ from phoenix6.hardware import TalonFX
 import commands2
 
 from utils import TalonConfig
+from constants import MotorIDs, IntakeConstants
 from commands2 import cmd
-import math
 from enum import Enum
-from utils import MotorIDs
 
 
 class IntakePositions(Enum):
@@ -17,14 +16,6 @@ class IntakePositions(Enum):
 
 
 class Intake(commands2.Subsystem):
-    ARM_HOME_ROTATIONS = 0
-    HEAD_HOME_ROTATIONS = 0
-
-    ARM_DEPLOYED_ROTATIONS = 10  # TODO: Gear-ratio * target-angle ...
-    HEAD_DEPLOYED_ROTATIONS = 20
-
-    ARM_STOWED_ROTATIONS = 5
-    HEAD_STOWED_ROTATIONS = 7
 
     def __init__(self):
         super().__init__()
@@ -83,53 +74,24 @@ class Intake(commands2.Subsystem):
     def init(self):
         pass
 
+    _POSITION_MAP = {
+        IntakePositions.HOME: (IntakeConstants.ARM_HOME_ROTATIONS, IntakeConstants.HEAD_HOME_ROTATIONS),
+        IntakePositions.STOWED: (IntakeConstants.ARM_STOWED_ROTATIONS, IntakeConstants.HEAD_STOWED_ROTATIONS),
+        IntakePositions.DEPLOYED: (IntakeConstants.ARM_DEPLOYED_ROTATIONS, IntakeConstants.HEAD_DEPLOYED_ROTATIONS),
+    }
+
     def go_to_position(self, position: IntakePositions):
-        if position == IntakePositions.DEPLOYED:
-            self.motor_arm.set_control(
-                self._motion_magic_position_voltage.with_position(
-                    self.ARM_DEPLOYED_ROTATIONS
-                )
-            )
-            self.motor_head.set_control(
-                self._motion_magic_position_voltage.with_position(
-                    self.HEAD_DEPLOYED_ROTATIONS
-                )
-            )
-        elif position == IntakePositions.STOWED:
-            self.motor_arm.set_control(
-                self._motion_magic_position_voltage.with_position(
-                    self.ARM_STOWED_ROTATIONS
-                )
-            )
-            self.motor_head.set_control(
-                self._motion_magic_position_voltage.with_position(
-                    self.HEAD_STOWED_ROTATIONS
-                )
-            )
-        elif position == IntakePositions.HOME:
-            self.motor_arm.set_control(
-                self._motion_magic_position_voltage.with_position(
-                    self.ARM_HOME_ROTATIONS
-                )
-            )
-            self.motor_head.set_control(
-                self._motion_magic_position_voltage.with_position(
-                    self.HEAD_HOME_ROTATIONS
-                )
-            )
+        arm_rot, head_rot = self._POSITION_MAP[position]
+        self.motor_arm.set_control(
+            self._motion_magic_position_voltage.with_position(arm_rot)
+        )
+        self.motor_head.set_control(
+            self._motion_magic_position_voltage.with_position(head_rot)
+        )
 
     def set_velocity(self, velocity: float = 1):  # ft/sec
-        # speed: rotations per seconds
-        # sets inital velocity of speed rotations / sec
-        # 25 ft / sec
-        # 4pi inches / sec
-        # speed = 1 roation per seocnd
-        # need to turn vel -> roations per second
-
-        circumfrence = 1.374 * math.pi  # inches # 1.374*math.pi
-        gear_ratio = 4
-
-        velocity *= (12 * gear_ratio) / circumfrence
+        # Convert ft/sec to motor rotations/sec
+        velocity *= (12 * IntakeConstants.ROLLER_GEARING) / IntakeConstants.ROLLER_CIRCUMFERENCE
 
         # print("AAAx")
         self.motor_roller_top.set_control(

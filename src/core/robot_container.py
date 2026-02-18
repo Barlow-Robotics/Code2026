@@ -7,7 +7,8 @@
 import commands2
 from commands2 import cmd
 
-from utils import TunerConstants, Telemetry
+from constants import TunerConstants
+from utils import Telemetry
 
 from phoenix6 import swerve
 from wpilib import DriverStation

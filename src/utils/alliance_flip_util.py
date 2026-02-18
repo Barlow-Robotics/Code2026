@@ -1,4 +1,4 @@
-from field_constants import FIELD_WIDTH, FIELD_LENGTH
+from constants.field_constants import FIELD_WIDTH, FIELD_LENGTH
 from wpimath.geometry import Translation2d, Translation3d, Pose2d, Pose3d, Rotation2d
 from wpilib import DriverStation
 import math
