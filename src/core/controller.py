@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from commands2 import cmd
 from commands2.button import CommandXboxController, CommandJoystick, Trigger
 
+import wpilib
 from phoenix6 import swerve
 from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
@@ -14,18 +16,12 @@ if TYPE_CHECKING:
 
 
 class Controller:
+    _JOYSTICK_PORT = 0
+    _DRIVER_PORT = 1
+
     def __init__(self, container: RobotContainer):
-        self.container = container
-        self._joystick = CommandXboxController(0)
-        self._driver = CommandJoystick(1)
-        self._configured = False
-
-    def setupTeleop(self):
-        if self._configured:
-            return
-        self._configured = True
-
-        container = self.container
+        self._joystick = CommandXboxController(self._JOYSTICK_PORT)
+        self._driver = CommandJoystick(self._DRIVER_PORT)
 
         # Drivetrain default command (field-centric drive)
         # Note that X is forward and Y is left per WPILib convention.
@@ -35,9 +31,7 @@ class Controller:
                     container.drive.with_velocity_x(
                         -self._joystick.getLeftY() * container.max_speed
                     )
-                    .with_velocity_y(
-                        -self._joystick.getLeftX() * container.max_speed
-                    )
+                    .with_velocity_y(-self._joystick.getLeftX() * container.max_speed)
                     .with_rotational_rate(
                         -self._joystick.getRightX() * container.max_angular_rate
                     )
@@ -78,3 +72,21 @@ class Controller:
         )
         self._driver.button(7).onTrue(container.spindex.set_velocity_command)
         self._driver.button(8).onTrue(container.spindex.stop_velocity_command)
+
+        # Periodically warn about missing controllers during teleop
+        Trigger(DriverStation.isTeleopEnabled).whileTrue(
+            cmd.sequence(
+                cmd.waitSeconds(5),
+                cmd.runOnce(self._log_missing_connections),
+            ).repeatedly()
+        )
+
+    def _log_missing_connections(self):
+        if not DriverStation.isJoystickConnected(self._JOYSTICK_PORT):
+            wpilib.reportWarning(
+                f"Xbox controller not connected on port {self._JOYSTICK_PORT}"
+            )
+        if not DriverStation.isJoystickConnected(self._DRIVER_PORT):
+            wpilib.reportWarning(
+                f"Driver joystick not connected on port {self._DRIVER_PORT}"
+            )

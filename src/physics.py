@@ -20,8 +20,8 @@ class PhysicsEngine:
     def __init__(self, physics_controller: PhysicsInterface, robot: "Robot"):
         self.physics_controller = physics_controller
         self.drivetrain_sim = DrivetrainSim(robot.container.drivetrain)
-        self.intake_sim = IntakeSim(robot)
-        self.spindex_sim = SpindexSim(robot)
+        self.intake_sim = IntakeSim(robot.container.intake)
+        self.spindex_sim = SpindexSim(robot.container.spindex)
 
     def update_sim(self, now: float, tm_diff: float) -> None:
         """

@@ -9,7 +9,7 @@ import wpilib
 import commands2
 import typing
 
-from core import RobotContainer, Controller
+from core import RobotContainer
 from phoenix6 import HootAutoReplay
 
 
@@ -31,7 +31,6 @@ class Robot(commands2.TimedCommandRobot):
         # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         # autonomous chooser on the dashboard.
         self.container = RobotContainer()
-        self.controller = Controller(self.container)
 
         # log and replay timestamp and joystick data
         self._time_and_joystick_replay = (
@@ -72,8 +71,6 @@ class Robot(commands2.TimedCommandRobot):
         pass
 
     def teleopInit(self) -> None:
-        self.controller.setupTeleop()
-
         # This makes sure that the autonomous stops running when
         # teleop starts running. If you want the autonomous to
         # continue until interrupted by another command, remove
@@ -82,7 +79,6 @@ class Robot(commands2.TimedCommandRobot):
             commands2.CommandScheduler.getInstance().cancel(self.autonomousCommand)
 
     def teleopPeriodic(self) -> None:
-        """This function is called periodically during operator control"""
         pass
 
     def testInit(self) -> None:

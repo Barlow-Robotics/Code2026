@@ -12,12 +12,9 @@ class MotorIDs:
     motor_id_head = 52
     motor_id_roller_top = 53
     motor_id_roller_bottom = 54
-    
+
     # SPINDEX
     motor_id_motor_spindex = 55
-
-
-
 
 
 class DriveConstants:

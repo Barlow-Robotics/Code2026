@@ -10,9 +10,11 @@ from commands2 import cmd
 from utils import TunerConstants, Telemetry
 
 from phoenix6 import swerve
+from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
 from wpimath.units import rotationsToRadians
 from subsystems import Vision, Intake, Spindex
+from core.controller import Controller
 
 
 class RobotContainer:
@@ -24,6 +26,8 @@ class RobotContainer:
     """
 
     def __init__(self) -> None:
+        DriverStation.silenceJoystickConnectionWarning(True)
+
         self.max_speed = (
             1.0 * TunerConstants.speed_at_12_volts
         )  # speed_at_12_volts desired top speed
@@ -35,9 +39,7 @@ class RobotContainer:
         self.drive = (
             swerve.requests.FieldCentric()
             .with_deadband(self.max_speed * 0.1)
-            .with_rotational_deadband(
-                self.max_angular_rate * 0.1
-            )  # Add a 10% deadband
+            .with_rotational_deadband(self.max_angular_rate * 0.1)  # Add a 10% deadband
             .with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )  # Use open-loop control for drive motors
@@ -56,6 +58,9 @@ class RobotContainer:
         self.drivetrain.register_telemetry(
             lambda state: self._logger.telemeterize(state)
         )
+
+        # Controller bindings
+        self.controller = Controller(self)
 
     def getAutonomousCommand(self) -> commands2.Command:
         """

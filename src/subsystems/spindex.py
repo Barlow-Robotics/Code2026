@@ -5,6 +5,7 @@ import commands2
 from utils import TalonConfig
 from utils import MotorIDs
 
+
 class Spindex(commands2.Subsystem):
     def __init__(self):
         SPINDEX_CONFIG = TalonConfig(kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True)

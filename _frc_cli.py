@@ -54,7 +54,9 @@ def _check_deps():
 
     # Parse src robotpy config
     src_robotpy = src_data.get("tool", {}).get("robotpy", {})
-    src_components = {c.lower().replace("-", "_") for c in src_robotpy.get("components", [])}
+    src_components = {
+        c.lower().replace("-", "_") for c in src_robotpy.get("components", [])
+    }
     src_requires = set()
     for req_str in src_robotpy.get("requires", []):
         req = Requirement(req_str)
@@ -67,9 +69,9 @@ def _check_deps():
         if pkg not in root_deps:
             errors.append(
                 f'  "{pkg}" is in src/pyproject.toml [tool.robotpy] requires\n'
-                f'  but missing from pyproject.toml [project] dependencies.\n'
+                f"  but missing from pyproject.toml [project] dependencies.\n"
                 f'  -> Add "{pkg}" to the [project] dependencies in pyproject.toml\n'
-                f'     so it is available locally for simulation.'
+                f"     so it is available locally for simulation."
             )
 
     # Check: src components should all appear in root robotpy extras
@@ -77,7 +79,7 @@ def _check_deps():
         if comp not in robotpy_extras:
             errors.append(
                 f'  robotpy component "{comp}" is in src/pyproject.toml [tool.robotpy] components\n'
-                f'  but missing from the robotpy[...] extras in pyproject.toml.\n'
+                f"  but missing from the robotpy[...] extras in pyproject.toml.\n"
                 f'  -> Add "{comp}" to the robotpy extras in pyproject.toml, e.g.:\n'
                 f'     "robotpy[...,{comp},sim]"'
             )
@@ -89,11 +91,11 @@ def _check_deps():
         if name not in src_requires:
             errors.append(
                 f'  "{name}" is in pyproject.toml [project] dependencies\n'
-                f'  but missing from src/pyproject.toml [tool.robotpy] requires.\n'
+                f"  but missing from src/pyproject.toml [tool.robotpy] requires.\n"
                 f'  -> Add "{name}" to the requires list in src/pyproject.toml\n'
-                f'     so it gets installed on the robot.\n'
-                f'  -> Or if this is a dev-only package, add it to HOST_ONLY_PACKAGES\n'
-                f'     in _frc_cli.py to silence this warning.'
+                f"     so it gets installed on the robot.\n"
+                f"  -> Or if this is a dev-only package, add it to HOST_ONLY_PACKAGES\n"
+                f"     in _frc_cli.py to silence this warning."
             )
 
     if errors:
