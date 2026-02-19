@@ -45,7 +45,7 @@ class SpindexConstants:
 class DriveConstants:
     TOTAL_WIDTH_INCHES = 27.0
     TOTAL_WIDTH_INCHES_BUMPERS = 34.5
-
+    CENTER_WHEEL_TO_CENTER_WHEEL = 21.452
 
 class VisionConstants:
     """Vision subsystem constants"""
