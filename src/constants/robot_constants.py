@@ -20,7 +20,9 @@ class IntakeConstants:
     ROLLER_MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
     ROLLER_GEARING = 4.0  # TODO: measure actual gear ratio
     ROLLER_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
-    ROLLER_CIRCUMFERENCE = 1.374 * 3.14159  # TODO: measure actual roller diameter (inches)
+    ROLLER_CIRCUMFERENCE = (
+        1.374 * 3.14159
+    )  # TODO: measure actual roller diameter (inches)
 
     ARM_HOME_ROTATIONS = 0  # TODO: calibrate
     ARM_DEPLOYED_ROTATIONS = 10  # TODO: gear-ratio * target-angle

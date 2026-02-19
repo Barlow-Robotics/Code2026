@@ -8,7 +8,7 @@ import commands2
 from commands2 import cmd
 
 from constants import TunerConstants
-from utils import Telemetry
+from utils import SwerveTelemetry
 
 from phoenix6 import swerve
 from wpilib import DriverStation
@@ -55,9 +55,9 @@ class RobotContainer:
         self.spindex = Spindex()
 
         # Telemetry
-        self._logger = Telemetry(self.max_speed)
+        self._swerve_telemetry = SwerveTelemetry(self.max_speed)
         self.drivetrain.register_telemetry(
-            lambda state: self._logger.telemeterize(state)
+            lambda state: self._swerve_telemetry.telemeterize(state)
         )
 
         # Controller bindings

@@ -58,9 +58,9 @@
       "axisCount": 5,
       "buttonCount": 7,
       "buttonKeys": [
-        -1,
-        -1,
-        -1,
+        65,
+        83,
+        68,
         70,
         71,
         72,

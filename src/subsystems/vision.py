@@ -1,5 +1,5 @@
+from dataclasses import dataclass
 from typing import Optional, List
-import ntcore
 from photonlibpy.photonCamera import PhotonCamera
 from photonlibpy.estimatedRobotPose import EstimatedRobotPose
 from photonlibpy.photonPoseEstimator import PhotonPoseEstimator
@@ -10,7 +10,25 @@ from wpimath.geometry import Transform3d, Pose2d, Translation2d
 from wpilib import DriverStation
 from constants import VisionConstants
 from subsystems import Drivetrain
+from utils import Logger
 import commands2
+
+
+@dataclass
+class CameraStats:
+    std_dev: float
+    tag_count: float
+    distance: float
+
+
+@dataclass
+class VisionTelemetry:
+    elevator_camera_pose: Pose2d | None = None
+    closest_april_tag: Pose2d | None = None
+    front_left: CameraStats | None = None
+    front_right: CameraStats | None = None
+    back_left: CameraStats | None = None
+    back_right: CameraStats | None = None
 
 
 class Vision(commands2.Subsystem):
@@ -60,8 +78,9 @@ class Vision(commands2.Subsystem):
         self.robot_to_camera: Optional[Transform3d] = None
         self.cur_std_devs = VisionConstants.K_SINGLE_TAG_STD_DEVS.copy()
 
-        # NetworkTables for logging
-        self.nt = ntcore.NetworkTableInstance.getDefault().getTable("Vision")
+        self.log = Logger("Vision")
+        self._camera_stats: dict[str, CameraStats] = {}
+        self._last_pose_estimate: Optional[Pose2d] = None
 
     def periodic(self):
         """Called periodically by the scheduler"""
@@ -69,7 +88,18 @@ class Vision(commands2.Subsystem):
             current_pose = self.drive_sub.get_pose()
             self.update_vision_localization(current_pose)
 
-        self.advantage_kit_logging()
+        self.log.publish(
+            VisionTelemetry(
+                elevator_camera_pose=self._last_pose_estimate,
+                closest_april_tag=self.find_pose_of_tag_closest_to_robot(
+                    self.drive_sub.get_pose()
+                ),
+                front_left=self._camera_stats.get("front_left_swerve"),
+                front_right=self._camera_stats.get("front_right_swerve"),
+                back_left=self._camera_stats.get("back_left_swerve"),
+                back_right=self._camera_stats.get("back_right_swerve"),
+            )
+        )
 
     def get_layout(self) -> AprilTagFieldLayout:
         """Returns the AprilTag field layout"""
@@ -91,14 +121,7 @@ class Vision(commands2.Subsystem):
         if vision_poses is not None:
             for vision_pose in vision_poses:
                 self.add_vision_measure(vision_pose, swerve_cam.getName())
-                self.nt.putNumberArray(
-                    "ElevatorCameraPoseEstimate",
-                    [
-                        vision_pose.estimatedPose.toPose2d().X(),
-                        vision_pose.estimatedPose.toPose2d().Y(),
-                        vision_pose.estimatedPose.toPose2d().rotation().radians(),
-                    ],
-                )
+                self._last_pose_estimate = vision_pose.estimatedPose.toPose2d()
 
     def update_vision_localization(self, drive_pose: Pose2d):
         """Update pose estimation using vision measurements"""
@@ -273,9 +296,11 @@ class Vision(commands2.Subsystem):
             )
 
             std_dev = 2.0
-            self.nt.putNumber(f"stdDev/{camera_name}", std_dev)
-            self.nt.putNumber(f"tagCount/{camera_name}", tag_count)
-            self.nt.putNumber(f"DistanceToTarget/{camera_name}", distance_to_target)
+            self._camera_stats[camera_name] = CameraStats(
+                std_dev=std_dev,
+                tag_count=float(tag_count),
+                distance=distance_to_target,
+            )
 
             if tag_count == 1:
                 if distance_to_target > 2.5:
@@ -326,10 +351,6 @@ class Vision(commands2.Subsystem):
             if tag_pose is not None:
                 pose_2d = tag_pose.toPose2d()
                 possible_poses.append(pose_2d)
-                self.nt.putNumberArray(
-                    f"Poses{tag_id}",
-                    [pose_2d.X(), pose_2d.Y(), pose_2d.rotation().radians()],
-                )
 
         if not possible_poses:
             return None
@@ -368,22 +389,6 @@ class Vision(commands2.Subsystem):
     def get_all_detected_targets(self) -> List[PhotonTrackedTarget]:
         """Returns all detected targets"""
         return self.all_detected_targets
-
-    def advantage_kit_logging(self):
-        """Log data to AdvantageKit/NetworkTables"""
-        closest_pose = self.find_pose_of_tag_closest_to_robot(self.drive_sub.get_pose())
-        if closest_pose is not None:
-            self.nt.putNumberArray(
-                "ClosestAprilTag",
-                [
-                    closest_pose.X(),
-                    closest_pose.Y(),
-                    closest_pose.rotation().radians(),
-                ],
-            )
-
-        if self.robot_to_camera is not None:
-            pass
 
     def simulation_periodic(self):
         """Called periodically in simulation"""

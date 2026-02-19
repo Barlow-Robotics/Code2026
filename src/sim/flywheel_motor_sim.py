@@ -7,7 +7,9 @@ from wpimath.units import radiansToRotations
 class FlywheelMotorSim:
     """Simulates a single TalonFX-driven flywheel (motor + gearbox + inertia)."""
 
-    def __init__(self, motor: TalonFX, motor_model: DCMotor, gearing: float, moi: float):
+    def __init__(
+        self, motor: TalonFX, motor_model: DCMotor, gearing: float, moi: float
+    ):
         self._sim_state = motor.sim_state
         plant = LinearSystemId.flywheelSystem(motor_model, moi, gearing)
         self._flywheel = FlywheelSim(plant, motor_model)

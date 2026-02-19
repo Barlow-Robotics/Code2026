@@ -1,132 +1,200 @@
+from __future__ import annotations
+
+import dataclasses
+from typing import Protocol, Sequence, runtime_checkable
+
 from ntcore import NetworkTableInstance
-from phoenix6 import SignalLogger, swerve, units
-from wpilib import Color, Color8Bit, Mechanism2d, MechanismLigament2d, SmartDashboard
-from wpimath.geometry import Pose2d
-from wpimath.kinematics import ChassisSpeeds, SwerveModulePosition, SwerveModuleState
+from phoenix6 import SignalLogger
+from wpimath.geometry import Pose2d, Pose3d, Rotation2d, Translation2d, Transform3d
+from wpimath.kinematics import ChassisSpeeds, SwerveModuleState, SwerveModulePosition
+
+WPIStruct = (
+    Pose2d
+    | Pose3d
+    | Rotation2d
+    | Translation2d
+    | Transform3d
+    | ChassisSpeeds
+    | SwerveModuleState
+    | SwerveModulePosition
+)
+
+_WPI_STRUCT_TYPES = (
+    Pose2d,
+    Pose3d,
+    Rotation2d,
+    Translation2d,
+    Transform3d,
+    ChassisSpeeds,
+    SwerveModuleState,
+    SwerveModulePosition,
+)
 
 
-class Telemetry:
-    def __init__(self, max_speed: units.meters_per_second):
+@runtime_checkable
+class LogBackend(Protocol):
+    def put_double(self, key: str, value: float) -> None: ...
+    def put_string(self, key: str, value: str) -> None: ...
+    def put_boolean(self, key: str, value: bool) -> None: ...
+    def put_double_array(self, key: str, value: Sequence[float]) -> None: ...
+    def put_struct(self, key: str, value: WPIStruct) -> None: ...
+    def put_struct_array(self, key: str, value: Sequence[WPIStruct]) -> None: ...
+
+
+class NTBackend:
+    """NetworkTables backend — caches publishers on first use."""
+
+    def __init__(self, table_name: str):
+        self._table = NetworkTableInstance.getDefault().getTable(table_name)
+        self._double_pubs: dict[str, object] = {}
+        self._string_pubs: dict[str, object] = {}
+        self._boolean_pubs: dict[str, object] = {}
+        self._double_array_pubs: dict[str, object] = {}
+        self._struct_pubs: dict[str, object] = {}
+        self._struct_array_pubs: dict[str, object] = {}
+
+    def put_double(self, key: str, value: float) -> None:
+        pub = self._double_pubs.get(key)
+        if pub is None:
+            pub = self._table.getDoubleTopic(key).publish()
+            self._double_pubs[key] = pub
+        pub.set(value)
+
+    def put_string(self, key: str, value: str) -> None:
+        pub = self._string_pubs.get(key)
+        if pub is None:
+            pub = self._table.getStringTopic(key).publish()
+            self._string_pubs[key] = pub
+        pub.set(value)
+
+    def put_boolean(self, key: str, value: bool) -> None:
+        pub = self._boolean_pubs.get(key)
+        if pub is None:
+            pub = self._table.getBooleanTopic(key).publish()
+            self._boolean_pubs[key] = pub
+        pub.set(value)
+
+    def put_double_array(self, key: str, value: Sequence[float]) -> None:
+        pub = self._double_array_pubs.get(key)
+        if pub is None:
+            pub = self._table.getDoubleArrayTopic(key).publish()
+            self._double_array_pubs[key] = pub
+        pub.set(value)
+
+    def put_struct(self, key: str, value: WPIStruct) -> None:
+        pub = self._struct_pubs.get(key)
+        if pub is None:
+            pub = self._table.getStructTopic(key, type(value)).publish()
+            self._struct_pubs[key] = pub
+        pub.set(value)
+
+    def put_struct_array(self, key: str, value: Sequence[WPIStruct]) -> None:
+        pub = self._struct_array_pubs.get(key)
+        if pub is None:
+            pub = self._table.getStructArrayTopic(key, type(value[0])).publish()
+            self._struct_array_pubs[key] = pub
+        pub.set(value)
+
+
+class Logger:
+    """Thin logging facade with dataclass publishing and child nesting.
+
+    Usage::
+
+        self.log = Logger("Intake")
+        self.log.publish(IntakeTelemetry(velocity=42.0))
+
+        # Or manual puts:
+        self.log.put("key", 42.0)
+        self.log.child("sub").put("nested_key", 1.0)
+    """
+
+    def __init__(
+        self,
+        name: str,
+        backend: LogBackend | None = None,
+        _prefix: str = "",
+    ):
+        self._backend = backend or NTBackend(name)
+        self._prefix = _prefix
+
+    def child(self, name: str) -> Logger:
+        """Create a nested logger. Logger("Vision").child("FrontLeft") → /Vision/FrontLeft/*"""
+        new_prefix = f"{self._prefix}{name}/" if self._prefix else f"{name}/"
+        return Logger("", backend=self._backend, _prefix=new_prefix)
+
+    def _full_key(self, key: str) -> str:
+        return f"{self._prefix}{key}"
+
+    # --- explicit typed methods ---
+
+    def put_double(self, key: str, value: float) -> None:
+        self._backend.put_double(self._full_key(key), value)
+
+    def put_string(self, key: str, value: str) -> None:
+        self._backend.put_string(self._full_key(key), value)
+
+    def put_boolean(self, key: str, value: bool) -> None:
+        self._backend.put_boolean(self._full_key(key), value)
+
+    def put_double_array(self, key: str, value: Sequence[float]) -> None:
+        self._backend.put_double_array(self._full_key(key), value)
+
+    def put_struct(self, key: str, value: WPIStruct) -> None:
+        self._backend.put_struct(self._full_key(key), value)
+
+    def put_struct_array(self, key: str, value: Sequence[WPIStruct]) -> None:
+        self._backend.put_struct_array(self._full_key(key), value)
+
+    # --- convenience put() with type dispatch ---
+
+    def put(
+        self, key: str, value: float | bool | str | Sequence[float] | WPIStruct
+    ) -> None:
+        if isinstance(value, bool):
+            self.put_boolean(key, value)
+        elif isinstance(value, (int, float)):
+            self.put_double(key, float(value))
+        elif isinstance(value, str):
+            self.put_string(key, value)
+        elif isinstance(value, _WPI_STRUCT_TYPES):
+            self.put_struct(key, value)
+        elif isinstance(value, (list, tuple)):
+            self.put_double_array(key, value)
+        else:
+            raise TypeError(f"Logger.put: unsupported type {type(value)}")
+
+    # --- dataclass publishing ---
+
+    def publish(self, data: object) -> None:
+        """Publish all fields of a dataclass to the backend.
+
+        Recursively walks nested dataclasses. None fields are skipped.
+        Construct the dataclass at the call site with no defaults so the
+        linter enforces completeness.
         """
-        Construct a telemetry object with the specified max speed of the robot.
+        for field in dataclasses.fields(data):
+            value = getattr(data, field.name)
 
-        :param max_speed: Maximum speed
-        :type max_speed: units.meters_per_second
-        """
-        self._max_speed = max_speed
-        SignalLogger.start()
+            if value is None:
+                continue
+            elif isinstance(value, bool):
+                self.put_boolean(field.name, value)
+            elif isinstance(value, (int, float)):
+                self.put_double(field.name, float(value))
+            elif isinstance(value, str):
+                self.put_string(field.name, value)
+            elif isinstance(value, _WPI_STRUCT_TYPES):
+                self.put_struct(field.name, value)
+            elif isinstance(value, (list, tuple)):
+                if len(value) > 0 and isinstance(value[0], _WPI_STRUCT_TYPES):
+                    self.put_struct_array(field.name, value)
+                else:
+                    self.put_double_array(field.name, value)
+            elif dataclasses.is_dataclass(value):
+                self.child(field.name).publish(value)
 
-        # What to publish over networktables for telemetry
-        self._inst = NetworkTableInstance.getDefault()
 
-        # Robot swerve drive state
-        self._drive_state_table = self._inst.getTable("DriveState")
-        self._drive_pose = self._drive_state_table.getStructTopic(
-            "Pose", Pose2d
-        ).publish()
-        self._drive_speeds = self._drive_state_table.getStructTopic(
-            "Speeds", ChassisSpeeds
-        ).publish()
-        self._drive_module_states = self._drive_state_table.getStructArrayTopic(
-            "ModuleStates", SwerveModuleState
-        ).publish()
-        self._drive_module_targets = self._drive_state_table.getStructArrayTopic(
-            "ModuleTargets", SwerveModuleState
-        ).publish()
-        self._drive_module_positions = self._drive_state_table.getStructArrayTopic(
-            "ModulePositions", SwerveModulePosition
-        ).publish()
-        self._drive_timestamp = self._drive_state_table.getDoubleTopic(
-            "Timestamp"
-        ).publish()
-        self._drive_odometry_frequency = self._drive_state_table.getDoubleTopic(
-            "OdometryFrequency"
-        ).publish()
-
-        # Robot pose for field positioning
-        self._table = self._inst.getTable("Pose")
-        self._field_pub = self._table.getDoubleArrayTopic("robotPose").publish()
-        self._field_type_pub = self._table.getStringTopic(".type").publish()
-
-        # Mechanisms to represent the swerve module states
-        self._module_mechanisms: list[Mechanism2d] = [
-            Mechanism2d(1, 1),
-            Mechanism2d(1, 1),
-            Mechanism2d(1, 1),
-            Mechanism2d(1, 1),
-        ]
-        # A direction and length changing ligament for speed representation
-        self._module_speeds: list[MechanismLigament2d] = [
-            self._module_mechanisms[0]
-            .getRoot("RootSpeed", 0.5, 0.5)
-            .appendLigament("Speed", 0.5, 0),
-            self._module_mechanisms[1]
-            .getRoot("RootSpeed", 0.5, 0.5)
-            .appendLigament("Speed", 0.5, 0),
-            self._module_mechanisms[2]
-            .getRoot("RootSpeed", 0.5, 0.5)
-            .appendLigament("Speed", 0.5, 0),
-            self._module_mechanisms[3]
-            .getRoot("RootSpeed", 0.5, 0.5)
-            .appendLigament("Speed", 0.5, 0),
-        ]
-        # A direction changing and length constant ligament for module direction
-        self._module_directions: list[MechanismLigament2d] = [
-            self._module_mechanisms[0]
-            .getRoot("RootDirection", 0.5, 0.5)
-            .appendLigament("Direction", 0.1, 0, 0, Color8Bit(Color.kWhite)),
-            self._module_mechanisms[1]
-            .getRoot("RootDirection", 0.5, 0.5)
-            .appendLigament("Direction", 0.1, 0, 0, Color8Bit(Color.kWhite)),
-            self._module_mechanisms[2]
-            .getRoot("RootDirection", 0.5, 0.5)
-            .appendLigament("Direction", 0.1, 0, 0, Color8Bit(Color.kWhite)),
-            self._module_mechanisms[3]
-            .getRoot("RootDirection", 0.5, 0.5)
-            .appendLigament("Direction", 0.1, 0, 0, Color8Bit(Color.kWhite)),
-        ]
-
-        # Set up the module state Mechanism2d telemetry
-        for i, module_mechanism in enumerate(self._module_mechanisms):
-            SmartDashboard.putData(f"Module {i}", module_mechanism)
-
-    def telemeterize(self, state: swerve.SwerveDrivetrain.SwerveDriveState):
-        """
-        Accept the swerve drive state and telemeterize it to SmartDashboard and SignalLogger.
-        """
-        # Telemeterize the swerve drive state
-        self._drive_pose.set(state.pose)
-        self._drive_speeds.set(state.speeds)
-        self._drive_module_states.set(state.module_states)
-        self._drive_module_targets.set(state.module_targets)
-        self._drive_module_positions.set(state.module_positions)
-        self._drive_timestamp.set(state.timestamp)
-        self._drive_odometry_frequency.set(1.0 / state.odometry_period)
-
-        # Also write to log file
-        SignalLogger.write_struct("DriveState/Pose", Pose2d, state.pose)
-        SignalLogger.write_struct("DriveState/Speeds", ChassisSpeeds, state.speeds)
-        SignalLogger.write_struct_array(
-            "DriveState/ModuleStates", SwerveModuleState, state.module_states
-        )
-        SignalLogger.write_struct_array(
-            "DriveState/ModuleTargets", SwerveModuleState, state.module_targets
-        )
-        SignalLogger.write_struct_array(
-            "DriveState/ModulePositions", SwerveModulePosition, state.module_positions
-        )
-        SignalLogger.write_double(
-            "DriveState/OdometryPeriod", state.odometry_period, "seconds"
-        )
-
-        # Telemeterize the pose to a Field2d
-        self._field_type_pub.set("Field2d")
-
-        pose_array = [state.pose.x, state.pose.y, state.pose.rotation().degrees()]
-        self._field_pub.set(pose_array)
-
-        # Telemeterize each module state to a Mechanism2d
-        for i, module_state in enumerate(state.module_states):
-            self._module_speeds[i].setAngle(module_state.angle.degrees())
-            self._module_directions[i].setAngle(module_state.angle.degrees())
-            self._module_speeds[i].setLength(module_state.speed / (2 * self._max_speed))
+def init_logging() -> None:
+    """Call once at robot startup to initialise global logging."""
+    SignalLogger.start()

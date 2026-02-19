@@ -1,13 +1,22 @@
+from dataclasses import dataclass
+
 from phoenix6.hardware import TalonFX
 from phoenix6 import controls
 from commands2 import cmd
 import commands2
-from utils import TalonConfig
+from utils import TalonConfig, Logger
 from constants import MotorIDs
+
+
+@dataclass
+class SpindexTelemetry:
+    velocity: float
 
 
 class Spindex(commands2.Subsystem):
     def __init__(self):
+        super().__init__()
+        self.log = Logger("Spindex")
         SPINDEX_CONFIG = TalonConfig(kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True)
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
@@ -37,4 +46,11 @@ class Spindex(commands2.Subsystem):
     def stop(self):
         self.motor_spindex.set_control(
             self._motion_magic_velocity_voltage.with_velocity(0).with_acceleration(0.1)
+        )
+
+    def periodic(self):
+        self.log.publish(
+            SpindexTelemetry(
+                velocity=float(self.motor_spindex.get_velocity().value),
+            )
         )

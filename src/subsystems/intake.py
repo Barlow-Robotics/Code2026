@@ -1,12 +1,20 @@
-import ntcore
+from dataclasses import dataclass
+
 from phoenix6 import controls
 from phoenix6.hardware import TalonFX
 import commands2
 
-from utils import TalonConfig
+from utils import TalonConfig, Logger
 from constants import MotorIDs, IntakeConstants
 from commands2 import cmd
 from enum import Enum
+
+
+@dataclass
+class IntakeTelemetry:
+    velocity_motor_bottom: float
+    velocity_motor_top: float
+    target_velocity: float
 
 
 class IntakePositions(Enum):
@@ -16,9 +24,9 @@ class IntakePositions(Enum):
 
 
 class Intake(commands2.Subsystem):
-
     def __init__(self):
         super().__init__()
+        self.log = Logger("Intake")
         INTAKE_CONFIG_ARM = TalonConfig(
             kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True
         )
@@ -75,9 +83,18 @@ class Intake(commands2.Subsystem):
         pass
 
     _POSITION_MAP = {
-        IntakePositions.HOME: (IntakeConstants.ARM_HOME_ROTATIONS, IntakeConstants.HEAD_HOME_ROTATIONS),
-        IntakePositions.STOWED: (IntakeConstants.ARM_STOWED_ROTATIONS, IntakeConstants.HEAD_STOWED_ROTATIONS),
-        IntakePositions.DEPLOYED: (IntakeConstants.ARM_DEPLOYED_ROTATIONS, IntakeConstants.HEAD_DEPLOYED_ROTATIONS),
+        IntakePositions.HOME: (
+            IntakeConstants.ARM_HOME_ROTATIONS,
+            IntakeConstants.HEAD_HOME_ROTATIONS,
+        ),
+        IntakePositions.STOWED: (
+            IntakeConstants.ARM_STOWED_ROTATIONS,
+            IntakeConstants.HEAD_STOWED_ROTATIONS,
+        ),
+        IntakePositions.DEPLOYED: (
+            IntakeConstants.ARM_DEPLOYED_ROTATIONS,
+            IntakeConstants.HEAD_DEPLOYED_ROTATIONS,
+        ),
     }
 
     def go_to_position(self, position: IntakePositions):
@@ -91,7 +108,9 @@ class Intake(commands2.Subsystem):
 
     def set_velocity(self, velocity: float = 1):  # ft/sec
         # Convert ft/sec to motor rotations/sec
-        velocity *= (12 * IntakeConstants.ROLLER_GEARING) / IntakeConstants.ROLLER_CIRCUMFERENCE
+        velocity *= (
+            12 * IntakeConstants.ROLLER_GEARING
+        ) / IntakeConstants.ROLLER_CIRCUMFERENCE
 
         # print("AAAx")
         self.motor_roller_top.set_control(
@@ -117,16 +136,13 @@ class Intake(commands2.Subsystem):
             self._motion_magic_velocity_voltage.with_velocity(0).with_acceleration(0.1)
         )
 
-    def update_table(self):
-        table = ntcore.NetworkTableInstance.getDefault().getTable("Intake")
-        table.getEntry("Velocity_Motor_Bottom").setDouble(
-            float(self.motor_roller_bottom.get_velocity().value)
-        )
-        table.getEntry("Velocity_Motor_Top").setDouble(
-            float(self.motor_roller_top.get_velocity().value)
-        )
-        table.getEntry("Target_Velocity").setDouble(float(self.target_velocity))
-        # v            # 4pi inches / sec
-
     def periodic(self):
-        self.update_table()
+        self.log.publish(
+            IntakeTelemetry(
+                velocity_motor_bottom=float(
+                    self.motor_roller_bottom.get_velocity().value
+                ),
+                velocity_motor_top=float(self.motor_roller_top.get_velocity().value),
+                target_velocity=float(self.target_velocity),
+            )
+        )
