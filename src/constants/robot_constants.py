@@ -43,9 +43,22 @@ class SpindexConstants:
 
 
 class DriveConstants:
-    TOTAL_WIDTH_INCHES = 27.0
-    TOTAL_WIDTH_INCHES_BUMPERS = 34.5
-    CENTER_WHEEL_TO_CENTER_WHEEL = 21.452
+    TOTAL_WIDTH_INCHES = 27.0  # IN
+    TOTAL_WIDTH_INCHES_BUMPERS = 34.5  # IN
+    CENTER_WHEEL_TO_CENTER_WHEEL = 21.452  # IN
+    CENTER_WHEEL_TO_CENTER_WHEEL_METERS = 0.0254 * CENTER_WHEEL_TO_CENTER_WHEEL  # M
+    ROBOT_MASS_KG = 50  # KG
+    ROBOT_MOI = (
+        ROBOT_MASS_KG
+        * (
+            CENTER_WHEEL_TO_CENTER_WHEEL_METERS**2
+            + CENTER_WHEEL_TO_CENTER_WHEEL_METERS**2
+        )
+        / 12
+    )  # kg·m^2 assuming sqaure robot
+    MAX_VELOCITY = 4  # m/s
+    MAX_ACCL = 3  # m/s^2
+
 
 class VisionConstants:
     """Vision subsystem constants"""
@@ -105,6 +118,8 @@ class VisionConstants:
     NO_TARGET_DISTANCE = -1.0
 
     AUTO_ALIGN_VELOCITY_CONSTANT = 3.0
+    AUTO_ALIGN_ACCELERATION_CONSTANT = 3.0
+
     AUTO_ALIGN_ANGULAR_VELOCITY_CONSTANT = units.degreesToRadians(
         180.0
     )  # wpk is this a good amount?

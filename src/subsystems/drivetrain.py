@@ -317,6 +317,9 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     def get_pose(self) -> Pose2d | None:
         return self.get_state().pose
 
+    def get_speeds(self) -> Pose2d | None:
+        return self.get_state().speeds
+
     @staticmethod
     def get_timestamp():
         return utils.get_current_time_seconds()
