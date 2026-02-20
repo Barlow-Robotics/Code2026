@@ -22,31 +22,27 @@ class ChassisAccelerations:
     alpha: float
 
 
-@dataclass
 class ChassisState:
-    speeds: ChassisSpeeds
-    accelerations: ChassisAccelerations
-
     def __init__(self, vx=0.0, vy=0.0, omega=0.0, ax=0.0, ay=0.0, alpha=0.0):
         self.speeds = ChassisSpeeds(vx, vy, omega)
         self.accelerations = ChassisAccelerations(ax, ay, alpha)
 
 
 @dataclass
-class TrajectorySample:
+class Sample:
     time: float
     pose: Pose2d
     chassis_state: ChassisState
 
 
 class NativeHolonomicTrajectory:
-    def __init__(self, samples: List[TrajectorySample]):
+    def __init__(self, samples: List[Sample]):
         self.samples = samples
 
     def total_time(self) -> float:
         return self.samples[-1].time if self.samples else 0.0
 
-    def sample_at(self, t: float) -> TrajectorySample:
+    def sample_at(self, t: float) -> Sample:
         """Linear interpolation between samples at time t."""
         if t <= self.samples[0].time:
             return self.samples[0]
@@ -57,30 +53,27 @@ class NativeHolonomicTrajectory:
             s1 = self.samples[i + 1]
             if s0.time <= t <= s1.time:
                 dt = s1.time - s0.time
-                alpha = (t - s0.time) / dt if dt > 0 else 0.0
-                # Interpolate pose
-                x = s0.pose.X() + alpha * (s1.pose.X() - s0.pose.X())
-                y = s0.pose.Y() + alpha * (s1.pose.Y() - s0.pose.Y())
-                r = s0.pose.rotation().radians() + alpha * (
+                a = (t - s0.time) / dt if dt > 0 else 0.0
+                x = s0.pose.X() + a * (s1.pose.X() - s0.pose.X())
+                y = s0.pose.Y() + a * (s1.pose.Y() - s0.pose.Y())
+                r = s0.pose.rotation().radians() + a * (
                     s1.pose.rotation().radians() - s0.pose.rotation().radians()
                 )
                 pose = Pose2d(x, y, Rotation2d(r))
-                # Interpolate chassis state
-                cs = ChassisState(
-                    vx=s0.chassis_state.vx
-                    + alpha * (s1.chassis_state.vx - s0.chassis_state.vx),
-                    vy=s0.chassis_state.vy
-                    + alpha * (s1.chassis_state.vy - s0.chassis_state.vy),
-                    omega=s0.chassis_state.omega
-                    + alpha * (s1.chassis_state.omega - s0.chassis_state.omega),
-                    ax=s0.chassis_state.ax
-                    + alpha * (s1.chassis_state.ax - s0.chassis_state.ax),
-                    ay=s0.chassis_state.ay
-                    + alpha * (s1.chassis_state.ay - s0.chassis_state.ay),
-                    alpha=s0.chassis_state.alpha
-                    + alpha * (s1.chassis_state.alpha - s0.chassis_state.alpha),
+                sp0, sp1 = s0.chassis_state.speeds, s1.chassis_state.speeds
+                ac0, ac1 = (
+                    s0.chassis_state.accelerations,
+                    s1.chassis_state.accelerations,
                 )
-                return TrajectorySample(t, pose, cs)
+                cs = ChassisState(
+                    vx=sp0.vx + a * (sp1.vx - sp0.vx),
+                    vy=sp0.vy + a * (sp1.vy - sp0.vy),
+                    omega=sp0.omega + a * (sp1.omega - sp0.omega),
+                    ax=ac0.ax + a * (ac1.ax - ac0.ax),
+                    ay=ac0.ay + a * (ac1.ay - ac0.ay),
+                    alpha=ac0.alpha + a * (ac1.alpha - ac0.alpha),
+                )
+                return Sample(t, pose, cs)
         return self.samples[-1]
 
 
@@ -185,13 +178,10 @@ def _calculate_rotation_double_prime(
 
 
 class TOPPGenerator:
-    # Algorithm constants
     EPSILON = 1e-6
-    N = 51  # Number of path points
+    N = 81
     DS = 1.0 / (N - 1)
-
-    SCAN_RES = 0.001
-    SCAN_LENGTH = 5000
+    SCAN_LENGTH = 14
 
     MIN_ROBOT_SPEED = 0.4
     END_CONTROL_POINT_LENGTH = 0.8
@@ -199,16 +189,7 @@ class TOPPGenerator:
     AWAY_FROM_TARGET_ANGLE_THRESHOLD = 100.0  # degrees
     AWAY_FROM_TARGET_FACTOR = 2.0
 
-    # Precompute s values and scan range once at class level
-    _s_values: list = [i / (51 - 1) for i in range(N)]
-
-    _scan_range: list = [0.0] * SCAN_LENGTH
-    for _i in range(1, SCAN_LENGTH):
-        _scan_range[_i] = (
-            SCAN_RES * math.floor(_i / 2.0)
-            if _i % 2 == 0
-            else SCAN_RES * math.ceil(-_i / 2.0)
-        )
+    _s_values: list = [i / (81 - 1) for i in range(N)]
 
     def __init__(
         self,
@@ -222,6 +203,10 @@ class TOPPGenerator:
         self._m_diag = [mass, mass, moi / robot_radius]
         self._pose_supplier = robot_pose_supplier
         self._speed_supplier = chassis_speed_supplier
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
 
     def generate(
         self,
@@ -238,10 +223,11 @@ class TOPPGenerator:
             target_position.translation() - current_pose.translation()
         ).angle()
 
-        if robot_speed > self.MIN_ROBOT_SPEED:
-            velocity_direction = Rotation2d(speeds.vx, speeds.vy)
-        else:
-            velocity_direction = direct_to_target
+        velocity_direction = (
+            Rotation2d(speeds.vx, speeds.vy)
+            if robot_speed > self.MIN_ROBOT_SPEED
+            else direct_to_target
+        )
 
         end_control_point_rotation = target_heading + Rotation2d(math.pi)
 
@@ -286,20 +272,23 @@ class TOPPGenerator:
             self._forward_pass_to_samples(q, q_prime, q_double_prime, x, u)
         )
 
+    # ------------------------------------------------------------------
+    # Path generation
+    # ------------------------------------------------------------------
+
     def _generate_path_points(
         self,
-        end_pose: Pose2d,
-        start_pose: Pose2d,
-        start_cp_length: float,
-        end_cp_length: float,
-        start_cp_rotation: Rotation2d,
-        end_cp_rotation: Rotation2d,
+        end_pose,
+        start_pose,
+        start_cp_length,
+        end_cp_length,
+        start_cp_rotation,
+        end_cp_rotation,
     ):
         start_cp = (
             Translation2d(start_cp_length, start_cp_rotation) + start_pose.translation()
         )
         end_cp = Translation2d(end_cp_length, end_cp_rotation) + end_pose.translation()
-
         p0, p1, p2, p3 = (
             start_pose.translation(),
             start_cp,
@@ -332,6 +321,10 @@ class TOPPGenerator:
 
         return q, q_prime, q_double_prime
 
+    # ------------------------------------------------------------------
+    # Backward pass (binary search)
+    # ------------------------------------------------------------------
+
     def _backward_pass(self, q, q_prime, q_double_prime, v_max, f_max, x_end):
         N = self.N
         DS = self.DS
@@ -339,35 +332,25 @@ class TOPPGenerator:
         x_max[N - 1] = x_end
 
         for i in range(N - 2, -1, -1):
-            found = False
-            j = 0
-            for j in range(self.SCAN_LENGTH):
-                offset = self._scan_range[j]
-                x = offset + x_max[i + 1]
-
-                vel_sq = _dot(q_prime[i], q_prime[i]) * x
-                if vel_sq > v_max**2:
-                    if offset > 0 and found:
-                        break
-                    continue
-
-                if x < x_max[i]:
-                    continue
-
+            qp_dot = _dot(q_prime[i], q_prime[i])
+            x_low = 0.0
+            x_high = (v_max**2 / qp_dot) if qp_dot > self.EPSILON else 0.0
+            x = 0.0
+            for _ in range(self.SCAN_LENGTH):
+                x = (x_low + x_high) / 2
                 u_min = self._u_min_feasible(q_prime[i], q_double_prime[i], x, f_max)
                 x_next_min = x + 2 * DS * u_min
-
                 if x_next_min <= x_max[i + 1]:
-                    if x >= x_max[i]:
-                        x_max[i] = x
-                        found = True
-                elif offset > 0 and found:
-                    break
-
-            if j == self.SCAN_LENGTH - 1:
-                print(f"Warning: No feasible velocity in backward pass at i={i}")
+                    x_low = x  # valid, try higher
+                else:
+                    x_high = x  # too high, try lower
+            x_max[i] = x
 
         return x_max
+
+    # ------------------------------------------------------------------
+    # Forward pass (binary search)
+    # ------------------------------------------------------------------
 
     def _forward_pass(self, q, q_prime, q_double_prime, x_max, f_max, x0):
         N = self.N
@@ -382,43 +365,37 @@ class TOPPGenerator:
         x[0] = min(x0, x_max[0])
 
         for i in range(1, N):
-            found = False
-            j = -1
-            for j in range(-1, self.SCAN_LENGTH):
-                if j < 0:
-                    x_i = x_max[i]
-                    offset = x_i - x[i - 1]
+            x_low = 0.0
+            x_high = x_max[i]
+            x_i = 0.0
+            u_required = 0.0
+            for _ in range(self.SCAN_LENGTH):
+                x_i = (x_low + x_high) / 2
+                u_required = (x_i - x[i - 1]) / (2 * DS)
+                force_vec, force_grad = self._get_force_vectors(
+                    q_prime[i - 1], q_double_prime[i - 1], x_i, x[i - 1]
+                )
+                force_sq = _dot(force_vec, force_vec)
+                grad_dot = _dot(force_vec, force_grad)
+
+                if force_sq <= f_max**2:
+                    x_low = x_i  # valid, try higher
+                elif grad_dot >= 0:
+                    x_low = x_i  # highest valid x is above current
                 else:
-                    offset = self._scan_range[j]
-                    x_i = offset + x[i - 1]
+                    x_high = x_i  # highest valid x is below current
 
-                if x_i < x[i]:
-                    continue
-                if x_i > x_max[i]:
-                    if found:
-                        break
-                    continue
-
-                u_req = (x_i - x[i - 1]) / (2 * DS)
-                if self._within_force_constraints(
-                    q_prime[i - 1], q_double_prime[i - 1], x[i - 1], u_req, f_max
-                ):
-                    if x_i >= x[i]:
-                        x[i] = x_i
-                        u[i] = u_req
-                        found = True
-                elif offset > 0 and found:
-                    break
-
-            if j == self.SCAN_LENGTH - 1:
-                print(f"Warning: No feasible velocity in forward pass at i={i}")
+            x[i] = x_i
+            u[i] = u_required
 
         return x, u
 
+    # ------------------------------------------------------------------
+    # Convert to samples
+    # ------------------------------------------------------------------
+
     @staticmethod
-    def _forward_pass_to_samples(
-        q, q_prime, q_double_prime, x, u
-    ) -> List[TrajectorySample]:
+    def _forward_pass_to_samples(q, q_prime, q_double_prime, x, u) -> List[Sample]:
         N = TOPPGenerator.N
         DS = TOPPGenerator.DS
         EPSILON = TOPPGenerator.EPSILON
@@ -446,9 +423,13 @@ class TOPPGenerator:
                 ay=acc[1],
                 alpha=acc[2],
             )
-            samples.append(TrajectorySample(time[i], pose, cs))
+            samples.append(Sample(time[i], pose, cs))
 
         return samples
+
+    # ------------------------------------------------------------------
+    # Constraint helpers
+    # ------------------------------------------------------------------
 
     def _u_min_feasible(self, q_prime, q_double_prime, x, f_max) -> float:
         A = B = 0.0
@@ -465,12 +446,17 @@ class TOPPGenerator:
             return float("inf")
         return (-B - math.sqrt(D)) / (2 * A)
 
-    def _within_force_constraints(self, q_prime, q_double_prime, x, u, f_max) -> bool:
-        force_sq = 0.0
+    def _get_force_vectors(self, q_prime, q_double_prime, x, x_prev):
+        DS = self.DS
+        u_required = (x - x_prev) / (2 * DS)
+        force_vec = [0.0, 0.0, 0.0]
+        force_grad = [0.0, 0.0, 0.0]
         for i in range(3):
-            f_i = self._m_diag[i] * (q_prime[i] * u + q_double_prime[i] * x)
-            force_sq += f_i * f_i
-        return force_sq <= f_max**2
+            a = self._m_diag[i] * q_prime[i]
+            b = self._m_diag[i] * q_double_prime[i]
+            force_vec[i] = a * u_required + b * x_prev
+            force_grad[i] = -a / (2 * DS)
+        return force_vec, force_grad
 
 
 def _angle_modulus(angle: float) -> float:
