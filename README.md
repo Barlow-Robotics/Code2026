@@ -18,6 +18,11 @@ We use ruff for formatting code. This ensures consistency and minimizes white-sp
     uv run ruff check
     ```
 
+## To simulate the robot
+```
+uv run frc sim
+```
+
 ## To deploy to the robot
 ```
 uv run frc deploy
@@ -25,7 +30,7 @@ uv run frc deploy
 
 If you want to skip running the tests
 ```
-uf run frc deploy --skip-tests
+uv run frc deploy --skip-tests
 ```
 
 
