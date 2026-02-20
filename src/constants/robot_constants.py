@@ -1,7 +1,8 @@
 from wpimath.geometry import Transform3d, Translation3d, Rotation3d
 from wpimath import units
 from wpimath.system.plant import DCMotor
-
+from constants.tuner_constants import TunerConstants
+from wpimath.units import rotationsToRadians
 
 class MotorIDs:
     foc_active = False
@@ -56,8 +57,12 @@ class DriveConstants:
         )
         / 12
     )  # kg·m^2 assuming sqaure robot
-    MAX_VELOCITY = 4  # m/s
+    MAX_TRANSLATIONAL_VELOCITY = 1.0 * TunerConstants.speed_at_12_volts  # m/s
     MAX_ACCL = 3  # m/s^2
+    MAX_ANGULAR_VELOCITY = rotationsToRadians(
+        0.75
+    )  # 3/4 of a rotation per second max angular velocity
+
 
 
 class VisionConstants:

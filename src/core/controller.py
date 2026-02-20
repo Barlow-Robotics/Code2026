@@ -10,7 +10,7 @@ from phoenix6 import swerve
 from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
 from subsystems import IntakePositions
-
+from constants import DriveConstants
 if TYPE_CHECKING:
     from core import RobotContainer
 
@@ -28,12 +28,12 @@ class Controller:
         container.drivetrain.setDefaultCommand(
             container.drivetrain.apply_request(
                 lambda: (
-                    container.drive.with_velocity_x(
-                        -self._joystick.getLeftY() * container.max_speed
+                    container.drivetrain.movement.with_velocity_x(
+                        -self._joystick.getLeftY() * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
                     )
-                    .with_velocity_y(-self._joystick.getLeftX() * container.max_speed)
+                    .with_velocity_y(-self._joystick.getLeftX() * DriveConstants.MAX_TRANSLATIONAL_VELOCITY)
                     .with_rotational_rate(
-                        -self._joystick.getRightX() * container.max_angular_rate
+                        -self._joystick.getRightX() * DriveConstants.MAX_ANGULAR_VELOCITY
                     )
                 )
             )
@@ -59,7 +59,8 @@ class Controller:
         )
 
         # Intake and spindex bindings (driver joystick)
-        self._driver.button(2).onTrue(container.intake.set_velocity_command)
+        # self._driver.button(2).onTrue(container.intake.set_velocity_command)
+        self._driver.button(2).onTrue(container.vision.auto_align_command)
         self._driver.button(3).onTrue(container.intake.stop_command)
         self._driver.button(4).onTrue(
             container.intake.goto_position_cmmand[IntakePositions.DEPLOYED]

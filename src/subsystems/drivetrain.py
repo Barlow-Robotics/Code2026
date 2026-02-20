@@ -7,7 +7,9 @@ from wpilib import DriverStation
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Pose2d, Rotation2d
 
-from constants import TunerSwerveDrivetrain
+from constants import TunerSwerveDrivetrain, DriveConstants
+from utils import Logger
+import ntcore
 
 
 class Drivetrain(Subsystem, TunerSwerveDrivetrain):
@@ -130,6 +132,15 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         TunerSwerveDrivetrain.__init__(
             self, drivetrain_constants, arg0, arg1, arg2, arg3
         )
+        self.movement = (
+            swerve.requests.FieldCentric()
+            .with_deadband(DriveConstants.MAX_TRANSLATIONAL_VELOCITY * 0.1)
+            .with_rotational_deadband(DriveConstants.MAX_ANGULAR_VELOCITY * 0.1)  # Add a 10% deadband
+            .with_drive_request_type(
+                swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
+            )  # Use open-loop control for drive motors
+        )
+        self.log = Logger("Drive")
 
         self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""
@@ -138,6 +149,7 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         self._translation_characterization = swerve.requests.SysIdSwerveTranslation()
         self._steer_characterization = swerve.requests.SysIdSwerveSteerGains()
         self._rotation_characterization = swerve.requests.SysIdSwerveRotation()
+        self.nt = ntcore.NetworkTableInstance.getDefault()
 
         self._sys_id_routine_translation = SysIdRoutine(
             SysIdRoutine.Config(
@@ -323,3 +335,26 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     @staticmethod
     def get_timestamp():
         return utils.get_current_time_seconds()
+    def drive_based_velocity(self, vx: float, vy: float, omega: float):
+        """
+        Drive the robot with the given velocities.
+
+        :param vx: Velocity in the x direction (m/s).
+        :param vy: Velocity in the y direction (m/s).
+        :param omega: Angular velocity (rad/s).
+        """
+        self.apply_request(
+            lambda: (
+                self.movement.with_velocity_x(vx)
+                .with_velocity_y(vy)
+                .with_rotational_rate(omega)
+            )
+        )
+    def stop(self):
+        self.set_control(swerve.requests.SwerveDriveBrake())
+
+    # def periodic(self):
+    #     pose = self.get_pose()
+    #     self.nt.getTable("Odometry").putNumberArray(
+    #         "Estimated pose", [pose.X(), pose.Y(), pose.rotation().radians()]
+    #     )

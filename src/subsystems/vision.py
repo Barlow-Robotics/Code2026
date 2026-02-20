@@ -6,12 +6,15 @@ from photonlibpy.photonPoseEstimator import PhotonPoseEstimator
 from photonlibpy.targeting.photonPipelineResult import PhotonPipelineResult
 from photonlibpy.targeting.photonTrackedTarget import PhotonTrackedTarget
 from robotpy_apriltag import AprilTagFieldLayout, AprilTagField
-from wpimath.geometry import Transform3d, Pose2d, Translation2d
+from wpimath.geometry import Transform3d, Pose2d, Translation2d, Translation3d, Rotation3d, Transform2d, Rotation2d
 from wpilib import DriverStation
 from constants import VisionConstants
 from subsystems import Drivetrain
 from utils import Logger
-import commands2
+from commands2 import Subsystem, cmd
+from commands import FollowTrajectoryCommand
+
+from utils.trajectory_generator import CreateTrajectory
 
 
 @dataclass
@@ -31,7 +34,7 @@ class VisionTelemetry:
     back_right: CameraStats | None = None
 
 
-class Vision(commands2.Subsystem):
+class Vision(Subsystem):
     """
     Vision subsystem for AprilTag-based pose estimation using PhotonVision
     """
@@ -81,6 +84,9 @@ class Vision(commands2.Subsystem):
         self.log = Logger("Vision")
         self._camera_stats: dict[str, CameraStats] = {}
         self._last_pose_estimate: Optional[Pose2d] = None
+        
+        
+        self.auto_align_command = cmd.runOnce(self.auto_align)
 
     def periodic(self):
         """Called periodically by the scheduler"""
@@ -392,4 +398,21 @@ class Vision(commands2.Subsystem):
 
     def simulation_periodic(self):
         """Called periodically in simulation"""
+        
         pass
+    def auto_align(self):
+        print("AUTO ALIGN")
+
+        starting_pose = self.drive_sub.get_pose()
+        target_pose = Pose2d(starting_pose.X() + 1, starting_pose.Y(), starting_pose.rotation())
+        
+        trajectory_obj = CreateTrajectory(
+            lambda: self.drive_sub.get_pose,
+            lambda: self.drive_sub.get_speeds,
+        ).get_trajectory(
+            target_pose,
+            Rotation2d(target_pose.rotation().radians()),
+        )
+        # FollowTrajectoryCommand(self.drive_sub, trajectory_obj)
+        
+        FollowTrajectoryCommand(self.drive_sub, trajectory_obj).schedule()

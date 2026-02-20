@@ -24,6 +24,12 @@ class ChassisAccelerations:
 
 class ChassisState:
     def __init__(self, vx=0.0, vy=0.0, omega=0.0, ax=0.0, ay=0.0, alpha=0.0):
+        self.vx = vx
+        self.vy = vy
+        self.omega = omega
+        self.ax = ax
+        self.ay = ay
+        self.alpha = alpha
         self.speeds = ChassisSpeeds(vx, vy, omega)
         self.accelerations = ChassisAccelerations(ax, ay, alpha)
 
@@ -215,9 +221,9 @@ class TOPPGenerator:
         v_max: float,
         a_max: float,
     ) -> NativeHolonomicTrajectory:
-        speeds = self._speed_supplier()
+        speeds = self._speed_supplier()()
         robot_speed = math.hypot(speeds.vx, speeds.vy)
-        current_pose = self._pose_supplier()
+        current_pose = self._pose_supplier()()
 
         direct_to_target = (
             target_position.translation() - current_pose.translation()
@@ -478,8 +484,8 @@ class CreateTrajectory:
             mass=DriveConstants.ROBOT_MASS_KG,
             moi=DriveConstants.ROBOT_MOI,
             wheel_base=DriveConstants.CENTER_WHEEL_TO_CENTER_WHEEL_METERS,
-            robot_pose_supplier=lambda: robot_pose_supplier,
-            chassis_speed_supplier=lambda: chassis_speed_supplier,
+            robot_pose_supplier=robot_pose_supplier,
+            chassis_speed_supplier=chassis_speed_supplier,
         )
 
     def get_trajectory(

@@ -7,13 +7,12 @@
 import commands2
 from commands2 import cmd
 
-from constants import TunerConstants
+from constants import TunerConstants, DriveConstants
 from utils import SwerveTelemetry
 
 from phoenix6 import swerve
 from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
-from wpimath.units import rotationsToRadians
 from subsystems import Vision, Intake, Spindex
 from core.controller import Controller
 
@@ -29,22 +28,7 @@ class RobotContainer:
     def __init__(self) -> None:
         DriverStation.silenceJoystickConnectionWarning(True)
 
-        self.max_speed = (
-            1.0 * TunerConstants.speed_at_12_volts
-        )  # speed_at_12_volts desired top speed
-        self.max_angular_rate = rotationsToRadians(
-            0.75
-        )  # 3/4 of a rotation per second max angular velocity
-
         # Swerve drive requests
-        self.drive = (
-            swerve.requests.FieldCentric()
-            .with_deadband(self.max_speed * 0.1)
-            .with_rotational_deadband(self.max_angular_rate * 0.1)  # Add a 10% deadband
-            .with_drive_request_type(
-                swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
-            )  # Use open-loop control for drive motors
-        )
         self.brake = swerve.requests.SwerveDriveBrake()
         self.point = swerve.requests.PointWheelsAt()
 
@@ -55,13 +39,16 @@ class RobotContainer:
         self.spindex = Spindex()
 
         # Telemetry
-        self._swerve_telemetry = SwerveTelemetry(self.max_speed)
+        self._swerve_telemetry = SwerveTelemetry(DriveConstants.MAX_TRANSLATIONAL_VELOCITY)
         self.drivetrain.register_telemetry(
             lambda state: self._swerve_telemetry.telemeterize(state)
         )
 
         # Controller bindings
         self.controller = Controller(self)
+        
+        
+        
 
     def getAutonomousCommand(self) -> commands2.Command:
         """
@@ -80,7 +67,7 @@ class RobotContainer:
             # Then slowly drive forward (away from us) for 5 seconds.
             self.drivetrain.apply_request(
                 lambda: (
-                    self.drive.with_velocity_x(0.5)
+                    self.drivetrain.movement.with_velocity_x(0.5)
                     .with_velocity_y(0)
                     .with_rotational_rate(0)
                 )

@@ -1,0 +1,1 @@
+from .follow_trajectory_command import FollowTrajectoryCommand as FollowTrajectoryCommand
