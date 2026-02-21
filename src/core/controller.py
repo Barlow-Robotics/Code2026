@@ -66,19 +66,20 @@ class Controller:
 
         # Intake and spindex bindings (driver joystick)
         # self._driver.button(2).onTrue(container.intake.set_velocity_command)
-        self._driver.button(2).onTrue(container.vision.auto_align_command)
-        self._driver.button(3).onTrue(container.intake.stop_command)
-        self._driver.button(4).onTrue(
-            container.intake.goto_position_cmmand[IntakePositions.DEPLOYED]
-        )
-        self._driver.button(5).onTrue(
-            container.intake.goto_position_cmmand[IntakePositions.STOWED]
-        )
-        self._driver.button(6).onTrue(
-            container.intake.goto_position_cmmand[IntakePositions.HOME]
-        )
-        self._driver.button(7).onTrue(container.spindex.set_velocity_command)
-        self._driver.button(8).onTrue(container.spindex.stop_velocity_command)
+        if False:
+            self._driver.button(2).onTrue(container.vision.auto_align_command)
+            self._driver.button(3).onTrue(container.intake.stop_command)
+            self._driver.button(4).onTrue(
+                container.intake.goto_position_cmmand[IntakePositions.DEPLOYED]
+            )
+            self._driver.button(5).onTrue(
+                container.intake.goto_position_cmmand[IntakePositions.STOWED]
+            )
+            self._driver.button(6).onTrue(
+                container.intake.goto_position_cmmand[IntakePositions.HOME]
+            )
+            self._driver.button(7).onTrue(container.spindex.set_velocity_command)
+            self._driver.button(8).onTrue(container.spindex.stop_velocity_command)
 
         # Periodically warn about missing controllers during teleop
         Trigger(DriverStation.isTeleopEnabled).whileTrue(
