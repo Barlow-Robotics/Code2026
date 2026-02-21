@@ -357,8 +357,5 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     def stop(self):
         self.set_control(swerve.requests.SwerveDriveBrake())
 
-    # def periodic(self):
-    #     pose = self.get_pose()
-    #     self.nt.getTable("Odometry").putNumberArray(
-    #         "Estimated pose", [pose.X(), pose.Y(), pose.rotation().radians()]
-    #     )
+    def get_rotation(self):  # BW: NEED TO SET UP GYRO
+        return Rotation2d(0)

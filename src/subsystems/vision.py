@@ -154,12 +154,52 @@ class Vision(Subsystem):
         observations: List[VisionObservation] = []
 
         for result in cam_cfg.camera.getAllUnreadResults():
-            # ADD POSE REAMBIGUITY UPON 1 tag and having gyro.
-            # targets = result.getTargets()
-            # if len(targets) == 1 and targets[0].getPoseAmbiguity() < POSE_AMBIGUITY:
+            targets = result.getTargets()
+            if len(targets) == 1 and targets[0].getPoseAmbiguity() > POSE_AMBIGUITY:
+                target = targets[0]
+                tag_pose = self.april_tag_field_layout.getTagPose(
+                    target.getFiducialId()
+                )
+                if tag_pose is None:
+                    continue
 
-            estimated = self._get_best_pose_estimate(result, cam_cfg.estimator)
-            if estimated is None:
+                camera_to_robot = cam_cfg.estimator.robotToCamera.inverse()
+
+                robot_pose_best = tag_pose.transformBy(
+                    target.getBestCameraToTarget().inverse()
+                ).transformBy(camera_to_robot)
+
+                robot_pose_alt = tag_pose.transformBy(
+                    target.getAlternateCameraToTarget().inverse()
+                ).transformBy(camera_to_robot)
+
+                gyro = self.drive_sub.get_rotation()
+
+                diff_best = abs(
+                    (gyro - robot_pose_best.toPose2d().rotation()).radians()
+                )
+                diff_alt = abs((gyro - robot_pose_alt.toPose2d().rotation()).radians())
+                if diff_best < diff_alt:
+                    estimated = EstimatedRobotPose(
+                        estimatedPose=robot_pose_best,
+                        targetsUsed=[target],
+                        timestampSeconds=result.getTimestampSeconds(),
+                    )
+                else:
+                    estimated = EstimatedRobotPose(
+                        estimatedPose=robot_pose_alt,
+                        targetsUsed=[target],
+                        timestampSeconds=result.getTimestampSeconds(),
+                    )
+
+            else:
+                estimated = self._get_best_pose_estimate(result, cam_cfg.estimator)
+                if estimated is None:
+                    continue
+
+            tags = estimated.targetsUsed
+            tag_count = len(tags)
+            if tag_count == 0:
                 continue
 
             pose_2d = estimated.estimatedPose.toPose2d()
@@ -175,11 +215,6 @@ class Vision(Subsystem):
                 continue
 
             if self._should_reject_by_alliance(estimated.targetsUsed):
-                continue
-
-            tags = estimated.targetsUsed
-            tag_count = len(tags)
-            if tag_count == 0:
                 continue
 
             if self._should_reject_by_z(estimated):
@@ -266,9 +301,7 @@ class Vision(Subsystem):
 
     @staticmethod
     def _should_reject_by_z(estimated: EstimatedRobotPose) -> bool:
-        if abs(estimated.estimatedPose.Z()) > CAMERA_HEIGHT_TOLERANCE:
-            return True
-        return True
+        return abs(estimated.estimatedPose.Z()) > CAMERA_HEIGHT_TOLERANCE
 
     @staticmethod  # BW NEED TO FIX: This is a temporary hack until we have a better way to filter out bad targets
     def _should_reject_by_alliance(targets: List[PhotonTrackedTarget]) -> bool:
