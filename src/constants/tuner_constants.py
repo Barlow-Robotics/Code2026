@@ -3,7 +3,7 @@ from phoenix6 import CANBus, configs, hardware, signals, swerve, units
 from wpimath.units import inchesToMeters
 
 if TYPE_CHECKING:
-    from subsystems.drivetrain import Drivetrain
+    from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
 
 
 class TunerConstants:
@@ -79,20 +79,20 @@ class TunerConstants:
 
     # Theoretical free speed (m/s) at 12 V applied output;
     # This needs to be tuned to your individual robot
-    speed_at_12_volts: units.meters_per_second = 5.23
+    speed_at_12_volts: units.meters_per_second = 4.33
 
     # Every 1 rotation of the azimuth results in _couple_ratio drive motor turns;
     # This may need to be tuned to your individual robot
     _couple_ratio = 3.125
 
-    _drive_gear_ratio = 5.902777777777778
+    _drive_gear_ratio = 7.125
     _steer_gear_ratio = 18.75
     _wheel_radius: units.meter = inchesToMeters(2)
 
     _invert_left_side = False
     _invert_right_side = True
 
-    _pigeon_id = 26
+    _pigeon_id = 1
 
     # These are only used for simulation
     _steer_inertia: units.kilogram_square_meter = 0.01
@@ -136,49 +136,51 @@ class TunerConstants:
         .with_drive_friction_voltage(_drive_friction_voltage)
     )
 
+
     # Front Left
-    _front_left_drive_motor_id = 1
-    _front_left_steer_motor_id = 2
-    _front_left_encoder_id = 20
-    _front_left_encoder_offset: units.rotation = -0.472900390625
+    _front_left_drive_motor_id = 11
+    _front_left_steer_motor_id = 12
+    _front_left_encoder_id = 10
+    _front_left_encoder_offset: units.rotation = -0.47509765625
     _front_left_steer_motor_inverted = True
     _front_left_encoder_inverted = False
 
-    _front_left_x_pos: units.meter = inchesToMeters(12)
-    _front_left_y_pos: units.meter = inchesToMeters(12)
+    _front_left_x_pos: units.meter = inchesToMeters(10.875)
+    _front_left_y_pos: units.meter = inchesToMeters(10.875)
 
     # Front Right
-    _front_right_drive_motor_id = 3
-    _front_right_steer_motor_id = 4
-    _front_right_encoder_id = 21
-    _front_right_encoder_offset: units.rotation = 0.46240234375
+    _front_right_drive_motor_id = 21
+    _front_right_steer_motor_id = 22
+    _front_right_encoder_id = 20
+    _front_right_encoder_offset: units.rotation = 0.17822265625
     _front_right_steer_motor_inverted = True
     _front_right_encoder_inverted = False
 
-    _front_right_x_pos: units.meter = inchesToMeters(12)
-    _front_right_y_pos: units.meter = inchesToMeters(-12)
+    _front_right_x_pos: units.meter = inchesToMeters(10.875)
+    _front_right_y_pos: units.meter = inchesToMeters(-10.875)
 
     # Back Left
-    _back_left_drive_motor_id = 5
-    _back_left_steer_motor_id = 6
-    _back_left_encoder_id = 23
-    _back_left_encoder_offset: units.rotation = 0.176513671875
+    _back_left_drive_motor_id = 31
+    _back_left_steer_motor_id = 32
+    _back_left_encoder_id = 30
+    _back_left_encoder_offset: units.rotation = 0.46484375
     _back_left_steer_motor_inverted = True
     _back_left_encoder_inverted = False
 
-    _back_left_x_pos: units.meter = inchesToMeters(-12)
-    _back_left_y_pos: units.meter = inchesToMeters(12)
+    _back_left_x_pos: units.meter = inchesToMeters(-10.875)
+    _back_left_y_pos: units.meter = inchesToMeters(10.875)
 
     # Back Right
-    _back_right_drive_motor_id = 7
-    _back_right_steer_motor_id = 8
-    _back_right_encoder_id = 22
-    _back_right_encoder_offset: units.rotation = -0.03173828125
+    _back_right_drive_motor_id = 41
+    _back_right_steer_motor_id = 42
+    _back_right_encoder_id = 40
+    _back_right_encoder_offset: units.rotation = -0.030029296875
     _back_right_steer_motor_inverted = True
     _back_right_encoder_inverted = False
 
-    _back_right_x_pos: units.meter = inchesToMeters(-12)
-    _back_right_y_pos: units.meter = inchesToMeters(-12)
+    _back_right_x_pos: units.meter = inchesToMeters(-10.875)
+    _back_right_y_pos: units.meter = inchesToMeters(-10.875)
+
 
     front_left = _constants_creator.create_module_constants(
         _front_left_steer_motor_id,
