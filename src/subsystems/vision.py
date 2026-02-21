@@ -303,7 +303,7 @@ class Vision(Subsystem):
     def _should_reject_by_z(estimated: EstimatedRobotPose) -> bool:
         return abs(estimated.estimatedPose.Z()) > CAMERA_HEIGHT_TOLERANCE
 
-    @staticmethod  # BW NEED TO FIX: This is a temporary hack until we have a better way to filter out bad targets
+    @staticmethod
     def _should_reject_by_alliance(targets: List[PhotonTrackedTarget]) -> bool:
         """Return True if any visible tag belongs to the opponent's side."""
         alliance = DriverStation.getAlliance()
@@ -313,9 +313,9 @@ class Vision(Subsystem):
         is_blue = alliance == DriverStation.Alliance.kBlue
         for tag in targets:
             tag_id = tag.getFiducialId()
-            if is_blue and 6 <= tag_id <= 11:
+            if is_blue and 1 <= tag_id <= 16:
                 return True
-            if not is_blue and 17 <= tag_id <= 22:
+            if not is_blue and 17 <= tag_id <= 32:
                 return True
         return False
 
