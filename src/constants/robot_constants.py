@@ -4,6 +4,7 @@ from wpimath.system.plant import DCMotor
 from constants.tuner_constants import TunerConstants
 from wpimath.units import rotationsToRadians
 
+
 class MotorIDs:
     foc_active = False
 
@@ -62,7 +63,6 @@ class DriveConstants:
     MAX_ANGULAR_VELOCITY = rotationsToRadians(
         0.75
     )  # 3/4 of a rotation per second max angular velocity
-
 
 
 class VisionConstants:

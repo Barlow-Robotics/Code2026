@@ -11,6 +11,7 @@ from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
 from subsystems import IntakePositions
 from constants import DriveConstants
+
 if TYPE_CHECKING:
     from core import RobotContainer
 
@@ -29,11 +30,16 @@ class Controller:
             container.drivetrain.apply_request(
                 lambda: (
                     container.drivetrain.movement.with_velocity_x(
-                        -self._joystick.getLeftY() * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                        -self._joystick.getLeftY()
+                        * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
                     )
-                    .with_velocity_y(-self._joystick.getLeftX() * DriveConstants.MAX_TRANSLATIONAL_VELOCITY)
+                    .with_velocity_y(
+                        -self._joystick.getLeftX()
+                        * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                    )
                     .with_rotational_rate(
-                        -self._joystick.getRightX() * DriveConstants.MAX_ANGULAR_VELOCITY
+                        -self._joystick.getRightX()
+                        * DriveConstants.MAX_ANGULAR_VELOCITY
                     )
                 )
             )

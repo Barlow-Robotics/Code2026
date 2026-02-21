@@ -39,16 +39,15 @@ class RobotContainer:
         self.spindex = Spindex()
 
         # Telemetry
-        self._swerve_telemetry = SwerveTelemetry(DriveConstants.MAX_TRANSLATIONAL_VELOCITY)
+        self._swerve_telemetry = SwerveTelemetry(
+            DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+        )
         self.drivetrain.register_telemetry(
             lambda state: self._swerve_telemetry.telemeterize(state)
         )
 
         # Controller bindings
         self.controller = Controller(self)
-        
-        
-        
 
     def getAutonomousCommand(self) -> commands2.Command:
         """

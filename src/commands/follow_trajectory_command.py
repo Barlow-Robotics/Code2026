@@ -3,6 +3,7 @@ from wpilib import Timer
 from subsystems import Drivetrain
 from utils import NativeHolonomicTrajectory
 
+
 class FollowTrajectoryCommand(Command):
     def __init__(self, driveSub: Drivetrain, trajectory: NativeHolonomicTrajectory):
         """

@@ -135,7 +135,9 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         self.movement = (
             swerve.requests.FieldCentric()
             .with_deadband(DriveConstants.MAX_TRANSLATIONAL_VELOCITY * 0.1)
-            .with_rotational_deadband(DriveConstants.MAX_ANGULAR_VELOCITY * 0.1)  # Add a 10% deadband
+            .with_rotational_deadband(
+                DriveConstants.MAX_ANGULAR_VELOCITY * 0.1
+            )  # Add a 10% deadband
             .with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )  # Use open-loop control for drive motors
@@ -335,6 +337,7 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     @staticmethod
     def get_timestamp():
         return utils.get_current_time_seconds()
+
     def drive_based_velocity(self, vx: float, vy: float, omega: float):
         """
         Drive the robot with the given velocities.
@@ -350,6 +353,7 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
                 .with_rotational_rate(omega)
             )
         )
+
     def stop(self):
         self.set_control(swerve.requests.SwerveDriveBrake())
 

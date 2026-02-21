@@ -37,3 +37,10 @@ uv run frc deploy --skip-tests
 TODO at comp:
 AprilTagField.k2026RebuiltAndyMark or AprilTagField.k2026RebuiltWelded depending on comp. 
 Change motors from L2 to L1 or L3
+Need to update _should_reject_by_alliance based on alliance
+
+1. Need new Gyro
+2. Need new cameras
+3. Gyro comparison to disambiguate
+4. Z coordinate sanity check
+5. Separate pose estimator for precise alignment
