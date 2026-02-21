@@ -41,5 +41,7 @@ Need to update _should_reject_by_alliance based on alliance
 
 1. Need new Gyro
 2. Need new cameras
-3. Gyro comparison to disambiguate
-4. Separate pose estimator for precise alignment
+3. if len(targets) == 1 and targets[0].getPoseAmbiguity() > POSE_AMBIGUITY: OR just f len(targets) == 1
+4. Gyro magnitude problem, min_diff = min(diff_best, diff_alt); min_diff > math.radians(30):
+5. Update gyro based on vision. 
+6. If angular_velocity is high don't use vision. 
