@@ -30,6 +30,8 @@ DISTANCE_EXPONENT = 1.2  # How aggressively distance degrades trust
 TAG_COUNT_EXPONENT = 2.0  # How aggressively tag count improves trust
 FIELD_BORDER_MARGIN = 0.5  # Metres outside field to still accept a pose
 TIMESTAMP_OFFSET = 0.0  # Adjust if clocks drift between coprocessor/RIO
+CAMERA_HEIGHT_TOLERANCE = 1 # Metres of tolerance on the camera Z value
+POSE_AMBIGUITY = 0.2  # Minimum pose ambiguity to accept from a single-tag detection (0-1, lower is more strict)
 
 
 @dataclass
@@ -130,8 +132,7 @@ class Vision(Subsystem):
     def _update_all_cameras(self, drive_pose: Pose2d):
         """
         Collect observations from every camera, sort them chronologically,
-        then add them to the drive estimator — matching 6328's approach of
-        sorted multi-source fusion.
+        then add them to the drive estimator
         """
         all_observations: List[VisionObservation] = []
 
@@ -161,13 +162,20 @@ class Vision(Subsystem):
         observations: List[VisionObservation] = []
 
         for result in cam_cfg.camera.getAllUnreadResults():
+            # ADD POSE REAMBIGUITY UPON 1 tag and having gyro.
+            # targets = result.getTargets()
+            # if len(targets) == 1 and targets[0].getPoseAmbiguity() < POSE_AMBIGUITY:
+                
+                
+                
+            
             estimated = self._get_best_pose_estimate(result, cam_cfg.estimator)
             if estimated is None:
                 continue
+            
 
             pose_2d = estimated.estimatedPose.toPose2d()
 
-            # ── Reject poses outside the field ────────────────────────────
             field_length = self.april_tag_field_layout.getFieldLength()
             field_width = self.april_tag_field_layout.getFieldWidth()
             if (
@@ -185,6 +193,9 @@ class Vision(Subsystem):
             tag_count = len(tags)
             if tag_count == 0:
                 continue
+            
+            if self._should_reject_by_z(estimated):
+                continue
 
             avg_distance = self._average_tag_distance(
                 estimated.estimatedPose.toPose2d(), tags, cam_cfg.estimator
@@ -194,10 +205,8 @@ class Vision(Subsystem):
                 avg_distance, tag_count, cam_cfg.std_dev_factor
             )
 
-            # ── Apply timestamp offset (corrects coprocessor clock drift) ─
             timestamp = estimated.timestampSeconds + TIMESTAMP_OFFSET
 
-            # ── Update telemetry stats ────────────────────────────────────
             self._camera_stats[cam_cfg.name] = CameraStats(
                 std_dev=std_devs[0],
                 tag_count=float(tag_count),
@@ -217,14 +226,12 @@ class Vision(Subsystem):
     ) -> Optional[EstimatedRobotPose]:
         """
         Prefer multi-tag (coprocessor) estimate; fall back to lowest-ambiguity
-        single-tag estimate.  Multi-tag results are now accepted, not discarded.
         """
         estimated = estimator.estimateCoprocMultiTagPose(result)
         if estimated is None:
             estimated = estimator.estimateLowestAmbiguityPose(result)
         return estimated
 
-    # ── Standard deviation calculation ───────────────────────────────────────
 
     @staticmethod
     def _calculate_std_devs(
@@ -236,10 +243,6 @@ class Vision(Subsystem):
         Mirror 6328's formula:
             xy  = XY_COEFF  * dist^1.2 / tag_count^2 * factor
             θ   = TH_COEFF  * dist^1.2 / tag_count^2 * factor
-
-        More tags → lower std dev (more trust).
-        More distance → higher std dev (less trust).
-        Single-tag at very long range → effectively infinite std dev.
         """
         tag_weight = tag_count**TAG_COUNT_EXPONENT
         dist_weight = avg_distance**DISTANCE_EXPONENT
@@ -273,8 +276,14 @@ class Vision(Subsystem):
             )
             count += 1
         return total / count if count > 0 else 0.0
-
+    
     @staticmethod
+    def _should_reject_by_z(estimated: EstimatedRobotPose) -> bool:
+        if abs(estimated.estimatedPose.Z()) > CAMERA_HEIGHT_TOLERANCE:
+            return True
+        return True
+    
+    @staticmethod # BW NEED TO FIX: This is a temporary hack until we have a better way to filter out bad targets
     def _should_reject_by_alliance(targets: List[PhotonTrackedTarget]) -> bool:
         """Return True if any visible tag belongs to the opponent's side."""
         alliance = DriverStation.getAlliance()
