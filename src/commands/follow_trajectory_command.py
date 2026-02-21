@@ -31,7 +31,7 @@ class FollowTrajectoryCommand(Command):
 
         # Get the desired state at the current time
         sample = self.trajectory.sample_at(current_time)
-        desired_pose = sample.pose
+        # desired_pose = sample.pose
         desired_chassis_state = sample.chassis_state
 
         # Command the drivetrain with the desired velocities

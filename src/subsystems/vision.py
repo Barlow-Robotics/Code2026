@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional, List
 from photonlibpy.photonCamera import PhotonCamera
 from photonlibpy.estimatedRobotPose import EstimatedRobotPose
@@ -6,16 +6,8 @@ from photonlibpy.photonPoseEstimator import PhotonPoseEstimator
 from photonlibpy.targeting.photonPipelineResult import PhotonPipelineResult
 from photonlibpy.targeting.photonTrackedTarget import PhotonTrackedTarget
 from robotpy_apriltag import AprilTagFieldLayout, AprilTagField
-from wpimath.geometry import (
-    Transform3d,
-    Pose2d,
-    Translation2d,
-    Translation3d,
-    Rotation3d,
-    Transform2d,
-    Rotation2d,
-)
-from wpilib import DriverStation, Timer
+from wpimath.geometry import Pose2d, Rotation2d
+from wpilib import DriverStation
 from constants import VisionConstants
 from subsystems import Drivetrain
 from utils import Logger
@@ -30,7 +22,7 @@ DISTANCE_EXPONENT = 1.2  # How aggressively distance degrades trust
 TAG_COUNT_EXPONENT = 2.0  # How aggressively tag count improves trust
 FIELD_BORDER_MARGIN = 0.5  # Metres outside field to still accept a pose
 TIMESTAMP_OFFSET = 0.0  # Adjust if clocks drift between coprocessor/RIO
-CAMERA_HEIGHT_TOLERANCE = 1 # Metres of tolerance on the camera Z value
+CAMERA_HEIGHT_TOLERANCE = 1  # Metres of tolerance on the camera Z value
 POSE_AMBIGUITY = 0.2  # Minimum pose ambiguity to accept from a single-tag detection (0-1, lower is more strict)
 
 
@@ -165,14 +157,10 @@ class Vision(Subsystem):
             # ADD POSE REAMBIGUITY UPON 1 tag and having gyro.
             # targets = result.getTargets()
             # if len(targets) == 1 and targets[0].getPoseAmbiguity() < POSE_AMBIGUITY:
-                
-                
-                
-            
+
             estimated = self._get_best_pose_estimate(result, cam_cfg.estimator)
             if estimated is None:
                 continue
-            
 
             pose_2d = estimated.estimatedPose.toPose2d()
 
@@ -193,7 +181,7 @@ class Vision(Subsystem):
             tag_count = len(tags)
             if tag_count == 0:
                 continue
-            
+
             if self._should_reject_by_z(estimated):
                 continue
 
@@ -231,7 +219,6 @@ class Vision(Subsystem):
         if estimated is None:
             estimated = estimator.estimateLowestAmbiguityPose(result)
         return estimated
-
 
     @staticmethod
     def _calculate_std_devs(
@@ -276,14 +263,14 @@ class Vision(Subsystem):
             )
             count += 1
         return total / count if count > 0 else 0.0
-    
+
     @staticmethod
     def _should_reject_by_z(estimated: EstimatedRobotPose) -> bool:
         if abs(estimated.estimatedPose.Z()) > CAMERA_HEIGHT_TOLERANCE:
             return True
         return True
-    
-    @staticmethod # BW NEED TO FIX: This is a temporary hack until we have a better way to filter out bad targets
+
+    @staticmethod  # BW NEED TO FIX: This is a temporary hack until we have a better way to filter out bad targets
     def _should_reject_by_alliance(targets: List[PhotonTrackedTarget]) -> bool:
         """Return True if any visible tag belongs to the opponent's side."""
         alliance = DriverStation.getAlliance()

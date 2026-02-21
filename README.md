@@ -42,5 +42,4 @@ Need to update _should_reject_by_alliance based on alliance
 1. Need new Gyro
 2. Need new cameras
 3. Gyro comparison to disambiguate
-4. Z coordinate sanity check
-5. Separate pose estimator for precise alignment
+4. Separate pose estimator for precise alignment
