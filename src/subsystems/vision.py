@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, List
 from photonlibpy.photonCamera import PhotonCamera
 from photonlibpy.estimatedRobotPose import EstimatedRobotPose
@@ -7,7 +7,7 @@ from photonlibpy.targeting.photonPipelineResult import PhotonPipelineResult
 from photonlibpy.targeting.photonTrackedTarget import PhotonTrackedTarget
 from robotpy_apriltag import AprilTagFieldLayout, AprilTagField
 from wpimath.geometry import Transform3d, Pose2d, Translation2d, Translation3d, Rotation3d, Transform2d, Rotation2d
-from wpilib import DriverStation
+from wpilib import DriverStation, Timer
 from constants import VisionConstants
 from subsystems import Drivetrain
 from utils import Logger
@@ -16,12 +16,26 @@ from commands import FollowTrajectoryCommand
 
 from utils.trajectory_generator import CreateTrajectory
 
+XY_STD_DEV_COEFFICIENT = 0.005   # Base xy std dev coefficient
+THETA_STD_DEV_COEFFICIENT = 0.01  # Base theta std dev coefficient
+DISTANCE_EXPONENT = 1.2           # How aggressively distance degrades trust
+TAG_COUNT_EXPONENT = 2.0          # How aggressively tag count improves trust
+FIELD_BORDER_MARGIN = 0.5         # Metres outside field to still accept a pose
+TIMESTAMP_OFFSET = 0.0            # Adjust if clocks drift between coprocessor/RIO
+
 
 @dataclass
 class CameraStats:
     std_dev: float
     tag_count: float
     distance: float
+
+
+@dataclass
+class VisionObservation:
+    pose: Pose2d
+    timestamp: float
+    std_devs: List[float]  
 
 
 @dataclass
@@ -34,65 +48,57 @@ class VisionTelemetry:
     back_right: CameraStats | None = None
 
 
-class Vision(Subsystem):
-    """
-    Vision subsystem for AprilTag-based pose estimation using PhotonVision
-    """
+@dataclass
+class _CameraConfig:
+    camera: PhotonCamera
+    estimator: PhotonPoseEstimator
+    name: str
+    std_dev_factor: float = 1.0  
 
-    def __init__(
-        self,
-        drive_sub: Drivetrain,
-    ):
+
+class Vision(Subsystem):
+
+
+    def __init__(self, drive_sub: Drivetrain):
         self.drive_sub = drive_sub
 
-        # BW PhotonVision cameras
-        self.back_left_swerve_cam = PhotonCamera(VisionConstants.BACK_LEFT_SWERVE_NAME)
-        self.back_right_swerve_cam = PhotonCamera(
-            VisionConstants.BACK_RIGHT_SWERVE_NAME
-        )
-        self.front_left_swerve_cam = PhotonCamera(
-            VisionConstants.FRONT_LEFT_SWERVE_NAME
-        )
-        self.front_right_swerve_cam = PhotonCamera(
-            VisionConstants.FRONT_RIGHT_SWERVE_NAME
-        )
+        field_layout = AprilTagFieldLayout.loadField(AprilTagField.k2026RebuiltAndyMark)
+        self.april_tag_field_layout = field_layout
 
-        self.april_tag_field_layout = AprilTagFieldLayout.loadField(
-            AprilTagField.k2026RebuiltAndyMark
-        )
-
-        self.front_right_photon_estimator = PhotonPoseEstimator(
-            self.april_tag_field_layout, VisionConstants.FRONT_RIGHT_SWERVE_TO_ROBOT
-        )
-
-        self.front_left_photon_estimator = PhotonPoseEstimator(
-            self.april_tag_field_layout, VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT
-        )
-        self.back_right_photon_estimator = PhotonPoseEstimator(
-            self.april_tag_field_layout, VisionConstants.BACK_RIGHT_SWERVE_TO_ROBOT
-        )
-        self.back_left_photon_estimator = PhotonPoseEstimator(
-            self.april_tag_field_layout, VisionConstants.BACK_LEFT_SWERVE_TO_ROBOT
-        )
+        self._cameras: List[_CameraConfig] = [
+            _CameraConfig(
+                camera=PhotonCamera(VisionConstants.FRONT_LEFT_SWERVE_NAME),
+                estimator=PhotonPoseEstimator(field_layout, VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT),
+                name="front_left_swerve",
+            ),
+            _CameraConfig(
+                camera=PhotonCamera(VisionConstants.FRONT_RIGHT_SWERVE_NAME),
+                estimator=PhotonPoseEstimator(field_layout, VisionConstants.FRONT_RIGHT_SWERVE_TO_ROBOT),
+                name="front_right_swerve",
+            ),
+            _CameraConfig(
+                camera=PhotonCamera(VisionConstants.BACK_LEFT_SWERVE_NAME),
+                estimator=PhotonPoseEstimator(field_layout, VisionConstants.BACK_LEFT_SWERVE_TO_ROBOT),
+                name="back_left_swerve",
+            ),
+            _CameraConfig(
+                camera=PhotonCamera(VisionConstants.BACK_RIGHT_SWERVE_NAME),
+                estimator=PhotonPoseEstimator(field_layout, VisionConstants.BACK_RIGHT_SWERVE_TO_ROBOT),
+                name="back_right_swerve",
+            ),
+        ]
 
         self.disabled_vision = False
-        self.all_detected_targets: List[PhotonTrackedTarget] = []
-        self.april_tag_detected = False
-        self.robot_to_camera: Optional[Transform3d] = None
-        self.cur_std_devs = VisionConstants.K_SINGLE_TAG_STD_DEVS.copy()
+        self._last_pose_estimate: Optional[Pose2d] = None
+        self._camera_stats: dict[str, CameraStats] = {}
 
         self.log = Logger("Vision")
-        self._camera_stats: dict[str, CameraStats] = {}
-        self._last_pose_estimate: Optional[Pose2d] = None
-        
-        
         self.auto_align_command = cmd.runOnce(self.auto_align)
 
     def periodic(self):
-        """Called periodically by the scheduler"""
         if not self.disabled_vision:
             current_pose = self.drive_sub.get_pose()
-            self.update_vision_localization(current_pose)
+            self._update_all_cameras(current_pose)
 
         self.log.publish(
             VisionTelemetry(
@@ -107,239 +113,175 @@ class Vision(Subsystem):
             )
         )
 
+    def _update_all_cameras(self, drive_pose: Pose2d):
+        """
+        Collect observations from every camera, sort them chronologically,
+        then add them to the drive estimator — matching 6328's approach of
+        sorted multi-source fusion.
+        """
+        all_observations: List[VisionObservation] = []
+
+        for cam_cfg in self._cameras:
+            obs_list = self._get_observations_from_camera(drive_pose, cam_cfg)
+            all_observations.extend(obs_list)
+
+        all_observations.sort(key=lambda o: o.timestamp)
+
+        for obs in all_observations:
+            self.drive_sub.add_vision_measurement(obs.pose, obs.timestamp, obs.std_devs)
+            self._last_pose_estimate = obs.pose
+
+
+
+
+    def _get_observations_from_camera(
+        self,
+        drive_pose: Pose2d,
+        cam_cfg: _CameraConfig,
+    ) -> List[VisionObservation]:
+        """
+        Process every unread result from one camera and return a list of
+        validated VisionObservations.  Returns an empty list if the camera
+        is disconnected or produces no usable data.
+        """
+        if not cam_cfg.camera.isConnected():
+            return []
+
+        observations: List[VisionObservation] = []
+
+        for result in cam_cfg.camera.getAllUnreadResults():
+            estimated = self._get_best_pose_estimate(result, cam_cfg.estimator)
+            if estimated is None:
+                continue
+
+            pose_2d = estimated.estimatedPose.toPose2d()
+
+            # ── Reject poses outside the field ────────────────────────────
+            field_length = self.april_tag_field_layout.getFieldLength()
+            field_width = self.april_tag_field_layout.getFieldWidth()
+            if (
+                pose_2d.X() < -FIELD_BORDER_MARGIN
+                or pose_2d.X() > field_length + FIELD_BORDER_MARGIN
+                or pose_2d.Y() < -FIELD_BORDER_MARGIN
+                or pose_2d.Y() > field_width + FIELD_BORDER_MARGIN
+            ):
+                continue
+
+            if self._should_reject_by_alliance(estimated.targetsUsed):
+                continue
+
+            tags = estimated.targetsUsed
+            tag_count = len(tags)
+            if tag_count == 0:
+                continue
+
+            avg_distance = self._average_tag_distance(
+                estimated.estimatedPose.toPose2d(), tags, cam_cfg.estimator
+            )
+
+            std_devs = self._calculate_std_devs(
+                avg_distance, tag_count, cam_cfg.std_dev_factor
+            )
+
+            # ── Apply timestamp offset (corrects coprocessor clock drift) ─
+            timestamp = estimated.timestampSeconds + TIMESTAMP_OFFSET
+
+            # ── Update telemetry stats ────────────────────────────────────
+            self._camera_stats[cam_cfg.name] = CameraStats(
+                std_dev=std_devs[0],
+                tag_count=float(tag_count),
+                distance=avg_distance,
+            )
+
+            observations.append(VisionObservation(pose=pose_2d, timestamp=timestamp, std_devs=std_devs))
+
+        return observations
+
+    def _get_best_pose_estimate(
+        self,
+        result: PhotonPipelineResult,
+        estimator: PhotonPoseEstimator,
+    ) -> Optional[EstimatedRobotPose]:
+        """
+        Prefer multi-tag (coprocessor) estimate; fall back to lowest-ambiguity
+        single-tag estimate.  Multi-tag results are now accepted, not discarded.
+        """
+        estimated = estimator.estimateCoprocMultiTagPose(result)
+        if estimated is None:
+            estimated = estimator.estimateLowestAmbiguityPose(result)
+        return estimated
+
+    # ── Standard deviation calculation ───────────────────────────────────────
+
+    @staticmethod
+    def _calculate_std_devs(
+        avg_distance: float,
+        tag_count: int,
+        std_dev_factor: float = 1.0,
+    ) -> List[float]:
+        """
+        Mirror 6328's formula:
+            xy  = XY_COEFF  * dist^1.2 / tag_count^2 * factor
+            θ   = TH_COEFF  * dist^1.2 / tag_count^2 * factor
+
+        More tags → lower std dev (more trust).
+        More distance → higher std dev (less trust).
+        Single-tag at very long range → effectively infinite std dev.
+        """
+        tag_weight = (tag_count ** TAG_COUNT_EXPONENT)
+        dist_weight = (avg_distance ** DISTANCE_EXPONENT)
+
+        xy_std = XY_STD_DEV_COEFFICIENT * dist_weight / tag_weight * std_dev_factor
+        theta_std = THETA_STD_DEV_COEFFICIENT * dist_weight / tag_weight * std_dev_factor
+
+        # For single-tag observations at long range, trust rotation even less
+        if tag_count == 1 and avg_distance > 4.0:
+            theta_std = float("inf")
+
+        return [xy_std, xy_std, theta_std]
+
+    def _average_tag_distance(
+        self,
+        robot_pose: Pose2d,
+        targets: List[PhotonTrackedTarget],
+        estimator: PhotonPoseEstimator,
+    ) -> float:
+        """Calculate average 2D distance from robot to each visible tag."""
+        total = 0.0
+        count = 0
+        for tgt in targets:
+            tag_pose = estimator.fieldTags.getTagPose(tgt.getFiducialId())
+            if tag_pose is None:
+                continue
+            total += tag_pose.toPose2d().translation().distance(robot_pose.translation())
+            count += 1
+        return total / count if count > 0 else 0.0
+
+
+    @staticmethod
+    def _should_reject_by_alliance(targets: List[PhotonTrackedTarget]) -> bool:
+        """Return True if any visible tag belongs to the opponent's side."""
+        alliance = DriverStation.getAlliance()
+        if alliance is None:
+            return False
+
+        is_blue = alliance == DriverStation.Alliance.kBlue
+        for tag in targets:
+            tag_id = tag.getFiducialId()
+            if is_blue and 6 <= tag_id <= 11:
+                return True
+            if not is_blue and 17 <= tag_id <= 22:
+                return True
+        return False
+
     def get_layout(self) -> AprilTagFieldLayout:
-        """Returns the AprilTag field layout"""
         return self.april_tag_field_layout
 
     def disable_the_vision(self, val: bool):
-        """Enable or disable vision processing"""
         self.disabled_vision = val
 
-    def update_vision_localization_camera(
-        self,
-        drive_pose: Pose2d,
-        swerve_cam: PhotonCamera,
-        photon_estimator: PhotonPoseEstimator,
-    ):
-        vision_poses = self.get_unprocessed_poses(
-            drive_pose, swerve_cam, photon_estimator
-        )
-        if vision_poses is not None:
-            for vision_pose in vision_poses:
-                self.add_vision_measure(vision_pose, swerve_cam.getName())
-                self._last_pose_estimate = vision_pose.estimatedPose.toPose2d()
-
-    def update_vision_localization(self, drive_pose: Pose2d):
-        """Update pose estimation using vision measurements"""
-        self.update_vision_localization_camera(
-            drive_pose, self.front_left_swerve_cam, self.front_left_photon_estimator
-        )
-        self.update_vision_localization_camera(
-            drive_pose, self.front_right_swerve_cam, self.front_right_photon_estimator
-        )
-        self.update_vision_localization_camera(
-            drive_pose, self.back_left_swerve_cam, self.back_left_photon_estimator
-        )
-        self.update_vision_localization_camera(
-            drive_pose, self.back_right_swerve_cam, self.back_right_photon_estimator
-        )
-
-    def get_camera_vision_est(
-        self, result: PhotonPipelineResult, estimator: PhotonPoseEstimator
-    ) -> EstimatedRobotPose | None:
-        """
-        Returns an EstimatedRobotPose, which includes pose, timestamp, tags, and strategy
-        """
-        # result = camera.getLatestResult()
-        camEstPose = estimator.estimateCoprocMultiTagPose(result)
-        if camEstPose is None:
-            camEstPose = estimator.estimateLowestAmbiguityPose(result)
-
-        return camEstPose
-
-    def get_unprocessed_poses(
-        self,
-        robot_pose: Pose2d,
-        camera: PhotonCamera,
-        pose_estimator: PhotonPoseEstimator,
-    ) -> List[EstimatedRobotPose]:
-        """
-        Get estimated global pose from camera
-
-        Args:
-            robot_pose: Current robot pose estimate
-            camera: PhotonCamera instance
-            pose_estimator: PhotonPoseEstimator instance
-
-        Returns:
-            EstimatedRobotPose if available, None otherwise
-        """
-        if not camera.isConnected():
-            return []
-
-        # BW: Process all unread results
-        vision_est = None
-        vision_poses: List[EstimatedRobotPose] = []
-        for result in camera.getAllUnreadResults():  # BW: What do we want to do with old camera information if there is multiple frames? If robot is moving not rlly relv.
-            vision_est = self.get_camera_vision_est(result, camera, pose_estimator)
-            vision_poses.append(vision_est)
-            # OR UPDATE STD DEVS
-            # self.update_estimation_std_devs(vision_est, result.getTargets(), pose_estimator)
-
-        return vision_poses
-
-    def update_estimation_std_devs(
-        self,
-        estimated_pose: Optional[EstimatedRobotPose],
-        targets: List[PhotonTrackedTarget],
-        pose_estimator: PhotonPoseEstimator,
-    ):
-        """
-        Calculates new standard deviations based on number of tags and distance
-
-        This algorithm is a heuristic that creates dynamic standard deviations
-        based on number of tags, estimation strategy, and distance from the tags.
-        """
-        if estimated_pose is None:
-            # No pose input. Default to single-tag std devs
-            self.cur_std_devs = VisionConstants.K_SINGLE_TAG_STD_DEVS.copy()
-            return
-
-        # Pose present. Start running Heuristic
-        est_std_devs = VisionConstants.K_SINGLE_TAG_STD_DEVS.copy()
-        num_tags = 0
-        avg_dist = 0.0
-
-        # Precalculation - see how many tags we found, and calculate average distance
-        for tgt in targets:
-            tag_pose = pose_estimator.fieldTags.getTagPose(tgt.getFiducialId())
-            if tag_pose is None:
-                continue
-            num_tags += 1
-            avg_dist += (
-                tag_pose.toPose2d()
-                .translation()
-                .distance(estimated_pose.estimatedPose.toPose2d().translation())
-            )
-
-        if num_tags == 0:
-            # No tags visible. Default to single-tag std devs
-            self.cur_std_devs = VisionConstants.K_SINGLE_TAG_STD_DEVS.copy()
-        else:
-            # One or more tags visible, run the full heuristic
-            avg_dist /= num_tags
-
-            # Decrease std devs if multiple targets are visible
-            if num_tags > 1:
-                est_std_devs = VisionConstants.K_MULTI_TAG_STD_DEVS.copy()
-
-            # Increase std devs based on (average) distance
-            if num_tags == 1 and avg_dist > 4:
-                est_std_devs = [float("inf"), float("inf"), float("inf")]
-            else:
-                multiplier = 1 + (avg_dist * avg_dist / 30)
-                est_std_devs = [x * multiplier for x in est_std_devs]
-
-            self.cur_std_devs = est_std_devs
-
-    def get_estimation_std_devs(self) -> List[float]:
-        """
-        Returns the latest standard deviations of the estimated pose
-
-        For use with SwerveDrivePoseEstimator. This should only be used
-        when there are targets visible.
-        """
-        return self.cur_std_devs
-
-    def add_vision_measure(
-        self, estimated_pose: EstimatedRobotPose, camera_name: str
-    ) -> Optional[List[float]]:
-        """
-        Add vision measurement to pose estimator with dynamic standard deviations
-
-        Args:
-            estimated_pose: The estimated robot pose from vision
-            camera_name: Name of the camera for logging
-
-        Returns:
-            Standard deviations used, or None if measurement was rejected
-        """
-        pose = estimated_pose.estimatedPose.toPose2d()
-        vision_time = estimated_pose.timestampSeconds
-        tags = estimated_pose.targetsUsed
-        tag_count = len(tags)
-
-        if tag_count == 0:
-            return None
-
-        tag_ids = [tag.fiducialId for tag in tags]
-        primary_id = tag_ids[0]
-
-        # Get alliance
-        alliance = DriverStation.getAlliance()
-        if alliance is not None:
-            is_blue = alliance == DriverStation.Alliance.kBlue
-
-            # Filter out opponent tags
-            if is_blue:
-                for tag in tags:
-                    tag_id = tag.getFiducialId()
-                    if 6 <= tag_id <= 11:
-                        return None
-            else:
-                for tag in tags:
-                    tag_id = tag.getFiducialId()
-                    if 17 <= tag_id <= 22:
-                        return None
-
-        # Check if primary tag is a reef tag
-        if self.is_reef_tag(primary_id):
-            distance_to_target = (
-                tags[0]
-                .bestCameraToTarget.translation()
-                .toTranslation2d()
-                .distance(Translation2d(0, 0))
-            )
-
-            std_dev = 2.0
-            self._camera_stats[camera_name] = CameraStats(
-                std_dev=std_dev,
-                tag_count=float(tag_count),
-                distance=distance_to_target,
-            )
-
-            if tag_count == 1:
-                if distance_to_target > 2.5:
-                    return None
-
-                if distance_to_target <= 1.5:
-                    std_dev = 0.25
-                    if distance_to_target <= 0.75:
-                        std_dev = 0.1
-
-                    self.drive_sub.add_vision_measurement(
-                        pose, vision_time, [std_dev, std_dev, std_dev]
-                    )
-                    return None
-
-            elif tag_count >= 2:
-                # Multi-tag measurement commented out in original
-                return None
-
-        return None
-
     def find_pose_of_tag_closest_to_robot(self, drive_pose: Pose2d) -> Optional[Pose2d]:
-        """
-        Find the pose of the AprilTag closest to the robot
-
-        Args:
-            drive_pose: Current robot pose
-
-        Returns:
-            Pose2d of closest tag, or None if no alliance
-        """
         alliance = DriverStation.getAlliance()
-
         if alliance is None:
             return None
 
@@ -351,61 +293,38 @@ class Vision(Subsystem):
             return None
 
         possible_poses: List[Pose2d] = []
-
         for tag_id in april_tag_list:
             tag_pose = self.get_layout().getTagPose(tag_id)
             if tag_pose is not None:
-                pose_2d = tag_pose.toPose2d()
-                possible_poses.append(pose_2d)
+                possible_poses.append(tag_pose.toPose2d())
 
-        if not possible_poses:
-            return None
-
-        return drive_pose.nearest(possible_poses)
+        return drive_pose.nearest(possible_poses) if possible_poses else None
 
     @staticmethod
     def is_reef_tag(primary_id: int) -> bool:
-        """Check if tag ID is a reef tag"""
         return (6 <= primary_id <= 11) or (17 <= primary_id <= 22)
 
     @staticmethod
-    def filter_april_tag_field(
-        field: AprilTagFieldLayout,
-    ) -> AprilTagFieldLayout:
-        """
-        Filter AprilTag field to only include reef tags
-
-        Args:
-            field: Original field layout
-
-        Returns:
-            Filtered field layout with only reef tags
-        """
-        tags = field.getTags()
-        new_tags = []
-
-        for tag in tags:
-            if Vision.is_reef_tag(tag.ID):
-                new_tags.append(tag)
-
-        return AprilTagFieldLayout(
-            new_tags, field.getFieldLength(), field.getFieldWidth()
-        )
+    def filter_april_tag_field(field: AprilTagFieldLayout) -> AprilTagFieldLayout:
+        new_tags = [tag for tag in field.getTags() if Vision.is_reef_tag(tag.ID)]
+        return AprilTagFieldLayout(new_tags, field.getFieldLength(), field.getFieldWidth())
 
     def get_all_detected_targets(self) -> List[PhotonTrackedTarget]:
-        """Returns all detected targets"""
-        return self.all_detected_targets
+        all_targets: List[PhotonTrackedTarget] = []
+        for cam_cfg in self._cameras:
+            if cam_cfg.camera.isConnected():
+                result = cam_cfg.camera.getLatestResult()
+                all_targets.extend(result.getTargets())
+        return all_targets
 
     def simulation_periodic(self):
-        """Called periodically in simulation"""
-        
         pass
+
     def auto_align(self):
         print("AUTO ALIGN")
-
         starting_pose = self.drive_sub.get_pose()
         target_pose = Pose2d(starting_pose.X() + 1, starting_pose.Y(), starting_pose.rotation())
-        
+
         trajectory_obj = CreateTrajectory(
             lambda: self.drive_sub.get_pose,
             lambda: self.drive_sub.get_speeds,
@@ -413,6 +332,4 @@ class Vision(Subsystem):
             target_pose,
             Rotation2d(target_pose.rotation().radians()),
         )
-        # FollowTrajectoryCommand(self.drive_sub, trajectory_obj)
-        
         FollowTrajectoryCommand(self.drive_sub, trajectory_obj).schedule()
