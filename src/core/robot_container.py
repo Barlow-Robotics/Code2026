@@ -35,8 +35,8 @@ class RobotContainer:
         # Subsystems
         self.drivetrain = TunerConstants.create_drivetrain()
         self.vision = Vision(drive_sub=self.drivetrain)
-        self.intake = Intake()
-        self.spindex = Spindex()
+        #self.intake = Intake()
+        #self.spindex = Spindex()
 
         # Telemetry
         self._swerve_telemetry = SwerveTelemetry(
