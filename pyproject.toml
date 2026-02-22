@@ -15,6 +15,7 @@ dependencies = [
     # The host environment needs these tools for development, debugging, etc.
     "debugpy",
     "ruff",
+    #"robotpy-pykit-watch>=1.0.0",
 
     # This list should match the robotpy components in src/pyproject.toml
     "robotpy[apriltag,commands2,pathplannerlib,phoenix6,rev,sim]",

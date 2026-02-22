@@ -3,7 +3,7 @@ from phoenix6 import CANBus, configs, hardware, signals, swerve, units
 from wpimath.units import inchesToMeters
 
 if TYPE_CHECKING:
-    from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
+    from subsystems import Drivetrain
 
 
 class TunerConstants:

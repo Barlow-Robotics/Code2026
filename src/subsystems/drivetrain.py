@@ -357,5 +357,5 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     def stop(self):
         self.set_control(swerve.requests.SwerveDriveBrake())
 
-    def get_rotation(self):  # BW: NEED TO SET UP GYRO
-        return Rotation2d(0)
+    def get_gyro_rotation(self):  # BW: NEED TO SET UP GYRO
+        return self.pigeon2.getRotation2d()

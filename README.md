@@ -33,13 +33,17 @@ If you want to skip running the tests
 uv run frc deploy --skip-tests
 ```
 
+Notes:
+USB: 172.22.11.2
+Radio: 10.45.72.1
+RoboRIO: 10.45.72.2
+Vision: 10.45.72.201
+
 
 TODO at comp:
 AprilTagField.k2026RebuiltAndyMark or AprilTagField.k2026RebuiltWelded depending on comp. 
 Change motors from L2 to L1 or L3
-Need to update _should_reject_by_alliance based on alliance
 
-1. Need new Gyro
 2. Need new cameras
 3. if len(targets) == 1 and targets[0].getPoseAmbiguity() > POSE_AMBIGUITY: OR just f len(targets) == 1
 4. Gyro magnitude problem, min_diff = min(diff_best, diff_alt); min_diff > math.radians(30):
