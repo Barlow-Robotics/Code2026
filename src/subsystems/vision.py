@@ -173,7 +173,7 @@ class Vision(Subsystem):
                     target.getAlternateCameraToTarget().inverse()
                 ).transformBy(camera_to_robot)
 
-                gyro = self.drive_sub.get_gyro_rotation()
+                gyro = self.drive_sub.get_rotation()
 
                 diff_best = abs(
                     (gyro - robot_pose_best.toPose2d().rotation()).radians()
