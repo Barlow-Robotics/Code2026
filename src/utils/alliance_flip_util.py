@@ -1,7 +1,8 @@
 from constants.field_constants import FIELD_WIDTH, FIELD_LENGTH
-from wpimath.geometry import Translation2d, Translation3d, Pose2d, Pose3d, Rotation2d
+from wpimath.geometry import Rotation3d, Translation2d, Translation3d, Pose2d, Pose3d, Rotation2d
 from wpilib import DriverStation
 import math
+from constants import SI
 
 ### Credit to Team 6328 Mechanical Advantage
 
@@ -70,3 +71,35 @@ def get_alliance_pose3d(pose: Pose3d) -> Pose3d:
         if should_flip()
         else pose
     )
+
+### Credit to Team 7407 Choate Robotics 
+
+def get_red_pose(
+    pose: Pose2d | Pose3d | Translation2d,
+) -> Pose2d | Pose3d | Translation2d:
+    """
+    Takes in a Pose2d, Pose3d, or Translation2d on the blue side of the field 
+    and returns the corresponding type on the red side of the field, still using the blue origin.
+    """
+    if isinstance(pose, Pose2d):
+        return Pose2d(
+            Translation2d(
+                FIELD_LENGTH - pose.X(),
+                FIELD_WIDTH - pose.Y(),
+            ),
+            pose.rotation().rotateBy(Rotation2d(180 * SI.degrees_to_radians)),
+        )
+    elif isinstance(pose, Pose3d):
+        return Pose3d(
+            Translation3d(
+                FIELD_LENGTH - pose.X(),
+                FIELD_WIDTH - pose.Y(),
+                pose.Z(),
+            ),
+            pose.rotation().rotateBy(Rotation3d(0, 0, 180 * SI.degrees_to_radians)),
+        )
+    elif isinstance(pose, Translation2d):
+        return Translation2d(
+            FIELD_LENGTH - pose.X(),
+            FIELD_WIDTH - pose.Y(),
+        )

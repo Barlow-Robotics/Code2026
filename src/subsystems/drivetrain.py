@@ -1,6 +1,8 @@
 from commands2 import Command, Subsystem
 from commands2.sysid import SysIdRoutine
 import math
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.config import RobotConfig
 from phoenix6 import SignalLogger, swerve, units, utils
 from typing import Callable, overload
 from wpilib import DriverStation
@@ -8,9 +10,11 @@ from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Pose2d, Rotation2d
 
 from constants import TunerSwerveDrivetrain, DriveConstants
-from utils import Logger
+from utils import Logger, should_flip
 import ntcore
-
+from pathplannerlib.controller import PPHolonomicDriveController
+from wpimath.kinematics import ChassisSpeeds
+from constants import AutoConstants
 
 class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     """
@@ -142,6 +146,22 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )  # Use open-loop control for drive motors
         )
+        
+        AutoBuilder.configure(
+            self.get_pose,
+            self.reset_odometry_auto,
+            self.get_speeds,
+            lambda spds, ffs: self.set_robot_centric_velocities(spds),
+            PPHolonomicDriveController(
+                AutoConstants.auto_translation_pid,
+                AutoConstants.auto_rotation_pid,
+                AutoConstants.period
+            ),
+            RobotConfig.fromGUISettings(),
+            should_flip,
+            self
+        )        
+        
         self.log = Logger("Drive")
 
         self._has_applied_operator_perspective = False
@@ -331,7 +351,7 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     def get_pose(self) -> Pose2d | None:
         return self.get_state().pose
 
-    def get_speeds(self) -> Pose2d | None:
+    def get_speeds(self):
         return self.get_state().speeds
 
     @staticmethod
@@ -357,9 +377,21 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     def stop(self):
         self.set_control(swerve.requests.SwerveDriveBrake())
 
-
     def get_rotation(self):
         return self.get_state().pose.rotation()
     
     def get_gyro_rotation(self):  # BW: Shouldn't really ever be used. Lowkey don't need this if our vision system is good.
         return self.pigeon2.getRotation2d()
+    
+    def reset_odometry_auto(self, pose: Pose2d):
+        self.reset_pose(pose)
+        
+    def set_robot_centric_velocities(self, speeds: ChassisSpeeds): # BW needed for AutoBuilder since it only supports robot-centric control, but we want to use field-centric control for teleop
+        self.set_control(
+            swerve.requests.RobotCentric()
+            .with_velocity_x(speeds.vx)
+            .with_velocity_y(speeds.vy)
+            .with_rotational_rate(speeds.omega)
+        )
+        
+        

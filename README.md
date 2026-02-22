@@ -49,3 +49,7 @@ Change motors from L2 to L1 or L3
 4. Gyro magnitude problem, min_diff = min(diff_best, diff_alt); min_diff > math.radians(30):
 5. Update gyro based on vision. 
 6. If angular_velocity is high don't use vision. 
+7. have to run uv pip install robotpy-pathplannerlib not just run ``` frc sync```. 
+8. Figure out what AutoConstants.period is (and how it effects AutoBuilder)
+9. Need to update deploy/pathplanner/settings.json
+10. Need to figure out how to get pose to change in Sim. 

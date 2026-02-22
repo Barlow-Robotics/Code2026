@@ -5,3 +5,4 @@ from .robot_constants import IntakeConstants as IntakeConstants
 from .robot_constants import SpindexConstants as SpindexConstants
 from .tuner_constants import TunerSwerveDrivetrain as TunerSwerveDrivetrain
 from .tuner_constants import TunerConstants as TunerConstants
+from .robot_constants import AutoConstants as AutoConstants
