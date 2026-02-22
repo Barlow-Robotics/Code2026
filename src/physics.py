@@ -8,7 +8,7 @@ from pyfrc.physics.core import PhysicsInterface
 from phoenix6 import unmanaged
 from typing import TYPE_CHECKING
 
-from sim import DrivetrainSim, IntakeSim, SpindexSim
+from sim import DrivetrainSim
 
 if TYPE_CHECKING:
     from robot import Robot
@@ -20,8 +20,8 @@ class PhysicsEngine:
     def __init__(self, physics_controller: PhysicsInterface, robot: "Robot"):
         self.physics_controller = physics_controller
         self.drivetrain_sim = DrivetrainSim(robot.container.drivetrain)
-        #self.intake_sim = IntakeSim(robot.container.intake)
-        #self.spindex_sim = SpindexSim(robot.container.spindex)
+        # self.intake_sim = IntakeSim(robot.container.intake)
+        # self.spindex_sim = SpindexSim(robot.container.spindex)
 
     def update_sim(self, now: float, tm_diff: float) -> None:
         """
@@ -35,6 +35,6 @@ class PhysicsEngine:
         while remaining > 0:
             dt = min(self._SIM_PERIOD, remaining)
             self.drivetrain_sim.update_sim(now, dt)
-            #self.intake_sim.update_sim(now, dt)
-            #self.spindex_sim.update_sim(now, dt)
+            # self.intake_sim.update_sim(now, dt)
+            # self.spindex_sim.update_sim(now, dt)
             remaining -= dt

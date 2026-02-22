@@ -3,7 +3,6 @@ SI units for use in typing and conversion.
 """
 
 import math
-from typing import Type
 
 # Distance
 

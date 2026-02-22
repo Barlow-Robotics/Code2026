@@ -1,7 +1,5 @@
 from pathplannerlib.path import PathPlannerPath
 from pathplannerlib.auto import AutoBuilder
-from pathplannerlib.path import PathPlannerPath
-from pathplannerlib.auto import AutoBuilder
 
 from autos import AutoRoutine
 
@@ -18,4 +16,4 @@ command = SequentialCommandGroup(
 )
 
 
-auto = AutoRoutine(command, paths[0].getStartingHolonomicPose())
+leave_auto = AutoRoutine(command, paths[0].getStartingHolonomicPose())

@@ -17,7 +17,6 @@ command = SequentialCommandGroup(
         AutoBuilder.followPath(paths[1]),
         # Do something
     ),
-    
     ParallelCommandGroup(
         AutoBuilder.followPath(paths[2]),
         # Do Smothing
@@ -26,4 +25,4 @@ command = SequentialCommandGroup(
 )
 
 
-auto = AutoRoutine(command, paths[0].getStartingHolonomicPose())
+example_path_auto = AutoRoutine(command, paths[0].getStartingHolonomicPose())

@@ -3,17 +3,12 @@
 # Open Source Software; you can modify and/or share it under the terms of
 # the WPILib BSD license file in the root directory of this project.
 #
-
-import commands2
-from commands2 import cmd
-
 from constants import TunerConstants, DriveConstants
 from utils import SwerveTelemetry
 
 from phoenix6 import swerve
 from wpilib import DriverStation
-from wpimath.geometry import Rotation2d
-from subsystems import Vision, Intake, Spindex
+from subsystems import Vision
 from core.controller import Controller
 
 
@@ -35,8 +30,8 @@ class RobotContainer:
         # Subsystems
         self.drivetrain = TunerConstants.create_drivetrain()
         self.vision = Vision(drive_sub=self.drivetrain)
-        #self.intake = Intake()
-        #self.spindex = Spindex()
+        # self.intake = Intake()
+        # self.spindex = Spindex()
 
         # Telemetry
         self._swerve_telemetry = SwerveTelemetry(

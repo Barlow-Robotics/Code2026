@@ -136,7 +136,6 @@ class TunerConstants:
         .with_drive_friction_voltage(_drive_friction_voltage)
     )
 
-
     # Front Left
     _front_left_drive_motor_id = 11
     _front_left_steer_motor_id = 12
@@ -180,7 +179,6 @@ class TunerConstants:
 
     _back_right_x_pos: units.meter = inchesToMeters(-10.875)
     _back_right_y_pos: units.meter = inchesToMeters(-10.875)
-
 
     front_left = _constants_creator.create_module_constants(
         _front_left_steer_motor_id,

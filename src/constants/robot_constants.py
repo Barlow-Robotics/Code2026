@@ -5,6 +5,8 @@ from constants.tuner_constants import TunerConstants
 from wpimath.units import rotationsToRadians
 from constants import SI
 from pathplannerlib.config import PIDConstants
+
+
 class MotorIDs:
     foc_active = False
 
@@ -48,7 +50,9 @@ class DriveConstants:
     TOTAL_WIDTH_INCHES = 27.0  # IN
     TOTAL_WIDTH_INCHES_BUMPERS = 34.5  # IN
     CENTER_WHEEL_TO_CENTER_WHEEL = 21.75  # IN
-    CENTER_WHEEL_TO_CENTER_WHEEL_METERS = SI.inches_to_meters * CENTER_WHEEL_TO_CENTER_WHEEL  # M
+    CENTER_WHEEL_TO_CENTER_WHEEL_METERS = (
+        SI.inches_to_meters * CENTER_WHEEL_TO_CENTER_WHEEL
+    )  # M
     ROBOT_MASS_KG = 50  # KG
     ROBOT_MOI = (
         ROBOT_MASS_KG
@@ -137,6 +141,7 @@ class VisionConstants:
     RED_APRIL_TAG_LIST_CORAL_STATION = [1, 2]
 
     NOTE_ALIGN_PIXEL_TOLERANCE = 250.0  # NEED TO CHANGE
+
 
 class AutoConstants:
     auto_translation_pid = PIDConstants(4, 0.0, 0)

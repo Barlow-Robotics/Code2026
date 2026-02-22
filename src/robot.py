@@ -43,15 +43,13 @@ class Robot(commands2.TimedCommandRobot):
         )
         import autos
 
-        
         self.auto_selection = SendableChooser()
-        self.auto_selection.setDefaultOption("kenny path", autos.example_path)
+        self.auto_selection.setDefaultOption("kenny path", autos.example_path_auto)
 
-        self.auto_selection.addOption("Leave", autos.leave)
+        self.auto_selection.addOption("Leave", autos.leave_auto)
 
         # allow us to choose our auto in Smart Dashboard
         wpilib.SmartDashboard.putData("Auto", self.auto_selection)
-
 
     def robotPeriodic(self) -> None:
         """This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
@@ -78,7 +76,11 @@ class Robot(commands2.TimedCommandRobot):
     def autonomousInit(self) -> None:
         """This autonomous runs the autonomous command selected by your RobotContainer class."""
         self.autonomousCommand = self.auto_selection.getSelected()
-        starting_pose: Pose2d = self.autonomousCommand.red_pose if DriverStation.getAlliance() == DriverStation.Alliance.kRed else self.autonomousCommand.blue_pose
+        starting_pose: Pose2d = (
+            self.autonomousCommand.red_pose
+            if DriverStation.getAlliance() == DriverStation.Alliance.kRed
+            else self.autonomousCommand.blue_pose
+        )
         self.container.drivetrain.reset_odometry_auto(starting_pose)
         if self.autonomousCommand:
             commands2.CommandScheduler.getInstance().schedule(self.autonomousCommand)

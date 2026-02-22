@@ -16,6 +16,7 @@ from pathplannerlib.controller import PPHolonomicDriveController
 from wpimath.kinematics import ChassisSpeeds
 from constants import AutoConstants
 
+
 class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     """
     Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -146,7 +147,7 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )  # Use open-loop control for drive motors
         )
-        
+
         AutoBuilder.configure(
             self.get_pose,
             self.reset_odometry_auto,
@@ -155,13 +156,13 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             PPHolonomicDriveController(
                 AutoConstants.auto_translation_pid,
                 AutoConstants.auto_rotation_pid,
-                AutoConstants.period
+                AutoConstants.period,
             ),
             RobotConfig.fromGUISettings(),
             should_flip,
-            self
-        )        
-        
+            self,
+        )
+
         self.log = Logger("Drive")
 
         self._has_applied_operator_perspective = False
@@ -379,19 +380,21 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
 
     def get_rotation(self):
         return self.get_state().pose.rotation()
-    
-    def get_gyro_rotation(self):  # BW: Shouldn't really ever be used. Lowkey don't need this if our vision system is good.
+
+    def get_gyro_rotation(
+        self,
+    ):  # BW: Shouldn't really ever be used. Lowkey don't need this if our vision system is good.
         return self.pigeon2.getRotation2d()
-    
+
     def reset_odometry_auto(self, pose: Pose2d):
         self.reset_pose(pose)
-        
-    def set_robot_centric_velocities(self, speeds: ChassisSpeeds): # BW needed for AutoBuilder since it only supports robot-centric control, but we want to use field-centric control for teleop
+
+    def set_robot_centric_velocities(
+        self, speeds: ChassisSpeeds
+    ):  # BW needed for AutoBuilder since it only supports robot-centric control, but we want to use field-centric control for teleop
         self.set_control(
             swerve.requests.RobotCentric()
             .with_velocity_x(speeds.vx)
             .with_velocity_y(speeds.vy)
             .with_rotational_rate(speeds.omega)
         )
-        
-        
