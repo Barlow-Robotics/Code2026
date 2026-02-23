@@ -59,7 +59,6 @@ class Spindex(commands2.Subsystem):
 
     def periodic(self):
         self.log.put("target_velocity", self.setVelocity)
-        self.log.put("stop_requested", self.stop_requested)
         self.log.publish(
             SpindexTelemetry(
                 velocity=float(self.motor_spindex.get_velocity().value),

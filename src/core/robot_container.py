@@ -8,11 +8,10 @@ from pathplannerlib.config import RobotConfig
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.logging import PathPlannerLogging
 from constants import TunerConstants, DriveConstants, AutoConstants
-from subsystems.intake import Intake
 from utils import SwerveTelemetry
 
 from phoenix6 import swerve
-from subsystems import Vision
+from subsystems import Vision, Shooter, Intake, Spindex
 from core.controller import Controller
 from wpilib import DriverStation, SendableChooser
 from utils import should_flip
@@ -38,9 +37,9 @@ class RobotContainer:
         # Subsystems
         self.drivetrain = TunerConstants.create_drivetrain()
         self.vision = Vision(drive_sub=self.drivetrain)
-        # self.shooter = Shooter(driveSub=self.drivetrain)
+        self.shooter = Shooter(driveSub=self.drivetrain)
         self.intake = Intake()
-        # self.spindex = Spindex()
+        self.spindex = Spindex()
 
         # Telemetry
         self._swerve_telemetry = SwerveTelemetry(

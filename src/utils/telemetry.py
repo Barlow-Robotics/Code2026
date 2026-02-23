@@ -7,6 +7,7 @@ from ntcore import NetworkTableInstance
 from phoenix6 import SignalLogger
 from wpimath.geometry import Pose2d, Pose3d, Rotation2d, Translation2d, Transform3d
 from wpimath.kinematics import ChassisSpeeds, SwerveModuleState, SwerveModulePosition
+from pykit.logger import Logger as PyKitLogger
 
 WPIStruct = (
     Pose2d
@@ -95,27 +96,35 @@ class NTBackend:
             self._struct_array_pubs[key] = pub
         pub.set(value)
 
+class PyKitBackend(LogBackend):
+    def __init__(self, name: str):
+        self._name = name
+
+    def _key(self, key: str) -> str:
+        return f"{self._name}/{key}"
+
+    def put_double(self, key: str, value: float) -> None:
+        PyKitLogger.recordOutput(self._key(key), value)
+
+    def put_string(self, key: str, value: str) -> None:
+        PyKitLogger.recordOutput(self._key(key), value)
+
+    def put_boolean(self, key: str, value: bool) -> None:
+        PyKitLogger.recordOutput(self._key(key), value)
+
+    def put_double_array(self, key: str, value) -> None:
+        PyKitLogger.recordOutput(self._key(key), list(value))
+
+    def put_struct(self, key: str, value) -> None:
+        PyKitLogger.recordOutput(self._key(key), value)
+
+    def put_struct_array(self, key: str, value) -> None:
+        PyKitLogger.recordOutput(self._key(key), list(value))
+
 
 class Logger:
-    """Thin logging facade with dataclass publishing and child nesting.
-
-    Usage::
-
-        self.log = Logger("Intake")
-        self.log.publish(IntakeTelemetry(velocity=42.0))
-
-        # Or manual puts:
-        self.log.put("key", 42.0)
-        self.log.child("sub").put("nested_key", 1.0)
-    """
-
-    def __init__(
-        self,
-        name: str,
-        backend: LogBackend | None = None,
-        _prefix: str = "",
-    ):
-        self._backend = backend or NTBackend(name)
+    def __init__(self, name: str, backend: LogBackend | None = None, _prefix: str = ""):
+        self._backend = backend or PyKitBackend(name) 
         self._prefix = _prefix
 
     def child(self, name: str) -> Logger:
@@ -193,8 +202,9 @@ class Logger:
                     self.put_double_array(field.name, value)
             elif dataclasses.is_dataclass(value):
                 self.child(field.name).publish(value)
+        
+            from pykit.logger import Logger as PyKitLogger
+            key = f"{self._prefix}{field.name}"
+            PyKitLogger.recordOutput(key, value)
 
 
-def init_logging() -> None:
-    """Call once at robot startup to initialise global logging."""
-    SignalLogger.start()

@@ -1,6 +1,6 @@
 from .talon_config import TalonConfig as TalonConfig
 from .telemetry import Logger as Logger
-from .telemetry import init_logging as init_logging
+from .telemetry import SignalLogger as SignalLogger
 from .swerve_telemetry import SwerveTelemetry as SwerveTelemetry
 from .trajectory_generator import NativeHolonomicTrajectory as NativeHolonomicTrajectory
 from .alliance_flip_util import get_red_pose as get_red_pose

@@ -12,15 +12,14 @@ import typing
 
 from core import RobotContainer
 from phoenix6 import HootAutoReplay
-from utils import init_logging
 from wpilib import DriverStation
 
 if typing.TYPE_CHECKING:
     from autos import AutoRoutine
-# from pykit.logger import Logger as pyLogger
-# from pykit.wpilog.wpilogwriter import WPILOGWriter
-# from pykit.networktables.nt4Publisher import NT4Publisher
-
+from pykit.logger import Logger as PyKitLogger
+from pykit.wpilog.wpilogwriter import WPILOGWriter
+from pykit.networktables.nt4Publisher import NT4Publisher
+from utils import SignalLogger
 
 class Robot(commands2.TimedCommandRobot):
     """
@@ -36,12 +35,10 @@ class Robot(commands2.TimedCommandRobot):
         This function is run when the robot is first started up and should be used for any
         initialization code.
         """
-
-        init_logging()
-        # pyLogger.addDataReciever(NT4Publisher())
-        # pyLogger.addDataReciever(WPILOGWriter())
-        # pyLogger.start()
-
+        PyKitLogger.addDataReciever(NT4Publisher())  
+        PyKitLogger.addDataReciever(WPILOGWriter())
+        PyKitLogger.start()
+        SignalLogger.start()
         # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         # autonomous chooser on the dashboard.
         self.container = RobotContainer()
@@ -57,6 +54,7 @@ class Robot(commands2.TimedCommandRobot):
 
         This runs after the mode specific periodic functions, but before LiveWindow and
         SmartDashboard integrated updating."""
+        PyKitLogger.periodicBeforeUser()
 
         self._time_and_joystick_replay.update()
         # Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
@@ -64,6 +62,8 @@ class Robot(commands2.TimedCommandRobot):
         # and running subsystem periodic() methods.  This must be called from the robot's periodic
         # block in order for anything in the Command-based framework to work.
         commands2.CommandScheduler.getInstance().run()
+        # start = PyKitLogger.getTimestamp()
+        PyKitLogger.periodicAfterUser(0, 0)
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""
