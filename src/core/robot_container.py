@@ -8,7 +8,7 @@ from utils import SwerveTelemetry
 
 from phoenix6 import swerve
 from wpilib import DriverStation
-from subsystems import Vision
+from subsystems import Vision, Shooter
 from core.controller import Controller
 
 
@@ -30,6 +30,7 @@ class RobotContainer:
         # Subsystems
         self.drivetrain = TunerConstants.create_drivetrain()
         self.vision = Vision(drive_sub=self.drivetrain)
+        # self.shooter = Shooter(driveSub=self.drivetrain)
         # self.intake = Intake()
         # self.spindex = Spindex()
 

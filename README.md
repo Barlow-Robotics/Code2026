@@ -38,6 +38,7 @@ USB: 172.22.11.2
 Radio: 10.45.72.1
 RoboRIO: 10.45.72.2
 Vision: 10.45.72.201
+SSH into RoboRIO: admin@roboRIO-4572-frc.local
 
 
 TODO at comp:

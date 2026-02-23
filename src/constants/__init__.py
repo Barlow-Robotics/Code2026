@@ -6,3 +6,5 @@ from .robot_constants import SpindexConstants as SpindexConstants
 from .tuner_constants import TunerSwerveDrivetrain as TunerSwerveDrivetrain
 from .tuner_constants import TunerConstants as TunerConstants
 from .robot_constants import AutoConstants as AutoConstants
+from .field_constants import Hub as Hub
+from .robot_constants import ShooterConstants as ShooterConstants
