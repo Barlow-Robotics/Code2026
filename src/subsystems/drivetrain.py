@@ -1,8 +1,6 @@
 from commands2 import Command, Subsystem
 from commands2.sysid import SysIdRoutine
 import math
-from pathplannerlib.auto import AutoBuilder
-from pathplannerlib.config import RobotConfig
 from phoenix6 import SignalLogger, swerve, units, utils
 from typing import Callable, overload
 from wpilib import DriverStation
@@ -10,11 +8,9 @@ from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Pose2d, Rotation2d
 
 from constants import TunerSwerveDrivetrain, DriveConstants
-from utils import Logger, should_flip
+from utils import Logger
 import ntcore
-from pathplannerlib.controller import PPHolonomicDriveController
 from wpimath.kinematics import ChassisSpeeds
-from constants import AutoConstants
 
 
 class Drivetrain(Subsystem, TunerSwerveDrivetrain):
@@ -148,21 +144,6 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             )  # Use open-loop control for drive motors
         )
 
-        AutoBuilder.configure(
-            self.get_pose,
-            self.reset_odometry_auto,
-            self.get_speeds,
-            lambda spds, ffs: self.set_robot_centric_velocities(spds),
-            PPHolonomicDriveController(
-                AutoConstants.auto_translation_pid,
-                AutoConstants.auto_rotation_pid,
-                AutoConstants.period,
-            ),
-            RobotConfig.fromGUISettings(),
-            should_flip,
-            self,
-        )
-
         self.log = Logger("Drive")
 
         self._has_applied_operator_perspective = False
@@ -180,10 +161,13 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
                 # Reduce dynamic voltage to 4 V to prevent brownout
                 stepVoltage=4.0,
                 # Log state with SignalLogger class
-                recordState=lambda state: SignalLogger.write_string(
-                    "SysIdTranslation_State", SysIdRoutineLog.stateEnumToString(state)
-                )
-                and None,
+                recordState=lambda state: (
+                    SignalLogger.write_string(
+                        "SysIdTranslation_State",
+                        SysIdRoutineLog.stateEnumToString(state),
+                    )
+                    and None
+                ),
             ),
             SysIdRoutine.Mechanism(
                 lambda output: self.set_control(
@@ -201,10 +185,12 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
                 # Use dynamic voltage of 7 V
                 stepVoltage=7.0,
                 # Log state with SignalLogger class
-                recordState=lambda state: SignalLogger.write_string(
-                    "SysIdSteer_State", SysIdRoutineLog.stateEnumToString(state)
-                )
-                and None,
+                recordState=lambda state: (
+                    SignalLogger.write_string(
+                        "SysIdSteer_State", SysIdRoutineLog.stateEnumToString(state)
+                    )
+                    and None
+                ),
             ),
             SysIdRoutine.Mechanism(
                 lambda output: self.set_control(
@@ -224,21 +210,25 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
                 stepVoltage=7.0,
                 # Use default timeout (10 s)
                 # Log state with SignalLogger class
-                recordState=lambda state: SignalLogger.write_string(
-                    "SysIdSteer_State", SysIdRoutineLog.stateEnumToString(state)
-                )
-                and None,
+                recordState=lambda state: (
+                    SignalLogger.write_string(
+                        "SysIdSteer_State", SysIdRoutineLog.stateEnumToString(state)
+                    )
+                    and None
+                ),
             ),
             SysIdRoutine.Mechanism(
                 lambda output: (
-                    # output is actually radians per second, but SysId only supports "volts"
-                    self.set_control(
-                        self._rotation_characterization.with_rotational_rate(output)
-                    ),
-                    # also log the requested output for SysId
-                    SignalLogger.write_double("Rotational_Rate", output),
-                )
-                and None,
+                    (
+                        # output is actually radians per second, but SysId only supports "volts"
+                        self.set_control(
+                            self._rotation_characterization.with_rotational_rate(output)
+                        ),
+                        # also log the requested output for SysId
+                        SignalLogger.write_double("Rotational_Rate", output),
+                    )
+                    and None
+                ),
                 lambda log: None,
                 self,
             ),

@@ -3,13 +3,18 @@
 # Open Source Software; you can modify and/or share it under the terms of
 # the WPILib BSD license file in the root directory of this project.
 #
-from constants import TunerConstants, DriveConstants
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.config import RobotConfig
+from pathplannerlib.controller import PPHolonomicDriveController
+from constants import TunerConstants, DriveConstants, AutoConstants
 from utils import SwerveTelemetry
 
 from phoenix6 import swerve
-from wpilib import DriverStation
 from subsystems import Vision
 from core.controller import Controller
+from wpilib import DriverStation, SendableChooser
+from utils import should_flip
+import wpilib
 
 
 class RobotContainer:
@@ -41,6 +46,32 @@ class RobotContainer:
         self.drivetrain.register_telemetry(
             lambda state: self._swerve_telemetry.telemeterize(state)
         )
+        AutoBuilder.configure(
+            self.drivetrain.get_pose,
+            self.drivetrain.reset_odometry_auto,
+            self.drivetrain.get_speeds,
+            lambda spds, ffs: self.drivetrain.set_robot_centric_velocities(spds),
+            PPHolonomicDriveController(
+                AutoConstants.auto_translation_pid,
+                AutoConstants.auto_rotation_pid,
+                AutoConstants.period,
+            ),
+            RobotConfig.fromGUISettings(),
+            should_flip,
+            self.drivetrain,
+        )
 
         # Controller bindings
         self.controller = Controller(self)
+        self.configure_autos()
+
+    def configure_autos(self):
+        import autos
+
+        self.auto_selection = SendableChooser()
+        self.auto_selection.setDefaultOption("kenny path", autos.example_path_auto)
+
+        self.auto_selection.addOption("Leave", autos.leave_auto)
+
+        # allow us to choose our auto in Smart Dashboard
+        wpilib.SmartDashboard.putData("Auto", self.auto_selection)

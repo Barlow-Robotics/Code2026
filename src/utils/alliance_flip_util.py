@@ -23,7 +23,7 @@ def should_flip():
     Should_flip means that if something is true, that thing should orient the opposite way
     of how it currently is
     """
-    return DriverStation.getAlliance() == DriverStation.Alliance().kRed
+    return DriverStation.getAlliance() == DriverStation.Alliance.kRed
 
 
 def get_x(x: float) -> float:
