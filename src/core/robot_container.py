@@ -8,7 +8,7 @@ from utils import SwerveTelemetry
 
 from phoenix6 import swerve
 from wpilib import DriverStation
-from subsystems import Vision, Shooter
+from subsystems import Vision
 from core.controller import Controller
 
 

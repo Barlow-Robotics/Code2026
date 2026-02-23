@@ -37,9 +37,11 @@ class IntakeConstants:
 
     PID = {"kP": 0.11, "kI": 0, "kD": 0, "kF": 0, "kA": 0}  # TODO: tune PID
 
+
 class ShooterConstants:
-    SHOOTER_HEIGHT_FOR_FUEL_IN = 20.57 
+    SHOOTER_HEIGHT_FOR_FUEL_IN = 20.57
     SHOOTER_HEIGHT_FOR_FUEL_M = 20.57 * SI.inches_to_meters
+
 
 class SpindexConstants:
     MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
