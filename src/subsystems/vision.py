@@ -305,7 +305,10 @@ class Vision(Subsystem):
 
             cam_log.put("accepted_avg_distance_m", avg_distance)
             cam_log.put("accepted_xy_std_dev", std_devs[0])
-            cam_log.put("accepted_theta_std_dev", std_devs[2] if std_devs[2] != float("inf") else -1.0)
+            cam_log.put(
+                "accepted_theta_std_dev",
+                std_devs[2] if std_devs[2] != float("inf") else -1.0,
+            )
             cam_log.put("accepted_timestamp", timestamp)
             cam_log.put_struct("accepted_pose", pose_2d)
 

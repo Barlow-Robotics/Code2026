@@ -3,8 +3,10 @@ from commands2 import Command
 from wpilib import Timer
 from wpimath.geometry import Pose2d
 from utils import NativeHolonomicTrajectory
+
 if TYPE_CHECKING:
     from subsystems import Vision
+
 
 class FollowTrajectoryCommand(Command):
     def __init__(self, visionSub: "Vision", trajectory: NativeHolonomicTrajectory):

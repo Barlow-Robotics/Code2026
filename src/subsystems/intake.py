@@ -175,17 +175,33 @@ class Intake(commands2.Subsystem):
     def periodic(self):
         self.log.publish(
             IntakeTelemetry(
-                velocity_motor_bottom=float(self.motor_roller_bottom.get_velocity().value),
+                velocity_motor_bottom=float(
+                    self.motor_roller_bottom.get_velocity().value
+                ),
                 velocity_motor_top=float(self.motor_roller_top.get_velocity().value),
                 target_velocity=float(self.target_velocity),
-                supply_current_top=float(self.motor_roller_top.get_supply_current().value),
-                supply_current_bottom=float(self.motor_roller_bottom.get_supply_current().value),
-                stator_current_top=float(self.motor_roller_top.get_stator_current().value),
-                stator_current_bottom=float(self.motor_roller_bottom.get_stator_current().value),
-                motor_voltage_top=float(self.motor_roller_top.get_motor_voltage().value),
-                motor_voltage_bottom=float(self.motor_roller_bottom.get_motor_voltage().value),
+                supply_current_top=float(
+                    self.motor_roller_top.get_supply_current().value
+                ),
+                supply_current_bottom=float(
+                    self.motor_roller_bottom.get_supply_current().value
+                ),
+                stator_current_top=float(
+                    self.motor_roller_top.get_stator_current().value
+                ),
+                stator_current_bottom=float(
+                    self.motor_roller_bottom.get_stator_current().value
+                ),
+                motor_voltage_top=float(
+                    self.motor_roller_top.get_motor_voltage().value
+                ),
+                motor_voltage_bottom=float(
+                    self.motor_roller_bottom.get_motor_voltage().value
+                ),
                 device_temp_top=float(self.motor_roller_top.get_device_temp().value),
-                device_temp_bottom=float(self.motor_roller_bottom.get_device_temp().value),
+                device_temp_bottom=float(
+                    self.motor_roller_bottom.get_device_temp().value
+                ),
                 arm_position=float(self.motor_arm.get_position().value),
                 head_position=float(self.motor_head.get_position().value),
                 arm_supply_current=float(self.motor_arm.get_supply_current().value),

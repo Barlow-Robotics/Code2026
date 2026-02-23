@@ -5,14 +5,11 @@ from autos import AutoRoutine
 
 from commands2 import SequentialCommandGroup, ParallelCommandGroup
 
-from robot import Robot
-
-
 path_name = "HP_Intake_Center_Pieces"
 paths = [PathPlannerPath.fromChoreoTrajectory(path_name, i) for i in range(3)]
 
 command = SequentialCommandGroup(
-    # SHOOT. 
+    # SHOOT.
     ParallelCommandGroup(
         AutoBuilder.followPath(paths[0]),
     ),

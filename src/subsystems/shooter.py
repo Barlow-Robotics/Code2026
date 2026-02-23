@@ -1,4 +1,3 @@
-import wpilib
 from commands2 import Subsystem
 from subsystems import Drivetrain
 from constants import Hub
@@ -70,9 +69,18 @@ class Shooter(Subsystem):
         )
 
         self._iteration_telemetry = ShooterIterationTelemetry(
-            iter_0_r=0.0, iter_0_discriminant=0.0, iter_0_hood_angle_deg=0.0, iter_0_tof=0.0,
-            iter_1_r=0.0, iter_1_discriminant=0.0, iter_1_hood_angle_deg=0.0, iter_1_tof=0.0,
-            iter_2_r=0.0, iter_2_discriminant=0.0, iter_2_hood_angle_deg=0.0, iter_2_tof=0.0,
+            iter_0_r=0.0,
+            iter_0_discriminant=0.0,
+            iter_0_hood_angle_deg=0.0,
+            iter_0_tof=0.0,
+            iter_1_r=0.0,
+            iter_1_discriminant=0.0,
+            iter_1_hood_angle_deg=0.0,
+            iter_1_tof=0.0,
+            iter_2_r=0.0,
+            iter_2_discriminant=0.0,
+            iter_2_hood_angle_deg=0.0,
+            iter_2_tof=0.0,
         )
 
     def set_velocity(self, velocity_rpm: float):
@@ -132,11 +140,15 @@ class Shooter(Subsystem):
             discriminant = B**2 - 4 * A * C
 
             setattr(self._iteration_telemetry, f"iter_{i}_r", float(r))
-            setattr(self._iteration_telemetry, f"iter_{i}_discriminant", float(discriminant))
+            setattr(
+                self._iteration_telemetry, f"iter_{i}_discriminant", float(discriminant)
+            )
 
             if discriminant < 0:
                 self._telemetry.calc_valid = False
-                self._telemetry.calc_failure_reason = "target_unreachable_discriminant_negative"
+                self._telemetry.calc_failure_reason = (
+                    "target_unreachable_discriminant_negative"
+                )
                 self._telemetry.discriminant = float(discriminant)
                 self._telemetry.horizontal_distance = float(r)
                 setattr(self._iteration_telemetry, f"iter_{i}_hood_angle_deg", 0.0)
@@ -147,7 +159,11 @@ class Shooter(Subsystem):
             hood_angle = math.atan(tan_theta)
             tof = r / (math.cos(hood_angle) * v_fixed)
 
-            setattr(self._iteration_telemetry, f"iter_{i}_hood_angle_deg", float(hood_angle * SI.radians_to_degrees))
+            setattr(
+                self._iteration_telemetry,
+                f"iter_{i}_hood_angle_deg",
+                float(hood_angle * SI.radians_to_degrees),
+            )
             setattr(self._iteration_telemetry, f"iter_{i}_tof", float(tof))
 
             dx = hub_pose.X() - robot_pose.X() - robot_speeds.vx * tof
@@ -166,7 +182,9 @@ class Shooter(Subsystem):
         self._telemetry.turret_yaw = float(turret_yaw_deg)
         self._telemetry.hub_dx = float(hub_pose.X() - robot_pose.X())
         self._telemetry.hub_dy = float(hub_pose.Y() - robot_pose.Y())
-        self._telemetry.hub_dz = float(hub_pose.Z() - ShooterConstants.SHOOTER_HEIGHT_FOR_FUEL_M)
+        self._telemetry.hub_dz = float(
+            hub_pose.Z() - ShooterConstants.SHOOTER_HEIGHT_FOR_FUEL_M
+        )
         self._telemetry.horizontal_distance = float(r)
         self._telemetry.time_of_flight = float(tof)
         self._telemetry.discriminant = float(discriminant)
