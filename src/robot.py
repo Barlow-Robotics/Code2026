@@ -17,6 +17,9 @@ from wpilib import DriverStation
 
 if typing.TYPE_CHECKING:
     from autos import AutoRoutine
+# from pykit.logger import Logger as pyLogger
+# from pykit.wpilog.wpilogwriter import WPILOGWriter
+# from pykit.networktables.nt4Publisher import NT4Publisher
 
 
 class Robot(commands2.TimedCommandRobot):
@@ -35,6 +38,9 @@ class Robot(commands2.TimedCommandRobot):
         """
 
         init_logging()
+        # pyLogger.addDataReciever(NT4Publisher())
+        # pyLogger.addDataReciever(WPILOGWriter())
+        # pyLogger.start()
 
         # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         # autonomous chooser on the dashboard.

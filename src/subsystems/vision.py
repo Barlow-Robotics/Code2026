@@ -381,4 +381,5 @@ class Vision(Subsystem):
             target_pose,
             Rotation2d(target_pose.rotation().radians()),
         )
+        # pyLogger.recordOutput("Vision/AutoAlignTrajectory", trajectory_obj)
         FollowTrajectoryCommand(self.drive_sub, trajectory_obj).schedule()

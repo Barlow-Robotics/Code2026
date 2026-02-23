@@ -357,12 +357,10 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         :param vy: Velocity in the y direction (m/s).
         :param omega: Angular velocity (rad/s).
         """
-        self.apply_request(
-            lambda: (
-                self.movement.with_velocity_x(vx)
-                .with_velocity_y(vy)
-                .with_rotational_rate(omega)
-            )
+        self.set_control(
+            self.movement.with_velocity_x(vx)
+            .with_velocity_y(vy)
+            .with_rotational_rate(omega)
         )
 
     def stop(self):

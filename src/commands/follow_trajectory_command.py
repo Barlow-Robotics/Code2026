@@ -23,7 +23,6 @@ class FollowTrajectoryCommand(Command):
         self.timer.start()
 
     def execute(self):
-        print("HIIII")
         """Sample the trajectory and command the drivetrain."""
         current_time = self.timer.get()
         if current_time > self.trajectory.total_time():
