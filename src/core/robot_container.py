@@ -6,7 +6,9 @@
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import RobotConfig
 from pathplannerlib.controller import PPHolonomicDriveController
+from pathplannerlib.logging import PathPlannerLogging
 from constants import TunerConstants, DriveConstants, AutoConstants
+from subsystems.intake import Intake
 from utils import SwerveTelemetry
 
 from phoenix6 import swerve
@@ -15,6 +17,7 @@ from core.controller import Controller
 from wpilib import DriverStation, SendableChooser
 from utils import should_flip
 import wpilib
+from utils import Logger
 
 
 class RobotContainer:
@@ -36,7 +39,7 @@ class RobotContainer:
         self.drivetrain = TunerConstants.create_drivetrain()
         self.vision = Vision(drive_sub=self.drivetrain)
         # self.shooter = Shooter(driveSub=self.drivetrain)
-        # self.intake = Intake()
+        self.intake = Intake()
         # self.spindex = Spindex()
 
         # Telemetry
@@ -69,9 +72,28 @@ class RobotContainer:
         import autos
 
         self.auto_selection = SendableChooser()
-        self.auto_selection.setDefaultOption("kenny path", autos.example_path_auto)
+        self.auto_selection.setDefaultOption("HP_Intake_Center_Pieces", autos.HP_Intake_Center_Pieces_Auto)
+        self.auto_selection.addOption("kenny path", autos.example_path_auto)
 
         self.auto_selection.addOption("Leave", autos.leave_auto)
 
         # allow us to choose our auto in Smart Dashboard
         wpilib.SmartDashboard.putData("Auto", self.auto_selection)
+        self.log = Logger("Autos")
+
+        self.log.put("option_0", "HP_Intake_Center_Pieces")
+        self.log.put("option_1", "kenny path")
+        self.log.put("option_2", "Leave")
+        self.log.put("default", "HP_Intake_Center_Pieces")
+
+        pp_log = self.log.child("PathPlanner")
+
+        PathPlannerLogging.setLogCurrentPoseCallback(
+            lambda pose: pp_log.put_struct("current_pose", pose)
+        )
+        PathPlannerLogging.setLogTargetPoseCallback(
+            lambda pose: pp_log.put_struct("target_pose", pose)
+        )
+        PathPlannerLogging.setLogActivePathCallback(
+            lambda poses: pp_log.put_struct_array("active_path", poses)
+        )

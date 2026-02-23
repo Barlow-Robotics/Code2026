@@ -1,11 +1,13 @@
+from typing import TYPE_CHECKING
 from commands2 import Command
 from wpilib import Timer
-from subsystems import Drivetrain
+from wpimath.geometry import Pose2d
 from utils import NativeHolonomicTrajectory
-
+if TYPE_CHECKING:
+    from subsystems import Vision
 
 class FollowTrajectoryCommand(Command):
-    def __init__(self, driveSub: Drivetrain, trajectory: NativeHolonomicTrajectory):
+    def __init__(self, visionSub: "Vision", trajectory: NativeHolonomicTrajectory):
         """
         Command to make the robot follow a NativeHolonomicTrajectory.
 
@@ -13,7 +15,8 @@ class FollowTrajectoryCommand(Command):
         :param trajectory: The trajectory to follow.
         """
         super().__init__()
-        self.driveSub = driveSub
+        self.driveSub = visionSub.drive_sub
+        self.visionSub = visionSub
         self.trajectory = trajectory
         self.timer = Timer()
 
@@ -42,8 +45,15 @@ class FollowTrajectoryCommand(Command):
 
     def isFinished(self):
         """End the command when the trajectory is complete."""
+        self.visionSub._auto_align_triggered = False
+        self.visionSub._auto_align_target_pose = Pose2d()
+        self.visionSub._auto_align_starting_pose = Pose2d()
+
         return self.timer.get() >= self.trajectory.total_time()
 
     def end(self, interrupted):
         """Stop the drivetrain when the command ends."""
+        self.visionSub._auto_align_triggered = False
+        self.visionSub._auto_align_target_pose = Pose2d()
+        self.visionSub._auto_align_starting_pose = Pose2d()
         self.driveSub.stop()
