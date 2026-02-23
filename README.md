@@ -33,6 +33,21 @@ If you want to skip running the tests
 uv run frc deploy --skip-tests
 ```
 
+## To run back a log file in replay mode, set the `LOG_PATH` environment variable and then run in simulation
+
+An example is to run the following:
+
+```sh
+LOG_PATH=/path/to/log/file.wpilog uv run -- robotpy --main src sim
+```
+
+For replay watch, do the following:
+
+```sh
+LOG_PATH=/path/to/log/file.wpilog uv run -- robotpy --main src watch
+```
+
+
 Notes:
 USB: 172.22.11.2
 Radio: 10.45.72.1
