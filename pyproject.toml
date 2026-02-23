@@ -24,6 +24,14 @@ dependencies = [
     "numpy",
     "phoenix6",
     "photonlibpy",
+    "robotpy-pykit==1.0.3",
+    "robotpy-pykit-watch==1.0.0",
+    "robotpy-halsim-gui>=2026.1.1",
+    "robotpy-cli>=2026.0.1",
+    "black>=25.9.8",
+    "pylint>=4.0.2",
+    "robotpy-pathplannerlib>=2026.1.1",
+
 ]
 
 [project.scripts]
