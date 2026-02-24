@@ -5,6 +5,7 @@
 # the WPILib BSD license file in the root directory of this project.
 #
 
+from datetime import datetime
 from phoenix6.swerve import Pose2d
 import wpilib
 import commands2
@@ -17,11 +18,13 @@ from utils import configure_pykit
 
 if typing.TYPE_CHECKING:
     from autos import AutoRoutine
-from pykit.logger import Logger as PyKitLogger
 
-from utils import SignalLogger
+from phoenix6 import SignalLogger
 
-class Robot(commands2.TimedCommandRobot):
+from pykit.loggedrobot import LoggedRobot
+
+
+class Robot(LoggedRobot):
     """
     Command v2 robots are encouraged to inherit from TimedCommandRobot, which
     has an implementation of robotPeriodic which runs the scheduler for you
@@ -29,16 +32,17 @@ class Robot(commands2.TimedCommandRobot):
 
     def __init__(self):
         super().__init__()
-        self.useTiming = configure_pykit(type(self).__name__)
+        SignalLogger.start()
+        self.useTiming = configure_pykit(
+            type(self).__name__, datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        )
 
     def robotInit(self) -> None:
-
         """Robot initialization function"""
         """
         This function is run when the robot is first started up and should be used for any
         initialization code.
         """
-        SignalLogger.start()
         self.autonomousCommand: typing.Optional[commands2.Command] = None
 
         # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
@@ -50,21 +54,10 @@ class Robot(commands2.TimedCommandRobot):
             HootAutoReplay().with_timestamp_replay().with_joystick_replay()
         )
 
-
     def robotPeriodic(self) -> None:
-        """This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
-        that you want ran during disabled, autonomous, teleoperated and test.
-
-        This runs after the mode specific periodic functions, but before LiveWindow and
-        SmartDashboard integrated updating."""
-        PyKitLogger.periodicBeforeUser()
-        # --- your user code ---
         self._time_and_joystick_replay.update()
 
         commands2.CommandScheduler.getInstance().run()
-        # --- end user code ---
-        PyKitLogger.periodicAfterUser(0, 0)
-
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""

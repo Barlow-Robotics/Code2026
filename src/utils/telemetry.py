@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import Protocol, Sequence, runtime_checkable
 
 from ntcore import NetworkTableInstance
-from phoenix6 import SignalLogger
 from wpimath.geometry import Pose2d, Pose3d, Rotation2d, Translation2d, Transform3d
 from wpimath.kinematics import ChassisSpeeds, SwerveModuleState, SwerveModulePosition
 

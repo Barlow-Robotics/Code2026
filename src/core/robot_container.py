@@ -11,7 +11,8 @@ from constants import TunerConstants, DriveConstants, AutoConstants
 from utils import SwerveTelemetry
 
 from phoenix6 import swerve
-from subsystems import Vision, Shooter, Intake, Spindex
+
+# from subsystems import Vision, Shooter, Intake, Spindex
 from core.controller import Controller
 from wpilib import DriverStation, SendableChooser
 from utils import should_flip
