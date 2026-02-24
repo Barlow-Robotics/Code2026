@@ -5,7 +5,7 @@ from photonlibpy.estimatedRobotPose import EstimatedRobotPose
 from photonlibpy.photonPoseEstimator import PhotonPoseEstimator
 from photonlibpy.targeting.photonPipelineResult import PhotonPipelineResult
 from photonlibpy.targeting.photonTrackedTarget import PhotonTrackedTarget
-from robotpy_apriltag import AprilTagFieldLayout, AprilTagField
+from robotpy_apriltag import AprilTagFieldLayout
 from wpilib._wpilib import RobotBase
 from wpimath.geometry import Pose2d, Rotation2d, Transform3d
 from wpilib import DriverStation
@@ -66,7 +66,7 @@ class Vision(Subsystem):
                     field_layout, VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT
                 ),
                 name="front_left_swerve",
-                robot_to_camera=VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT, 
+                robot_to_camera=VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT,
             ),
             _CameraConfig(
                 camera=PhotonCamera(VisionConstants.FRONT_RIGHT_SWERVE_NAME),
@@ -112,8 +112,7 @@ class Vision(Subsystem):
         PyKitLogger.recordOutput(
             "Vision/Config/camera_count", float(len(self._cameras))
         )
-        
-        
+
         if not RobotBase.isReal() and VisionConstants.VISION_SIM:
             self._vision_sim = VisionSystemSim("main")
             self._vision_sim.addAprilTags(self.april_tag_field_layout)
@@ -130,7 +129,7 @@ class Vision(Subsystem):
     def periodic(self):
         if not RobotBase.isReal() and VisionConstants.VISION_SIM:
             self.simulation_periodic()
-        
+
         if not self.disabled_vision:
             current_pose = self.drive_sub.get_pose()
             self._update_all_cameras(current_pose)
