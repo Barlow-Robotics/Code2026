@@ -16,7 +16,7 @@ from core.controller import Controller
 from wpilib import DriverStation, SendableChooser
 from utils import should_flip
 import wpilib
-from utils import Logger
+from pykit.logger import Logger as PyKitLogger
 
 
 class RobotContainer:
@@ -36,10 +36,10 @@ class RobotContainer:
 
         # Subsystems
         self.drivetrain = TunerConstants.create_drivetrain()
-        self.vision = Vision(drive_sub=self.drivetrain)
-        self.shooter = Shooter(driveSub=self.drivetrain)
-        self.intake = Intake()
-        self.spindex = Spindex()
+        # self.vision = Vision(drive_sub=self.drivetrain)
+        # self.shooter = Shooter(driveSub=self.drivetrain)
+        # self.intake = Intake()
+        # self.spindex = Spindex()
 
         # Telemetry
         self._swerve_telemetry = SwerveTelemetry(
@@ -80,21 +80,19 @@ class RobotContainer:
 
         # allow us to choose our auto in Smart Dashboard
         wpilib.SmartDashboard.putData("Auto", self.auto_selection)
-        self.log = Logger("Autos")
+        prefix = "Auto"
+        PyKitLogger.recordOutput(f"{prefix}/option_0", "HP_Intake_Center_Pieces")
+        PyKitLogger.recordOutput(f"{prefix}/option_1", "kenny path")
+        PyKitLogger.recordOutput(f"{prefix}/option_2", "Leave")
+        PyKitLogger.recordOutput(f"{prefix}/default", "HP_Intake_Center_Pieces")
 
-        self.log.put("option_0", "HP_Intake_Center_Pieces")
-        self.log.put("option_1", "kenny path")
-        self.log.put("option_2", "Leave")
-        self.log.put("default", "HP_Intake_Center_Pieces")
-
-        pp_log = self.log.child("PathPlanner")
-
+        prefix = prefix + "/PathPlanner"
         PathPlannerLogging.setLogCurrentPoseCallback(
-            lambda pose: pp_log.put_struct("current_pose", pose)
+            lambda pose: PyKitLogger.recordOutput(f"{prefix}/current_pose", pose)
         )
         PathPlannerLogging.setLogTargetPoseCallback(
-            lambda pose: pp_log.put_struct("target_pose", pose)
+            lambda pose: PyKitLogger.recordOutput(f"{prefix}/target_pose", pose)
         )
         PathPlannerLogging.setLogActivePathCallback(
-            lambda poses: pp_log.put_struct_array("active_path", poses)
+            lambda poses: PyKitLogger.recordOutput(f"{prefix}/active_path", poses)
         )

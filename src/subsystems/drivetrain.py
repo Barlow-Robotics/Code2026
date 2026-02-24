@@ -8,7 +8,6 @@ from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Pose2d, Rotation2d
 
 from constants import TunerSwerveDrivetrain, DriveConstants
-from utils import Logger
 import ntcore
 from wpimath.kinematics import ChassisSpeeds
 
@@ -143,8 +142,6 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )  # Use open-loop control for drive motors
         )
-
-        self.log = Logger("Drive")
 
         self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""

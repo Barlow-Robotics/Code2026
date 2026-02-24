@@ -221,9 +221,9 @@ class TOPPGenerator:
         v_max: float,
         a_max: float,
     ) -> NativeHolonomicTrajectory:
-        speeds = self._speed_supplier()()
+        speeds = self._speed_supplier()
         robot_speed = math.hypot(speeds.vx, speeds.vy)
-        current_pose = self._pose_supplier()()
+        current_pose = self._pose_supplier()
 
         direct_to_target = (
             target_position.translation() - current_pose.translation()

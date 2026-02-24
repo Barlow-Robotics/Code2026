@@ -4,8 +4,9 @@ from phoenix6.hardware import TalonFX
 from phoenix6 import controls
 from commands2 import cmd
 import commands2
-from utils import TalonConfig, Logger
+from utils import TalonConfig
 from constants import MotorIDs
+from pykit.logger import Logger as PyKitLogger
 
 
 @dataclass
@@ -22,7 +23,6 @@ class SpindexTelemetry:
 class Spindex(commands2.Subsystem):
     def __init__(self):
         super().__init__()
-        self.log = Logger("Spindex")
         SPINDEX_CONFIG = TalonConfig(kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True)
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
@@ -58,15 +58,32 @@ class Spindex(commands2.Subsystem):
         )
 
     def periodic(self):
-        self.log.put("target_velocity", self.setVelocity)
-        self.log.publish(
-            SpindexTelemetry(
-                velocity=float(self.motor_spindex.get_velocity().value),
-                supply_current=float(self.motor_spindex.get_supply_current().value),
-                stator_current=float(self.motor_spindex.get_stator_current().value),
-                supply_voltage=float(self.motor_spindex.get_supply_voltage().value),
-                motor_voltage=float(self.motor_spindex.get_motor_voltage().value),
-                device_temp=float(self.motor_spindex.get_device_temp().value),
-                is_inverted=bool(self.motor_spindex.get_applied_rotor_polarity().value),
-            )
+        prefix = "Spindex"
+        PyKitLogger.recordOutput(f"{prefix}/target_velocity", self.setVelocity)
+        PyKitLogger.recordOutput(
+            f"{prefix}/current_velocity", float(self.motor_spindex.get_velocity().value)
+        )
+        PyKitLogger.recordOutput(
+            f"{prefix}/current_supply_current",
+            float(self.motor_spindex.get_supply_current().value),
+        )
+        PyKitLogger.recordOutput(
+            f"{prefix}/current_stator_current",
+            float(self.motor_spindex.get_stator_current().value),
+        )
+        PyKitLogger.recordOutput(
+            f"{prefix}/current_supply_voltage",
+            float(self.motor_spindex.get_supply_voltage().value),
+        )
+        PyKitLogger.recordOutput(
+            f"{prefix}/current_motor_voltage",
+            float(self.motor_spindex.get_motor_voltage().value),
+        )
+        PyKitLogger.recordOutput(
+            f"{prefix}/current_device_temp",
+            float(self.motor_spindex.get_device_temp().value),
+        )
+        PyKitLogger.recordOutput(
+            f"{prefix}/is_inverted",
+            bool(self.motor_spindex.get_applied_rotor_polarity().value),
         )

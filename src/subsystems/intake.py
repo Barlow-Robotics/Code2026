@@ -1,10 +1,12 @@
 from dataclasses import dataclass
+import dataclasses
 
 from phoenix6 import controls
 from phoenix6.hardware import TalonFX
 import commands2
+from pykit.logger import Logger as PyKitLogger
 
-from utils import TalonConfig, Logger
+from utils import TalonConfig
 from constants import MotorIDs, IntakeConstants
 from commands2 import cmd
 from enum import Enum
@@ -48,7 +50,6 @@ class IntakePositions(Enum):
 class Intake(commands2.Subsystem):
     def __init__(self):
         super().__init__()
-        self.log = Logger("Intake")
         INTAKE_CONFIG_ARM = TalonConfig(
             kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True
         )
@@ -172,8 +173,27 @@ class Intake(commands2.Subsystem):
             self._motion_magic_velocity_voltage.with_velocity(0).with_acceleration(0.1)
         )
 
+    def _log_dataclass(self, prefix: str, data: object):
+        """Recursively log a dataclass to PyKitLogger using prefix."""
+        for field in dataclasses.fields(data):
+            value = getattr(data, field.name)
+
+            if value is None:
+                continue
+
+            key = f"{prefix}/{field.name}"
+
+            if dataclasses.is_dataclass(value):
+                self._log_dataclass(key, value)
+            else:
+                PyKitLogger.recordOutput(key, value)
+
     def periodic(self):
-        self.log.publish(
+        intake_prefix = "Intake/Telemetry"
+        command_prefix = "Intake/Command"
+
+        self._log_dataclass(
+            intake_prefix,
             IntakeTelemetry(
                 velocity_motor_bottom=float(
                     self.motor_roller_bottom.get_velocity().value
@@ -208,14 +228,15 @@ class Intake(commands2.Subsystem):
                 head_supply_current=float(self.motor_head.get_supply_current().value),
                 arm_stator_current=float(self.motor_arm.get_stator_current().value),
                 head_stator_current=float(self.motor_head.get_stator_current().value),
-            )
+            ),
         )
 
-        self.log.publish(
+        self._log_dataclass(
+            command_prefix,
             IntakeCommandTelemetry(
                 target_position=self._target_position_name,
                 commanded_velocity_ft_per_sec=self._commanded_velocity_ft_per_sec,
                 converted_velocity_rps=self._converted_velocity_rps,
                 stop_requested=self._stop_requested,
-            )
+            ),
         )

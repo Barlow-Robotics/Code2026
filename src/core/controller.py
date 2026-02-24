@@ -66,8 +66,9 @@ class Controller:
 
         # Intake and spindex bindings (driver joystick)
         # self._driver.button(2).onTrue(container.intake.set_velocity_command)
+        # self._driver.button(2).onTrue(container.vision.auto_align_command)
+
         if False:
-            self._driver.button(2).onTrue(container.vision.auto_align_command)
             self._driver.button(3).onTrue(container.intake.stop_command)
             self._driver.button(4).onTrue(
                 container.intake.goto_position_cmmand[IntakePositions.DEPLOYED]
