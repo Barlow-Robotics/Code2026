@@ -24,7 +24,9 @@ from phoenix6 import SignalLogger
 from pykit.loggedrobot import LoggedRobot
 
 
-class Robot(LoggedRobot): # BW: Don't worry LoggedRobot does the same thing as TimedRobot, just with logging. 
+class Robot(
+    LoggedRobot
+):  # BW: Don't worry LoggedRobot does the same thing as TimedRobot, just with logging.
     """
     Command v2 robots are encouraged to inherit from TimedCommandRobot, which
     has an implementation of robotPeriodic which runs the scheduler for you
