@@ -13,14 +13,13 @@ import typing
 from core import RobotContainer
 from phoenix6 import HootAutoReplay
 from wpilib import DriverStation
+from utils import configure_pykit
 
 if typing.TYPE_CHECKING:
     from autos import AutoRoutine
 from pykit.logger import Logger as PyKitLogger
-from pykit.wpilog.wpilogwriter import WPILOGWriter
-from pykit.networktables.nt4Publisher import NT4Publisher
-from utils import SignalLogger
 
+from utils import SignalLogger
 
 class Robot(commands2.TimedCommandRobot):
     """
@@ -28,6 +27,9 @@ class Robot(commands2.TimedCommandRobot):
     has an implementation of robotPeriodic which runs the scheduler for you
     """
 
+    def __init__(self):
+        super().__init__()
+        self.useTiming = configure_pykit(type(self).__name__)
 
     def robotInit(self) -> None:
 
@@ -36,9 +38,6 @@ class Robot(commands2.TimedCommandRobot):
         This function is run when the robot is first started up and should be used for any
         initialization code.
         """
-        PyKitLogger.addDataReciever(NT4Publisher())
-        PyKitLogger.addDataReciever(WPILOGWriter())
-        PyKitLogger.start()
         SignalLogger.start()
         self.autonomousCommand: typing.Optional[commands2.Command] = None
 
@@ -51,6 +50,7 @@ class Robot(commands2.TimedCommandRobot):
             HootAutoReplay().with_timestamp_replay().with_joystick_replay()
         )
 
+
     def robotPeriodic(self) -> None:
         """This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
         that you want ran during disabled, autonomous, teleoperated and test.
@@ -58,15 +58,13 @@ class Robot(commands2.TimedCommandRobot):
         This runs after the mode specific periodic functions, but before LiveWindow and
         SmartDashboard integrated updating."""
         PyKitLogger.periodicBeforeUser()
-
+        # --- your user code ---
         self._time_and_joystick_replay.update()
-        # Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-        # commands, running already-scheduled commands, removing finished or interrupted commands,
-        # and running subsystem periodic() methods.  This must be called from the robot's periodic
-        # block in order for anything in the Command-based framework to work.
+
         commands2.CommandScheduler.getInstance().run()
-        # start = PyKitLogger.getTimestamp()
+        # --- end user code ---
         PyKitLogger.periodicAfterUser(0, 0)
+
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""
