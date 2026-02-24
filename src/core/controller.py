@@ -7,7 +7,7 @@ from commands2.button import CommandXboxController, CommandJoystick, Trigger
 
 import wpilib
 from phoenix6 import swerve
-from wpilib import DriverStation
+from wpilib import DriverStation, RobotBase
 from wpimath.geometry import Rotation2d
 from subsystems import IntakePositions
 from constants import DriveConstants
@@ -66,9 +66,10 @@ class Controller:
 
         # Intake and spindex bindings (driver joystick)
         # self._driver.button(2).onTrue(container.intake.set_velocity_command)
-        # self._driver.button(2).onTrue(container.vision.auto_align_command)
 
-        if False:
+        if RobotBase.isReal() is False:
+            self._driver.button(2).onTrue(container.vision.auto_align_command)
+
             self._driver.button(3).onTrue(container.intake.stop_command)
             self._driver.button(4).onTrue(
                 container.intake.goto_position_cmmand[IntakePositions.DEPLOYED]

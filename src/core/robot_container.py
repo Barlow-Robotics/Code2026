@@ -12,9 +12,8 @@ from utils import SwerveTelemetry
 
 from phoenix6 import swerve
 
-# from subsystems import Vision, Shooter, Intake, Spindex
 from core.controller import Controller
-from wpilib import DriverStation, SendableChooser
+from wpilib import DriverStation, RobotBase, SendableChooser
 from utils import should_flip
 import wpilib
 from pykit.logger import Logger as PyKitLogger
@@ -37,10 +36,13 @@ class RobotContainer:
 
         # Subsystems
         self.drivetrain = TunerConstants.create_drivetrain()
-        # self.vision = Vision(drive_sub=self.drivetrain)
-        # self.shooter = Shooter(driveSub=self.drivetrain)
-        # self.intake = Intake()
-        # self.spindex = Spindex()
+        if RobotBase.isReal() is False:
+            from subsystems import Vision, Shooter, Intake, Spindex
+
+            self.vision = Vision(drive_sub=self.drivetrain)
+            self.shooter = Shooter(driveSub=self.drivetrain)
+            self.intake = Intake()
+            self.spindex = Spindex()
 
         # Telemetry
         self._swerve_telemetry = SwerveTelemetry(

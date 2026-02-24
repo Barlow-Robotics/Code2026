@@ -8,11 +8,15 @@ from pykit.networktables.nt4Publisher import NT4Publisher
 from wpilib import RobotBase
 import wpilib
 import os
+from datetime import datetime
+
+ddatetime_obj = datetime.now().strftime(
+    "%Y-%m-%d_%H-%M-%S"
+)  # ensures .hoot file and wpilog file have the same timestamp for easier replaying
 
 
-@staticmethod
-def configure_pykit(a, obj):
-    PyKitLogger.recordMetadata("Robot", a)
+def configure_pykit(robot_name: str):
+    PyKitLogger.recordMetadata("Robot", robot_name)
 
     class RobotModes(Enum):
         """Enum for robot modes."""
@@ -57,7 +61,9 @@ def configure_pykit(a, obj):
             PyKitLogger.addDataReciever(NT4Publisher(True))
             PyKitLogger.addDataReciever(WPILOGWriter())
         case RobotModes.SIMULATION:
-            PyKitLogger.addDataReciever(WPILOGWriter(f"logs/{obj}/sim.wpilog"))
+            PyKitLogger.addDataReciever(
+                WPILOGWriter(f"logs/{ddatetime_obj}/sim.wpilog")
+            )
             PyKitLogger.addDataReciever(NT4Publisher(True))
 
         case RobotModes.REPLAY:

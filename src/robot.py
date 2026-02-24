@@ -5,22 +5,23 @@
 # the WPILib BSD license file in the root directory of this project.
 #
 
-from datetime import datetime
 from phoenix6.swerve import Pose2d
 import wpilib
 import commands2
 import typing
 
+from utils import (
+    configure_pykit,
+)  # DO NOT MOVE IMPORT, it needs to be called before any PyKit loggers are created
+
 from core import RobotContainer
 from phoenix6 import HootAutoReplay
 from wpilib import DriverStation
-from utils import configure_pykit
 
 if typing.TYPE_CHECKING:
     from autos import AutoRoutine
 
 from phoenix6 import SignalLogger
-
 from pykit.loggedrobot import LoggedRobot
 
 
@@ -33,11 +34,11 @@ class Robot(
     """
 
     def __init__(self):
+
         super().__init__()
+        SignalLogger.set_path("logs")
+        self.useTiming = configure_pykit(type(self).__name__)
         SignalLogger.start()
-        self.useTiming = configure_pykit(
-            type(self).__name__, datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        )
 
     def robotInit(self) -> None:
         """Robot initialization function"""
