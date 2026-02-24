@@ -9,7 +9,7 @@ from robotpy_apriltag import AprilTagFieldLayout
 from wpilib._wpilib import RobotBase
 from wpimath.geometry import Pose2d, Rotation2d, Transform3d
 from wpilib import DriverStation
-from constants import VisionConstants
+from constants import SI, VisionConstants
 from subsystems import Drivetrain
 from commands2 import Subsystem, cmd
 from commands import FollowTrajectoryCommand
@@ -119,9 +119,15 @@ class Vision(Subsystem):
 
             for cam_cfg in self._cameras:
                 cam_props = SimCameraProperties()
+                cam_props.setFPS(15)
+                cam_props.setCalibrationFromFOV(
+                    800, 600, Rotation2d(SI.degrees_to_radians * 97)
+                )
+
                 cam_cfg.camera_sim = PhotonCameraSim(
                     cam_cfg.camera, cam_props, self.april_tag_field_layout
                 )
+
                 self._vision_sim.addCamera(cam_cfg.camera_sim, cam_cfg.robot_to_camera)
         else:
             self._vision_sim = None

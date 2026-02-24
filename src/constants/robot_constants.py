@@ -86,42 +86,45 @@ class VisionConstants:
 
     VISION_SIM = True
 
-    BACK_LEFT_SWERVE_TO_ROBOT = Transform3d(  # BW: NEED TO FIX
+    HALF_WIDTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)
+    HALF_LENGTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)
+    HEIGHT = units.inchesToMeters(12.625)
+
+    FRONT_LEFT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
-            units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2 - 12.625),
-            units.inchesToMeters(
-                (-1.0 * (DriveConstants.TOTAL_WIDTH_INCHES / 2) + 2.5)
-            ),
-            units.inchesToMeters(12),
+            HALF_LENGTH,
+            HALF_WIDTH,
+            HEIGHT,
         ),
-        Rotation3d(0, units.degreesToRadians(0), 0),
+        Rotation3d(0, 0, units.degreesToRadians(45)),
     )
 
-    BACK_RIGHT_SWERVE_TO_ROBOT = Transform3d(  # BW: NEED TO FIX
+    FRONT_RIGHT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
-            units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2 - 2.5),
-            units.inchesToMeters((DriveConstants.TOTAL_WIDTH_INCHES / 2 - 9.25)),
-            units.inchesToMeters(12.625),
+            HALF_LENGTH,
+            -HALF_WIDTH,
+            HEIGHT,
         ),
-        Rotation3d(0, units.degreesToRadians(0), 0),
-    )
-    FRONT_LEFT_SWERVE_TO_ROBOT = Transform3d(  # BW: NEED TO FIX
-        Translation3d(
-            units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2 - 2.5),
-            units.inchesToMeters((DriveConstants.TOTAL_WIDTH_INCHES / 2 - 9.25)),
-            units.inchesToMeters(12.625),
-        ),
-        Rotation3d(0, units.degreesToRadians(0), 0),
-    )
-    FRONT_RIGHT_SWERVE_TO_ROBOT = Transform3d(  # BW: NEED TO FIX
-        Translation3d(
-            units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2 - 2.5),
-            units.inchesToMeters((DriveConstants.TOTAL_WIDTH_INCHES / 2 - 9.25)),
-            units.inchesToMeters(12.625),
-        ),
-        Rotation3d(0, units.degreesToRadians(0), 0),
+        Rotation3d(0, 0, units.degreesToRadians(-45)),
     )
 
+    BACK_LEFT_SWERVE_TO_ROBOT = Transform3d(
+        Translation3d(
+            -HALF_LENGTH,
+            HALF_WIDTH,
+            HEIGHT,
+        ),
+        Rotation3d(0, 0, units.degreesToRadians(-45)),
+    )
+
+    BACK_RIGHT_SWERVE_TO_ROBOT = Transform3d(
+        Translation3d(
+            -HALF_LENGTH,
+            -HALF_WIDTH,
+            HEIGHT,
+        ),
+        Rotation3d(0, 0, units.degreesToRadians(45)),
+    )
     AUTO_ALIGN_VELOCITY_CONSTANT = 3.0
     AUTO_ALIGN_ACCELERATION_CONSTANT = 3.0
 
