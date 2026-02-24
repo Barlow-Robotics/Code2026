@@ -6,7 +6,8 @@ from photonlibpy.photonPoseEstimator import PhotonPoseEstimator
 from photonlibpy.targeting.photonPipelineResult import PhotonPipelineResult
 from photonlibpy.targeting.photonTrackedTarget import PhotonTrackedTarget
 from robotpy_apriltag import AprilTagFieldLayout, AprilTagField
-from wpimath.geometry import Pose2d, Rotation2d
+from wpilib._wpilib import RobotBase
+from wpimath.geometry import Pose2d, Rotation2d, Transform3d
 from wpilib import DriverStation
 from constants import VisionConstants
 from subsystems import Drivetrain
@@ -15,6 +16,7 @@ from commands import FollowTrajectoryCommand
 
 from pykit.logger import Logger as PyKitLogger
 from utils.trajectory_generator import CreateTrajectory
+from photonlibpy.simulation import PhotonCameraSim, SimCameraProperties, VisionSystemSim
 
 XY_STD_DEV_COEFFICIENT = 0.005  # Base xy std dev coefficient
 THETA_STD_DEV_COEFFICIENT = 0.01  # Base theta std dev coefficient
@@ -45,14 +47,16 @@ class _CameraConfig:
     camera: PhotonCamera
     estimator: PhotonPoseEstimator
     name: str
+    robot_to_camera: Transform3d
     std_dev_factor: float = 1.0
+    camera_sim: Optional[PhotonCameraSim] = None
 
 
 class Vision(Subsystem):
     def __init__(self, drive_sub: Drivetrain):
         self.drive_sub = drive_sub
 
-        field_layout = AprilTagFieldLayout.loadField(AprilTagField.k2026RebuiltAndyMark)
+        field_layout = AprilTagFieldLayout.loadField(VisionConstants.FIELD_LAYOUT)
         self.april_tag_field_layout = field_layout
 
         self._cameras: List[_CameraConfig] = [
@@ -62,6 +66,7 @@ class Vision(Subsystem):
                     field_layout, VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT
                 ),
                 name="front_left_swerve",
+                robot_to_camera=VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT, 
             ),
             _CameraConfig(
                 camera=PhotonCamera(VisionConstants.FRONT_RIGHT_SWERVE_NAME),
@@ -69,6 +74,7 @@ class Vision(Subsystem):
                     field_layout, VisionConstants.FRONT_RIGHT_SWERVE_TO_ROBOT
                 ),
                 name="front_right_swerve",
+                robot_to_camera=VisionConstants.FRONT_RIGHT_SWERVE_TO_ROBOT,
             ),
             _CameraConfig(
                 camera=PhotonCamera(VisionConstants.BACK_LEFT_SWERVE_NAME),
@@ -76,6 +82,7 @@ class Vision(Subsystem):
                     field_layout, VisionConstants.BACK_LEFT_SWERVE_TO_ROBOT
                 ),
                 name="back_left_swerve",
+                robot_to_camera=VisionConstants.BACK_LEFT_SWERVE_TO_ROBOT,
             ),
             _CameraConfig(
                 camera=PhotonCamera(VisionConstants.BACK_RIGHT_SWERVE_NAME),
@@ -83,6 +90,7 @@ class Vision(Subsystem):
                     field_layout, VisionConstants.BACK_RIGHT_SWERVE_TO_ROBOT
                 ),
                 name="back_right_swerve",
+                robot_to_camera=VisionConstants.BACK_RIGHT_SWERVE_TO_ROBOT,
             ),
         ]
 
@@ -104,8 +112,25 @@ class Vision(Subsystem):
         PyKitLogger.recordOutput(
             "Vision/Config/camera_count", float(len(self._cameras))
         )
+        
+        
+        if not RobotBase.isReal() and VisionConstants.VISION_SIM:
+            self._vision_sim = VisionSystemSim("main")
+            self._vision_sim.addAprilTags(self.april_tag_field_layout)
+
+            for cam_cfg in self._cameras:
+                cam_props = SimCameraProperties()
+                cam_cfg.camera_sim = PhotonCameraSim(
+                    cam_cfg.camera, cam_props, self.april_tag_field_layout
+                )
+                self._vision_sim.addCamera(cam_cfg.camera_sim, cam_cfg.robot_to_camera)
+        else:
+            self._vision_sim = None
 
     def periodic(self):
+        if not RobotBase.isReal() and VisionConstants.VISION_SIM:
+            self.simulation_periodic()
+        
         if not self.disabled_vision:
             current_pose = self.drive_sub.get_pose()
             self._update_all_cameras(current_pose)
@@ -413,9 +438,9 @@ class Vision(Subsystem):
             return None
 
         if alliance == DriverStation.Alliance.kBlue:
-            april_tag_list = VisionConstants.BLUE_APRIL_TAG_LIST_REEF
+            april_tag_list = VisionConstants.BLUE_APRIL_TAG_LIST
         elif alliance == DriverStation.Alliance.kRed:
-            april_tag_list = VisionConstants.RED_APRIL_TAG_LIST_REEF
+            april_tag_list = VisionConstants.RED_APRIL_TAG_LIST
         else:
             return None
 
@@ -447,7 +472,8 @@ class Vision(Subsystem):
         return all_targets
 
     def simulation_periodic(self):
-        pass
+        if self._vision_sim is not None:
+            self._vision_sim.update(self.drive_sub.get_pose())
 
     def auto_align(self):
         print("AUTO ALIGN")
