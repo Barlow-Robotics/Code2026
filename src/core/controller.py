@@ -68,6 +68,9 @@ class Controller:
         # self._driver.button(2).onTrue(container.intake.set_velocity_command)
 
         if RobotBase.isReal() is False:
+            self._joystick.button(1).onTrue(container.spindex.set_feeder_spindex_hub)
+            self._joystick.button(2).onTrue(container.spindex.set_feeder_spindex_damp)
+            self._joystick.button(4).onTrue(container.spindex.stop_velocity_command)
             self._driver.button(2).onTrue(container.vision.auto_align_command)
 
             self._driver.button(3).onTrue(container.intake.stop_command)
@@ -80,8 +83,6 @@ class Controller:
             self._driver.button(6).onTrue(
                 container.intake.goto_position_cmmand[IntakePositions.HOME]
             )
-            self._driver.button(7).onTrue(container.spindex.set_velocity_command)
-            self._driver.button(8).onTrue(container.spindex.stop_velocity_command)
 
         # Periodically warn about missing controllers during teleop
         Trigger(DriverStation.isTeleopEnabled).whileTrue(

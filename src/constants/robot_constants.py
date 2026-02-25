@@ -20,6 +20,10 @@ class MotorIDs:
     # SPINDEX
     motor_id_motor_spindex = 55
 
+    # FEEDER
+    motor_id_motor_feeder_constant = 56
+    motor_id_motor_feeder_alternating = 57
+
 
 class IntakeConstants:
     ROLLER_MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
