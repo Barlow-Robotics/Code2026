@@ -63,7 +63,9 @@ class Spindex(commands2.Subsystem):
         )
 
         self.stop_velocity_command = cmd.runOnce(self.stop)
-        self.setVelocity = -1
+        self.target_velocity_spindex = -1
+        self.target_velocity_feeder_constant = -1
+        self.target_velocity_feeder_alternating = -1
 
     def move_spindex(self, velocity: float = 1, invert=False):
         print("START CMD")
@@ -71,7 +73,9 @@ class Spindex(commands2.Subsystem):
         Args:
             velocity (float): roations per second. Defaults to 1.
         """
-        self.setVelocity = velocity
+        self.target_velocity_spindex = velocity
+        self.target_velocity_feeder_constant = velocity
+        self.target_velocity_feeder_alternating = velocity
         self.motor_spindex.set_control(
             self._motion_magic_velocity_voltage.with_velocity(
                 velocity
@@ -84,6 +88,7 @@ class Spindex(commands2.Subsystem):
             ).with_acceleration(0.1)
         )
         if invert:
+            self.target_velocity_feeder_alternating = -velocity
             self.motor_feeder_alternating.set_control(
                 self._motion_magic_velocity_voltage.with_velocity(
                     -velocity
@@ -109,12 +114,20 @@ class Spindex(commands2.Subsystem):
         )
 
     def periodic(self):
-        self.log_motor(self.motor_spindex, "Spindex")
-        self.log_motor(self.motor_feeder_constant, "Feeder_Constant")
-        self.log_motor(self.motor_feeder_alternating, "Feeder_Alternating")
+        self.log_motor(self.motor_spindex, "Spindex", self.target_velocity_spindex)
+        self.log_motor(
+            self.motor_feeder_constant,
+            "Feeder_Constant",
+            self.target_velocity_feeder_constant,
+        )
+        self.log_motor(
+            self.motor_feeder_alternating,
+            "Feeder_Alternating",
+            self.target_velocity_feeder_alternating,
+        )
 
-    def log_motor(self, motor: TalonFX, prefix: str):
-        PyKitLogger.recordOutput(f"{prefix}/target_velocity", self.setVelocity)
+    def log_motor(self, motor: TalonFX, prefix: str, target_velocity: float):
+        PyKitLogger.recordOutput(f"{prefix}/target_velocity", target_velocity)
         PyKitLogger.recordOutput(
             f"{prefix}/current_velocity", float(motor.get_velocity().value)
         )
