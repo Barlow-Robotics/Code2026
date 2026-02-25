@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 from commands2 import cmd
 from commands2.button import CommandXboxController, CommandJoystick, Trigger
 
+from commands2.sysid import SysIdRoutine
 import wpilib
 from phoenix6 import swerve
 from wpilib import DriverStation, RobotBase
 from wpimath.geometry import Rotation2d
-from subsystems import IntakePositions
 from constants import DriveConstants
 
 if TYPE_CHECKING:
@@ -68,21 +68,37 @@ class Controller:
         # self._driver.button(2).onTrue(container.intake.set_velocity_command)
 
         if RobotBase.isReal() is False:
-            self._joystick.button(1).onTrue(container.spindex.set_feeder_spindex_hub)
-            self._joystick.button(2).onTrue(container.spindex.set_feeder_spindex_damp)
-            self._joystick.button(4).onTrue(container.spindex.stop_velocity_command)
-            self._driver.button(2).onTrue(container.vision.auto_align_command)
+            self._joystick.button(1).onTrue(
+                container.spindex.sysIdDynamicSpindex(SysIdRoutine.Direction.kForward)
+            )
+            self._joystick.button(2).onTrue(
+                container.spindex.sysIdQuasistaticSpindex(
+                    SysIdRoutine.Direction.kReverse
+                )
+            )
+            self._joystick.button(3).onTrue(
+                container.spindex.sysIdDynamicSpindex(SysIdRoutine.Direction.kForward)
+            )
+            self._joystick.button(4).onTrue(
+                container.spindex.sysIdDynamicSpindex(SysIdRoutine.Direction.kReverse)
+            )
+            # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse))
+            # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward))
+            # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse))
+            # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward))
 
-            self._driver.button(3).onTrue(container.intake.stop_command)
-            self._driver.button(4).onTrue(
-                container.intake.goto_position_cmmand[IntakePositions.DEPLOYED]
-            )
-            self._driver.button(5).onTrue(
-                container.intake.goto_position_cmmand[IntakePositions.STOWED]
-            )
-            self._driver.button(6).onTrue(
-                container.intake.goto_position_cmmand[IntakePositions.HOME]
-            )
+            # self._driver.button(2).onTrue(container.vision.auto_align_command)
+
+            # self._driver.button(3).onTrue(container.intake.stop_command)
+            # self._driver.button(4).onTrue(
+            #     container.intake.goto_position_cmmand[IntakePositions.DEPLOYED]
+            # )
+            # self._driver.button(5).onTrue(
+            #     container.intake.goto_position_cmmand[IntakePositions.STOWED]
+            # )
+            # self._driver.button(6).onTrue(
+            #     container.intake.goto_position_cmmand[IntakePositions.HOME]
+            # )
 
         # Periodically warn about missing controllers during teleop
         Trigger(DriverStation.isTeleopEnabled).whileTrue(

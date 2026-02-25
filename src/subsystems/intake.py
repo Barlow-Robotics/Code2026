@@ -6,10 +6,12 @@ from phoenix6.hardware import TalonFX
 import commands2
 from pykit.logger import Logger as PyKitLogger
 
-from utils import TalonConfig
+from utils import TalonConfig, generateSysIdProfile
 from constants import MotorIDs, IntakeConstants
 from commands2 import cmd
 from enum import Enum
+
+from commands2.sysid import SysIdRoutine
 
 
 @dataclass
@@ -106,24 +108,31 @@ class Intake(commands2.Subsystem):
             pos: cmd.runOnce(lambda: self.go_to_position(pos))
             for pos in IntakePositions
         }
+        self._POSITION_MAP = {
+            IntakePositions.HOME: (
+                IntakeConstants.ARM_HOME_ROTATIONS,
+                IntakeConstants.HEAD_HOME_ROTATIONS,
+            ),
+            IntakePositions.STOWED: (
+                IntakeConstants.ARM_STOWED_ROTATIONS,
+                IntakeConstants.HEAD_STOWED_ROTATIONS,
+            ),
+            IntakePositions.DEPLOYED: (
+                IntakeConstants.ARM_DEPLOYED_ROTATIONS,
+                IntakeConstants.HEAD_DEPLOYED_ROTATIONS,
+            ),
+        }
 
-    def init(self):
-        pass
-
-    _POSITION_MAP = {
-        IntakePositions.HOME: (
-            IntakeConstants.ARM_HOME_ROTATIONS,
-            IntakeConstants.HEAD_HOME_ROTATIONS,
-        ),
-        IntakePositions.STOWED: (
-            IntakeConstants.ARM_STOWED_ROTATIONS,
-            IntakeConstants.HEAD_STOWED_ROTATIONS,
-        ),
-        IntakePositions.DEPLOYED: (
-            IntakeConstants.ARM_DEPLOYED_ROTATIONS,
-            IntakeConstants.HEAD_DEPLOYED_ROTATIONS,
-        ),
-    }
+        self.sys_id_routine_arm = generateSysIdProfile(self, self.motor_arm, name="Arm")
+        self.sys_id_routine_head = generateSysIdProfile(
+            self, self.motor_head, name="Head"
+        )
+        self.sys_id_routine_roller_top = generateSysIdProfile(
+            self, self.motor_roller_top, name="Roller_Top"
+        )
+        self.sys_id_routine_roller_bottom = generateSysIdProfile(
+            self, self.motor_roller_bottom, name="Roller_Bottom"
+        )
 
     def go_to_position(self, position: IntakePositions):
         self._target_position_name = position.name
@@ -164,6 +173,7 @@ class Intake(commands2.Subsystem):
         self._stop_requested = True
         self._commanded_velocity_ft_per_sec = 0.0
         self._converted_velocity_rps = 0.0
+        self.target_velocity = 0.0
 
         self.motor_roller_top.set_control(
             self._motion_magic_velocity_voltage.with_velocity(0).with_acceleration(0.1)
@@ -240,3 +250,27 @@ class Intake(commands2.Subsystem):
                 stop_requested=self._stop_requested,
             ),
         )
+
+    def sysIdQuasistaticArm(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_arm.quasistatic(direction)
+
+    def sysIdDynamicArm(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_arm.dynamic(direction)
+
+    def sysIdQuasistaticHead(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_head.quasistatic(direction)
+
+    def sysIdDynamicHead(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_head.dynamic(direction)
+
+    def sysIdQuasistaticRollerTop(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_roller_top.quasistatic(direction)
+
+    def sysIdDynamicRollerTop(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_roller_top.dynamic(direction)
+
+    def sysIdQuasistaticRollerBottom(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_roller_bottom.quasistatic(direction)
+
+    def sysIdDynamicRollerBottom(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_roller_bottom.dynamic(direction)

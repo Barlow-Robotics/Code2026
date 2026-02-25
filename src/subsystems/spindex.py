@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from phoenix6.hardware import TalonFX
 from phoenix6 import controls
 from commands2 import cmd
@@ -7,17 +5,8 @@ import commands2
 from utils import TalonConfig
 from constants import MotorIDs
 from pykit.logger import Logger as PyKitLogger
-
-
-@dataclass
-class SpindexTelemetry:
-    velocity: float
-    supply_current: float
-    stator_current: float
-    supply_voltage: float
-    motor_voltage: float
-    device_temp: float
-    is_inverted: bool
+from commands2.sysid import SysIdRoutine
+from utils import generateSysIdProfile
 
 
 class Spindex(commands2.Subsystem):
@@ -67,8 +56,17 @@ class Spindex(commands2.Subsystem):
         self.target_velocity_feeder_constant = -1
         self.target_velocity_feeder_alternating = -1
 
+        self.sys_id_routine_spindex = generateSysIdProfile(
+            self, self.motor_spindex, name="Spindex"
+        )
+        self.sys_id_routine_feeder_constant = generateSysIdProfile(
+            self, self.motor_feeder_constant, name="Feeder_Constant"
+        )
+        self.sys_id_routine_feeder_alternating = generateSysIdProfile(
+            self, self.motor_feeder_alternating, name="Feeder_Alternating"
+        )
+
     def move_spindex(self, velocity: float = 1, invert=False):
-        print("START CMD")
         """
         Args:
             velocity (float): roations per second. Defaults to 1.
@@ -103,6 +101,9 @@ class Spindex(commands2.Subsystem):
 
     def stop(self):
         self.setVelocity = 0
+        self.target_velocity_feeder_constant = 0
+        self.target_velocity_feeder_alternating = 0
+
         self.motor_spindex.set_control(
             self._motion_magic_velocity_voltage.with_velocity(0).with_acceleration(0.1)
         )
@@ -151,3 +152,21 @@ class Spindex(commands2.Subsystem):
             f"{prefix}/current_device_temp",
             float(motor.get_device_temp().value),
         )
+
+    def sysIdQuasistaticSpindex(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_spindex.quasistatic(direction)
+
+    def sysIdDynamicSpindex(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_spindex.dynamic(direction)
+
+    def sysIdQuasistaticFeederConstant(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_feeder_constant.quasistatic(direction)
+
+    def sysIdDynamicFeederConstant(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_feeder_constant.dynamic(direction)
+
+    def sysIdQuasistaticFeederAlternating(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_feeder_alternating.quasistatic(direction)
+
+    def sysIdDynamicFeederAlternating(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_feeder_alternating.dynamic(direction)

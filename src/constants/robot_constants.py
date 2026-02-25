@@ -118,7 +118,7 @@ class VisionConstants:
             HALF_WIDTH,
             HEIGHT,
         ),
-        Rotation3d(0, 0, units.degreesToRadians(-45)),
+        Rotation3d(0, 0, units.degreesToRadians(-(180 - 45))),
     )
 
     BACK_RIGHT_SWERVE_TO_ROBOT = Transform3d(
@@ -127,7 +127,7 @@ class VisionConstants:
             -HALF_WIDTH,
             HEIGHT,
         ),
-        Rotation3d(0, 0, units.degreesToRadians(45)),
+        Rotation3d(0, 0, units.degreesToRadians((180 - 45))),
     )
     AUTO_ALIGN_VELOCITY_CONSTANT = 3.0
     AUTO_ALIGN_ACCELERATION_CONSTANT = 3.0

@@ -7,6 +7,11 @@ from constants import SI
 
 from pykit.logger import Logger as PyKitLogger
 
+# 4 motors
+# 2 control flywheel to shoot ball - neo vortex moter: CTRE SparkFlex, SparkFlexExternalEncoder
+# One controls hood angle - CTR minion motor
+# One controls turret rotation - CTR minion  motor: TalonFX
+
 
 class Shooter(Subsystem):
     def __init__(self, driveSub: Drivetrain):
