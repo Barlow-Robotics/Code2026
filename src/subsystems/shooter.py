@@ -1,4 +1,6 @@
 from commands2 import Subsystem
+from phoenix6 import controls
+from constants.robot_constants import MotorIDs
 from subsystems import Drivetrain
 from constants import Hub
 import math
@@ -7,27 +9,87 @@ from constants import SI
 
 from pykit.logger import Logger as PyKitLogger
 
+from utils.talon_config import TalonConfig
+from phoenix6.hardware import TalonFX
+
 # 4 motors
-# 2 control flywheel to shoot ball - neo vortex moter: CTRE SparkFlex, SparkFlexExternalEncoder
-# One controls hood angle - CTR minion motor
-# One controls turret rotation - CTR minion  motor: TalonFX
+# 2 control flywheel to shoot ball - neo vortex moter: CTRE SparkFlex, SparkFlexExternalEncoder ------ MotionMagicVelocityVoltage
+# One controls hood angle - CTR minion motor -  MotionMagicVoltage
+# One controls turret rotation - CTR minion  motor: TalonFX - MotionMagicVoltage
+
+# auto aim, set both hood angle and turret rotation
 
 
 class Shooter(Subsystem):
     def __init__(self, driveSub: Drivetrain):
         super().__init__()
         self.driveSub = driveSub
-        self.target_velocity = 0.0
+        HOOD_MOTOR_CONFIG = TalonConfig(
+            kP=10, kI=0.6, kD=2, kF=0, kA=0.5, brake_mode=True
+        )
+        TURRET_MOTOR_CONFIG = TalonConfig(
+            kP=10, kI=0.6, kD=1, kF=0, kA=0.5, brake_mode=True
+        )
 
-    def set_velocity(self, velocity_rpm: float):
-        """Set target velocity in RPM"""
-        self.target_velocity = velocity_rpm
+        self.hood_motor = TalonFX(MotorIDs.motor_id_hood)
+        self.turret_motor = TalonFX(MotorIDs.motor_id_turret)
+        HOOD_MOTOR_CONFIG._apply_settings(self.hood_motor, inverted=False)
+        TURRET_MOTOR_CONFIG._apply_settings(self.turret_motor, inverted=False)
+
+        self._motion_magic_position_voltage = controls.MotionMagicVoltage(
+            0, enable_foc=MotorIDs.foc_active
+        )
+
+        self.target_hood_angle = 0.0
+        self.target_turret_yaw = 0.0
+
+    def set_angle_hood(self, angle_deg: float):
+        self.target_hood_angle = angle_deg
+        self.hood_motor.set_control(
+            self._motion_magic_position_voltage.with_position(
+                SI.degrees_to_rotations * angle_deg
+            )
+        )
+
+    def set_angle_turret(self, angle_deg: float):
+        self.target_turret_yaw = angle_deg
+        self.turret_motor.set_control(
+            self._motion_magic_position_voltage.with_position(
+                SI.degrees_to_rotations * angle_deg
+            )
+        )
+
+    def set_target_hood_and_turret(self):
+        print(self._optimal_angle_calc(ShooterConstants.SHOOTER_SET_VELOCITY_CONSTANT))
+        v_fixed, hood_angle_deg, turret_yaw_deg = self._optimal_angle_calc(
+            ShooterConstants.SHOOTER_SET_VELOCITY_CONSTANT
+        )
+        if v_fixed < 0:
+            return -1, -1, -1
+        self.set_angle_hood(hood_angle_deg)
+        self.set_angle_turret(turret_yaw_deg)
+        return v_fixed, hood_angle_deg, turret_yaw_deg
 
     def periodic(self):
-        self._optimal_angle_calc(9.5)
-        PyKitLogger.recordOutput("Shooter/target_velocity", float(self.target_velocity))
+        self.set_target_hood_and_turret()
+        PyKitLogger.recordOutput(
+            "Shooter/target_hood_angle", float(self.target_hood_angle)
+        )
+        PyKitLogger.recordOutput(
+            "Shooter/target_turret_yaw", float(self.target_turret_yaw)
+        )
+        PyKitLogger.recordOutput(
+            "Shooter/hood_motor_position",
+            float(self.hood_motor.get_position().value) * SI.rotations_to_degrees,
+        )
+        PyKitLogger.recordOutput(
+            "Shooter/turret_motor_position",
+            float(self.turret_motor.get_position().value) * SI.rotations_to_degrees,
+        )
 
-    def _optimal_angle_calc(self, v_fixed: float = 9.5):
+    def _optimal_angle_calc(
+        self, v_fixed: float = ShooterConstants.SHOOTER_SET_VELOCITY_CONSTANT
+    ):
         """
         Args:
             v_fixed: Should be ~10m/s this season, but can be tuned for optimal performance
@@ -37,6 +99,7 @@ class Shooter(Subsystem):
             hood_angle (degree), 0° = shooting horizontally, 90° = shooting straight up
             v_fixed (m/s) is the fixed velocity you input, returned for convenience
         """
+
         robot_pose = self.driveSub.get_pose()
         robot_speeds = self.driveSub.get_speeds()
 
@@ -90,7 +153,7 @@ class Shooter(Subsystem):
                     f"Shooter/Iterations/iter_{i}_hood_angle_deg", 0.0
                 )
                 PyKitLogger.recordOutput(f"Shooter/Iterations/iter_{i}_tof", 0.0)
-                return None
+                return -1, -1, -1
 
             tan_theta = (-B - math.sqrt(discriminant)) / (2 * A)
             hood_angle = math.atan(tan_theta)
