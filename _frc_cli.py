@@ -3,7 +3,7 @@ import sys
 
 # Packages that only exist in the root pyproject.toml for local dev/sim
 # and should NOT be expected in src/pyproject.toml
-HOST_ONLY_PACKAGES = {"debugpy", "ruff"}
+HOST_ONLY_PACKAGES = {"debugpy", "ruff", "black", "pylint", "robotpy_cli", "robotpy_halsim_gui", "robotpy_pykit_watch"}
 
 
 def main():
