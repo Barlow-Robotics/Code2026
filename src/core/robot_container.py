@@ -77,7 +77,7 @@ class RobotContainer:
         self.auto_selection.setDefaultOption(
             "HP_Intake_Center_Pieces", autos.HP_Intake_Center_Pieces_Auto
         )
-        self.auto_selection.addOption("kenny path", autos.example_path_auto)
+        # self.auto_selection.addOption("kenny path", autos.example_path_auto)
 
         self.auto_selection.addOption("Leave", autos.leave_auto)
 

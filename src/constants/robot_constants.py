@@ -27,6 +27,10 @@ class MotorIDs:
     # SHOOTER
     motor_id_hood = 58
     motor_id_turret = 59
+    motor_id_flywheel_left = 60
+    motor_id_flywheel_right = 61
+    
+    
 
 
 class IntakeConstants:
@@ -56,9 +60,16 @@ class ShooterConstants:
     HOOD_GEARING = 1.0  # TODO: measure actual gear ratio
     HOOD_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
 
+    FLYWHEEL_MOTOR = DCMotor.neoVortex(1)  # TODO: verify motor type
+    FLYWHEEL_GEARING = 1.0  # TODO: measure actual gear ratio
+    FLYWHEEL_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
+
+
     SHOOTER_HEIGHT_FOR_FUEL_IN = 20.57
     SHOOTER_HEIGHT_FOR_FUEL_M = 20.57 * SI.inches_to_meters
     SHOOTER_SET_VELOCITY_CONSTANT = 9.5
+    
+    FLYWHEEL_RPM_CONSTANT = 5700
 
 
 class SpindexConstants:

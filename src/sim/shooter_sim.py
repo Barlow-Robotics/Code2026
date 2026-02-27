@@ -1,5 +1,5 @@
 from constants import ShooterConstants
-from sim.flywheel_motor_sim import FlywheelMotorSim
+from sim.flywheel_motor_sim import FlywheelMotorSim, FlywheelMotorSimSparkFlex
 from subsystems import Shooter
 
 
@@ -17,7 +17,15 @@ class ShooterSim:
             ShooterConstants.TURRET_GEARING,
             ShooterConstants.TURRET_MOI,
         )
+        self._flywheel_leader = FlywheelMotorSimSparkFlex(
+            shooter.flywheel_motor_left_leader,
+            ShooterConstants.FLYWHEEL_MOTOR,
+            ShooterConstants.FLYWHEEL_GEARING,
+            ShooterConstants.FLYWHEEL_MOI,
+        )
+
 
     def update_sim(self, now: float, tm_diff: float) -> None:
         self._hood_motor.update(tm_diff)
         self._turret_motor.update(tm_diff)
+        self._flywheel_leader.update(tm_diff)   

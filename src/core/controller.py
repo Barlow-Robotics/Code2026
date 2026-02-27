@@ -88,6 +88,7 @@ class Controller:
             # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward))
 
             self._driver.button(2).onTrue(container.vision.auto_align_command)
+            self._driver.button(3).onTrue(container.shooter.start_flywheel_command)
 
             # self._driver.button(3).onTrue(container.intake.stop_command)
             # self._driver.button(4).onTrue(
