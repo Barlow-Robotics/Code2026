@@ -24,8 +24,7 @@ class ShooterSim:
             ShooterConstants.FLYWHEEL_MOI,
         )
 
-
     def update_sim(self, now: float, tm_diff: float) -> None:
         self._hood_motor.update(tm_diff)
         self._turret_motor.update(tm_diff)
-        self._flywheel_leader.update(tm_diff)   
+        self._flywheel_leader.update(tm_diff)

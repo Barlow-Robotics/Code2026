@@ -28,6 +28,7 @@ class FlywheelMotorSim:
         self._sim_state.set_raw_rotor_position(self._position_rot)
         self._sim_state.set_rotor_velocity(velocity_rps)
 
+
 class FlywheelMotorSimSparkFlex:
     """Simulates a single SparkFlex-driven flywheel (motor + gearbox + inertia)."""
 
@@ -41,14 +42,14 @@ class FlywheelMotorSimSparkFlex:
 
     def update(self, tm_diff: float) -> None:
         self._sim_state.setBusVoltage(12.0)
-        
+
         # Manually iterate the closed loop controller
         self._sim_state.iterate(
             self._flywheel.getAngularVelocity() * 60 / (2 * math.pi),  # current RPM
             12.0,  # bus voltage
-            tm_diff  # dt
+            tm_diff,  # dt
         )
-        
+
         applied_voltage = self._sim_state.getAppliedOutput() * 12.0
         self._flywheel.setInputVoltage(applied_voltage)
         self._flywheel.update(tm_diff)

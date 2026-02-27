@@ -7,7 +7,14 @@ from constants import Hub
 import math
 from constants import ShooterConstants
 from constants import SI
-from rev import FeedbackSensor, SparkBaseConfig, SparkFlex, SparkFlexConfig, ResetMode, PersistMode
+from rev import (
+    FeedbackSensor,
+    SparkBaseConfig,
+    SparkFlex,
+    SparkFlexConfig,
+    ResetMode,
+    PersistMode,
+)
 from pykit.logger import Logger as PyKitLogger
 
 from utils.talon_config import TalonConfig
@@ -26,14 +33,14 @@ class Shooter(Subsystem):
     def __init__(self, driveSub: Drivetrain):
         super().__init__()
         self.driveSub = driveSub
-        
+
         HOOD_MOTOR_CONFIG = TalonConfig(
             kP=0.2, kI=0.0, kD=0, kF=0, kA=0.5, brake_mode=True
         )
         if not RobotBase.isReal():
             HOOD_MOTOR_CONFIG = TalonConfig(
                 kP=10, kI=0, kD=6, kF=0, kA=0, brake_mode=True
-        )
+            )
 
         TURRET_MOTOR_CONFIG = TalonConfig(
             kP=0.2, kI=0, kD=0, kF=0, kA=0, brake_mode=True
@@ -41,10 +48,14 @@ class Shooter(Subsystem):
 
         self.hood_motor = TalonFX(MotorIDs.motor_id_hood)
         self.turret_motor = TalonFX(MotorIDs.motor_id_turret)
-        
-        self.flywheel_motor_left_leader = SparkFlex(MotorIDs.motor_id_flywheel_left, type=SparkFlex.MotorType.kBrushless) 
-        self.flywheel_motor_right_follower = SparkFlex(MotorIDs.motor_id_flywheel_right, type=SparkFlex.MotorType.kBrushless)
-        
+
+        self.flywheel_motor_left_leader = SparkFlex(
+            MotorIDs.motor_id_flywheel_left, type=SparkFlex.MotorType.kBrushless
+        )
+        self.flywheel_motor_right_follower = SparkFlex(
+            MotorIDs.motor_id_flywheel_right, type=SparkFlex.MotorType.kBrushless
+        )
+
         HOOD_MOTOR_CONFIG._apply_settings(self.hood_motor, inverted=False)
         TURRET_MOTOR_CONFIG._apply_settings(self.turret_motor, inverted=False)
 
@@ -52,45 +63,45 @@ class Shooter(Subsystem):
             0, enable_foc=MotorIDs.foc_active
         )
         leader_config = SparkFlexConfig()
-        leader_config.setIdleMode(leader_config.IdleMode(SparkBaseConfig.IdleMode.kCoast))
-        leader_config.smartCurrentLimit(80, freeLimit=5700) # set to 5700 for max
-        
+        leader_config.setIdleMode(
+            leader_config.IdleMode(SparkBaseConfig.IdleMode.kCoast)
+        )
+        leader_config.smartCurrentLimit(80, freeLimit=5700)  # set to 5700 for max
 
-        leader_config.closedLoop.setFeedbackSensor(FeedbackSensor.kPrimaryEncoder) \
-            .pid(0.0001, 0.0, 0.0) \
-            .velocityFF(0.000175) \
-            .outputRange(-1, 1)
+        leader_config.closedLoop.setFeedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(
+            0.0001, 0.0, 0.0
+        ).velocityFF(0.000175).outputRange(-1, 1)
 
-
-        leader_config.closedLoop.maxMotion \
-            .maxVelocity(5700) \
-            .maxAcceleration(10000) \
-            .allowedClosedLoopError(10)
+        leader_config.closedLoop.maxMotion.maxVelocity(5700).maxAcceleration(
+            10000
+        ).allowedClosedLoopError(10)
 
         self.flywheel_motor_left_leader.configure(
             leader_config,
             ResetMode.kResetSafeParameters,
-            PersistMode.kPersistParameters
+            PersistMode.kPersistParameters,
         )
         follower_config = SparkFlexConfig()
-        follower_config.setIdleMode(follower_config.IdleMode(SparkBaseConfig.IdleMode.kCoast))
-        follower_config.smartCurrentLimit(80, freeLimit=5700) # set to 5700 for max
-        
-        follower_config.follow(self.flywheel_motor_left_leader, False) 
-            
+        follower_config.setIdleMode(
+            follower_config.IdleMode(SparkBaseConfig.IdleMode.kCoast)
+        )
+        follower_config.smartCurrentLimit(80, freeLimit=5700)  # set to 5700 for max
+
+        follower_config.follow(self.flywheel_motor_left_leader, False)
+
         self.flywheel_motor_right_follower.configure(
             follower_config,
             ResetMode.kResetSafeParameters,
-            PersistMode.kPersistParameters
+            PersistMode.kPersistParameters,
         )
-        
+
         self.flywheel_target_velocity = 0.0
         self.target_hood_angle = 0.0
         self.target_turret_yaw = 0.0
 
-        self.start_flywheel_command = cmd.runOnce(lambda: self.setRPM(ShooterConstants.FLYWHEEL_RPM_CONSTANT))
-
-
+        self.start_flywheel_command = cmd.runOnce(
+            lambda: self.setRPM(ShooterConstants.FLYWHEEL_RPM_CONSTANT)
+        )
 
     def set_angle_hood(self, angle_deg: float):
         self.target_hood_angle = angle_deg
@@ -99,14 +110,13 @@ class Shooter(Subsystem):
                 SI.degrees_to_rotations * angle_deg
             )
         )
-        
+
     def setRPM(self, targetRPM: float):
         self.flywheel_target_velocity = targetRPM
         self.flywheel_motor_left_leader.getClosedLoopController().setReference(
-            targetRPM,
-            SparkFlex.ControlType.kMAXMotionVelocityControl 
+            targetRPM, SparkFlex.ControlType.kMAXMotionVelocityControl
         )
-    
+
     def get_current_rpm(self) -> float:
         return self.flywheel_motor_left_leader.getEncoder().getVelocity()
 
@@ -148,22 +158,23 @@ class Shooter(Subsystem):
             "Shooter/turret_motor_position",
             float(self.turret_motor.get_position().value) * SI.rotations_to_degrees,
         )
-        
+
         PyKitLogger.recordOutput(
-            "Shooter/hood_motor_voltage", float(self.hood_motor.get_motor_voltage().value_as_double)
+            "Shooter/hood_motor_voltage",
+            float(self.hood_motor.get_motor_voltage().value_as_double),
         )
         PyKitLogger.recordOutput(
-            "Shooter/turret_motor_voltage", float(self.turret_motor.get_motor_voltage().value_as_double)
+            "Shooter/turret_motor_voltage",
+            float(self.turret_motor.get_motor_voltage().value_as_double),
         )
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_velocity", float(self.get_current_rpm())
         )
-        PyKitLogger.recordOutput(   
-            "Shooter/flywheel_motor_left_target_velocity", float(self.flywheel_target_velocity)
+        PyKitLogger.recordOutput(
+            "Shooter/flywheel_motor_left_target_velocity",
+            float(self.flywheel_target_velocity),
         )
-        
-        
-       
+
     def _optimal_angle_calc(
         self, v_fixed: float = ShooterConstants.SHOOTER_SET_VELOCITY_CONSTANT
     ):

@@ -29,8 +29,6 @@ class MotorIDs:
     motor_id_turret = 59
     motor_id_flywheel_left = 60
     motor_id_flywheel_right = 61
-    
-    
 
 
 class IntakeConstants:
@@ -64,11 +62,10 @@ class ShooterConstants:
     FLYWHEEL_GEARING = 1.0  # TODO: measure actual gear ratio
     FLYWHEEL_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
 
-
     SHOOTER_HEIGHT_FOR_FUEL_IN = 20.57
     SHOOTER_HEIGHT_FOR_FUEL_M = 20.57 * SI.inches_to_meters
     SHOOTER_SET_VELOCITY_CONSTANT = 9.5
-    
+
     FLYWHEEL_RPM_CONSTANT = 5700
 
 
