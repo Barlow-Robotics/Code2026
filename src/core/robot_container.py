@@ -7,6 +7,7 @@ from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import RobotConfig
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.logging import PathPlannerLogging
+from commands.shoot_command import ShootCommand
 from constants import TunerConstants, DriveConstants, AutoConstants
 from utils import SwerveTelemetry
 
@@ -71,6 +72,7 @@ class RobotContainer:
 
         # Controller bindings
         self.controller = Controller(self)
+        self.create_commands()
         self.configure_autos()
 
     def configure_autos(self):
@@ -101,3 +103,5 @@ class RobotContainer:
         PathPlannerLogging.setLogActivePathCallback(
             lambda poses: PyKitLogger.recordOutput(f"{prefix}/active_path", poses)
         )
+    def create_commands(self):
+        self.shoot_command_factory = lambda: ShootCommand(self.shooter, self.feeder, self.spindex)

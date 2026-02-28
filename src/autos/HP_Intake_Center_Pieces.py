@@ -21,7 +21,7 @@ class HP_Intake_Center_Pieces:
         self.container = container
 
         self.command = SequentialCommandGroup(
-            # SHOOT.
+            self.container.shoot_command_factory().withTimeout(5),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[0]),
             ),
@@ -33,7 +33,7 @@ class HP_Intake_Center_Pieces:
                 AutoBuilder.followPath(self.paths[2]),
                 self.container.intake.goto_position_command[IntakePositions.STOWED],
             ),
-            # shoot
+            self.container.shoot_command_factory().withTimeout(5),
         )
 
     def get_command(self):
