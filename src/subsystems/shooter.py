@@ -1,6 +1,8 @@
 from commands2 import Subsystem
+from commands2.sysid import SysIdRoutine
 from phoenix6 import controls
 from wpilib import RobotBase
+from wpimath.units import volts
 from constants.robot_constants import MotorIDs
 from subsystems import Drivetrain
 from constants import Hub
@@ -20,7 +22,7 @@ from pykit.logger import Logger as PyKitLogger
 from utils.talon_config import TalonConfig
 from phoenix6.hardware import TalonFX
 from commands2 import cmd
-
+from utils import generateSysIdProfile
 # 4 motors
 # 2 control flywheel to shoot ball - neo vortex moter: SparkFlex, SparkFlexExternalEncoder ------ MotionMagicVelocityVoltage
 # One controls hood angle - CTR minion motor -  MotionMagicVoltage
@@ -103,6 +105,13 @@ class Shooter(Subsystem):
             lambda: self.setRPM(ShooterConstants.FLYWHEEL_RPM_CONSTANT)
         )
 
+        self.sys_id_routine_hood = generateSysIdProfile(
+            self, self.hood_motor, name="Hood_Motor"
+        )
+        self.sys_id_routine_turret = generateSysIdProfile(
+            self, self.turret_motor, name="Turret_Motor"
+        )
+
     def set_angle_hood(self, angle_deg: float):
         self.target_hood_angle = angle_deg
         self.hood_motor.set_control(
@@ -110,7 +119,7 @@ class Shooter(Subsystem):
                 SI.degrees_to_rotations * angle_deg
             )
         )
-
+        
     def setRPM(self, targetRPM: float):
         self.flywheel_target_velocity = targetRPM
         self.flywheel_motor_left_leader.getClosedLoopController().setReference(
@@ -308,3 +317,26 @@ class Shooter(Subsystem):
             print(
                 f"Recommended v_fixed: {v_min * 1.15:.1f} m/s ({v_min * 1.15 * 3.28084:.1f} ft/s) (15% margin)"
             )
+
+    def sysIdQuasistaticHood(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_hood.quasistatic(direction)
+
+    def sysIdDynamicHood(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_hood.dynamic(direction)
+
+    def sysIdQuasistaticTurret(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_turret.quasistatic(direction)
+
+    def sysIdDynamicTurret(self, direction: SysIdRoutine.Direction):
+        return self.sys_id_routine_turret.dynamic(direction)
+
+# 1. slywheel motor spins up to speed. 
+# both at same time
+# 2. spindex runs const
+# 3. feeder starts only once shooter is at speed. 
+
+
+# eject comamnd for spindex/feeder
+
+
+# shoot to other side of field when -1 -1 -1 

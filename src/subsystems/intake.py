@@ -104,7 +104,7 @@ class Intake(commands2.Subsystem):
         self.set_velocity_command = cmd.runOnce(self.set_velocity)
         self.stop_command = cmd.runOnce(self.stop)
 
-        self.goto_position_cmmand = {
+        self.goto_position_command = {
             pos: cmd.runOnce(lambda: self.go_to_position(pos))
             for pos in IntakePositions
         }
