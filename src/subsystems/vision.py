@@ -321,9 +321,9 @@ class Vision(Subsystem):
                 )
                 continue
 
-            if self._should_reject_by_alliance(estimated.targetsUsed):
-                PyKitLogger.recordOutput(f"{prefix}/rejected_wrong_alliance_tag", True)
-                continue
+            # if self._should_reject_by_alliance(estimated.targetsUsed):
+            #     PyKitLogger.recordOutput(f"{prefix}/rejected_wrong_alliance_tag", True)
+            #     continue
 
             if self._should_reject_by_z(estimated):
                 PyKitLogger.recordOutput(f"{prefix}/rejected_bad_z", True)
