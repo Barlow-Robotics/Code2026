@@ -26,9 +26,9 @@ class ShootCommand(Command):
     def execute(self):
         if self._feeding:
             return
-        current_rpm = self.shooter.get_current_rpm()
+        current_velocity = self.shooter.get_current_velocity()
         if (
-            abs(current_rpm - ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT)
+            abs(current_velocity - ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT)
             <= VELOCITY_TOLERANCE
         ):
             self.feeder.move()

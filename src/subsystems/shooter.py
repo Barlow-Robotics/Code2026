@@ -76,13 +76,18 @@ class Shooter(Subsystem):
 
     def get_current_rpm(self) -> float:
         return self.flywheel_motor_left_leader.getEncoder().getVelocity()
-
+    
+    def get_current_velocity(self) -> float:
+        radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES  # inches
+        current_rpm = self.get_current_rpm()
+        return (2 * math.pi * radius * current_rpm) / 60
+    
     def stop_flywheel(self):
         self.flywheel_motor_left_leader.set(0)
 
     def periodic(self):
         PyKitLogger.recordOutput(
-            "Shooter/flywheel_motor_left_velocity", float(self.get_current_rpm())
+            "Shooter/flywheel_motor_left_velocity", float(self.get_current_velocity())
         )
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_target_velocity",
