@@ -55,7 +55,7 @@ class ShooterConstants:
     FLYWHEEL_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
 
     FLYWHEEL_RPM_CONSTANT = 5700
-    FLYWHEEL_VELOCITY_CONSTANT = 9.5  
+    FLYWHEEL_VELOCITY_CONSTANT = 9.5
     FLYWHEEL_RADIUS_INCHES = 2
 
 

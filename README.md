@@ -60,7 +60,5 @@ TODO at comp:
 AprilTagField.k2026RebuiltAndyMark or AprilTagField.k2026RebuiltWelded depending on comp. 
 Change motors from L2 to L1 or L3
 
-2. Need new cameras
-3. if len(targets) == 1 and targets[0].getPoseAmbiguity() > POSE_AMBIGUITY: OR just f len(targets) == 1
 9. Need to update deploy/pathplanner/settings.json
 12. Update Constants 

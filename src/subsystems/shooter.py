@@ -65,10 +65,10 @@ class Shooter(Subsystem):
         )
 
     def set_velocity(self, target_velocity: float = 9.5):
-        
+
         radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES  # inches
         setRPM = (60 * target_velocity) / (2 * math.pi * radius)
-        
+
         self.flywheel_target_velocity = setRPM
         self.flywheel_motor_left_leader.getClosedLoopController().setReference(
             setRPM, SparkFlex.ControlType.kMAXMotionVelocityControl
@@ -88,14 +88,12 @@ class Shooter(Subsystem):
             "Shooter/flywheel_motor_left_target_velocity",
             float(self.flywheel_target_velocity),
         )
-        
-    # 1. flywheel motor spins up to speed. 
+
+    # 1. flywheel motor spins up to speed.
     # both at same time
     # 2. spindex runs const
-    # 3. feeder starts only once shooter is at speed. 
-
+    # 3. feeder starts only once shooter is at speed.
 
     # eject comamnd for spindex/feeder
 
-
-    # shoot to other side of field when -1 -1 -1 
+    # shoot to other side of field when -1 -1 -1
