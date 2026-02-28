@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from commands2 import cmd
 from commands2.button import CommandXboxController, CommandJoystick, Trigger
 
-from commands2.sysid import SysIdRoutine
 import wpilib
 from phoenix6 import swerve
 from wpilib import DriverStation, RobotBase
@@ -68,20 +67,31 @@ class Controller:
         # self._driver.button(2).onTrue(container.intake.set_velocity_command)
 
         if RobotBase.isReal() is False:
-            self._operator.button(1).onTrue(
-                container.spindex.sysIdDynamicSpindex(SysIdRoutine.Direction.kForward)
-            )
-            self._operator.button(2).onTrue(
-                container.spindex.sysIdQuasistaticSpindex(
-                    SysIdRoutine.Direction.kReverse
-                )
-            )
-            self._operator.button(3).onTrue(
-                container.spindex.sysIdDynamicSpindex(SysIdRoutine.Direction.kForward)
-            )
-            self._operator.button(4).onTrue(
-                container.spindex.sysIdDynamicSpindex(SysIdRoutine.Direction.kReverse)
-            )
+            # self._driver.button(1).onTrue(
+            #     container.shooter.sysIdDynamicTurret(SysIdRoutine.Direction.kForward)
+            # )
+            # self._driver.button(2).onTrue(
+            #     container.shooter.sysIdDynamicTurret(SysIdRoutine.Direction.kReverse)
+            # )
+
+            # self._driver.button(3).onTrue(
+            #     container.shooter.sysIdQuasistaticTurret(
+            #         SysIdRoutine.Direction.kForward
+            #     )
+            # )
+            # self._driver.button(4).onTrue(
+            #     container.shooter.sysIdQuasistaticTurret(
+            #         SysIdRoutine.Direction.kReverse
+            #     )
+            # )
+
+            # self._operator.button(3).onTrue(
+            #     container.shooter.sysIdDynamicHood(SysIdRoutine.Direction.kForward)
+            # )
+            # self._operator.button(4).onTrue(
+            #     container.shooter.sysIdDynamicHood(SysIdRoutine.Direction.kReverse)
+            # )
+
             # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse))
             # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward))
             # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse))

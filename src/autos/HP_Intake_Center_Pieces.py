@@ -1,3 +1,4 @@
+import typing
 from pathplannerlib.path import PathPlannerPath
 from pathplannerlib.auto import AutoBuilder
 
@@ -5,25 +6,35 @@ from autos import AutoRoutine
 
 from commands2 import SequentialCommandGroup, ParallelCommandGroup
 
+if typing.TYPE_CHECKING:
+    from core import RobotContainer
+from subsystems import IntakePositions
+
 path_name = "HP_Intake_Center_Pieces"
-paths = [PathPlannerPath.fromChoreoTrajectory(path_name, i) for i in range(3)]
-
-command = SequentialCommandGroup(
-    # SHOOT.
-    ParallelCommandGroup(
-        AutoBuilder.followPath(paths[0]),
-    ),
-    ParallelCommandGroup(
-        AutoBuilder.followPath(paths[1]),
-        # start intake
-        # Robot.container.intake.set_velocity_command
-    ),
-    ParallelCommandGroup(
-        AutoBuilder.followPath(paths[2]),
-        # stop intake
-    ),
-    # shoot
-)
 
 
-HP_Intake_Center_Pieces_Auto = AutoRoutine(command, paths[0].getStartingHolonomicPose())
+class HP_Intake_Center_Pieces:
+    def __init__(self, container: "RobotContainer"):
+        self.paths = [
+            PathPlannerPath.fromChoreoTrajectory(path_name, i) for i in range(3)
+        ]
+        self.container = container
+
+        self.command = SequentialCommandGroup(
+            # SHOOT.
+            ParallelCommandGroup(
+                AutoBuilder.followPath(self.paths[0]),
+            ),
+            ParallelCommandGroup(
+                AutoBuilder.followPath(self.paths[1]),
+                self.container.intake.goto_position_command[IntakePositions.DEPLOYED],
+            ),
+            ParallelCommandGroup(
+                AutoBuilder.followPath(self.paths[2]),
+                self.container.intake.goto_position_command[IntakePositions.STOWED],
+            ),
+            # shoot
+        )
+
+    def get_command(self):
+        return AutoRoutine(self.command, self.paths[0].getStartingHolonomicPose())

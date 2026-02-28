@@ -26,6 +26,8 @@ FIELD_BORDER_MARGIN = 0.5  # Metres outside field to still accept a pose
 TIMESTAMP_OFFSET = 0.0  # Adjust if clocks drift between coprocessor/RIO
 CAMERA_HEIGHT_TOLERANCE = 1  # Metres of tolerance on the camera Z value
 POSE_AMBIGUITY = 0.2  # Minimum pose ambiguity to accept from a single-tag detection (0-1, lower is more strict)
+MAX_ANGULAR_VELOCITY_DEGREES = 90
+MAX_ANGLE_DIFFERENCE_FOR_GYRO_DISAMBIGUATION_DEGREES = 30
 
 
 @dataclass
@@ -277,6 +279,15 @@ class Vision(Subsystem):
                         timestampSeconds=result.getTimestampSeconds(),
                     )
 
+                if (
+                    min(diff_best, diff_alt)
+                    > MAX_ANGLE_DIFFERENCE_FOR_GYRO_DISAMBIGUATION_DEGREES
+                    * SI.degrees_to_radians
+                ):
+                    PyKitLogger.recordOutput(
+                        f"{prefix}/rejected_gyro_disambiguation_too_large", True
+                    )
+                    continue
             else:
                 PyKitLogger.recordOutput(
                     f"{prefix}/using_single_tag_gyro_disambiguation", False
@@ -320,10 +331,22 @@ class Vision(Subsystem):
                     f"{prefix}/rejected_out_of_bounds_y", pose_2d.Y()
                 )
                 continue
-
-            if self._should_reject_by_alliance(estimated.targetsUsed):
-                PyKitLogger.recordOutput(f"{prefix}/rejected_wrong_alliance_tag", True)
+            if (
+                self.drive_sub.get_speeds().omega
+                > SI.degrees_to_radians * MAX_ANGULAR_VELOCITY_DEGREES
+            ):
+                PyKitLogger.recordOutput(
+                    f"{prefix}/rejected_excessive_angular_velocity", True
+                )
+                PyKitLogger.recordOutput(
+                    f"{prefix}/rejected_excessive_angular_velocity_value",
+                    self.drive_sub.get_speeds().omega,
+                )
                 continue
+
+            # if self._should_reject_by_alliance(estimated.targetsUsed):
+            #     PyKitLogger.recordOutput(f"{prefix}/rejected_wrong_alliance_tag", True)
+            #     continue
 
             if self._should_reject_by_z(estimated):
                 PyKitLogger.recordOutput(f"{prefix}/rejected_bad_z", True)
