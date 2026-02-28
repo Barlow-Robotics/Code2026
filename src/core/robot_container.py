@@ -103,5 +103,8 @@ class RobotContainer:
         PathPlannerLogging.setLogActivePathCallback(
             lambda poses: PyKitLogger.recordOutput(f"{prefix}/active_path", poses)
         )
+
     def create_commands(self):
-        self.shoot_command_factory = lambda: ShootCommand(self.shooter, self.feeder, self.spindex)
+        self.shoot_command_factory = lambda: ShootCommand(
+            self.shooter, self.feeder, self.spindex
+        )
