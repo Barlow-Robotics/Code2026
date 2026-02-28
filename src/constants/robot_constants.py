@@ -46,6 +46,8 @@ class IntakeConstants:
     HEAD_DEPLOYED_ROTATIONS = 20  # TODO: calibrate
     HEAD_STOWED_ROTATIONS = 7  # TODO: calibrate
 
+    INTAKE_VELOCITY_CONSTANT = 1  # ft/sec
+
     PID = {"kP": 0.11, "kI": 0, "kD": 0, "kF": 0, "kA": 0}  # TODO: tune PID
 
 

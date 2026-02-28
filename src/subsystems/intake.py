@@ -143,8 +143,10 @@ class Intake(commands2.Subsystem):
         self.motor_head.set_control(
             self._motion_magic_position_voltage.with_position(head_rot)
         )
+        if position == IntakePositions.DEPLOYED:
+            self.set_velocity(IntakeConstants.INTAKE_VELOCITY_CONSTANT)
 
-    def set_velocity(self, velocity: float = 1):  # ft/sec
+    def set_velocity(self, velocity: float = IntakeConstants.INTAKE_VELOCITY_CONSTANT):
         self._commanded_velocity_ft_per_sec = float(velocity)
         self._stop_requested = False
 
