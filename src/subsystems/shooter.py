@@ -1,7 +1,7 @@
 import math
 from commands2 import Subsystem
 from constants.robot_constants import MotorIDs
-from constants import ShooterConstants
+from constants import SI, ShooterConstants
 from rev import (
     FeedbackSensor,
     SparkBaseConfig,
@@ -29,11 +29,11 @@ class Shooter(Subsystem):
         leader_config.setIdleMode(
             leader_config.IdleMode(SparkBaseConfig.IdleMode.kCoast)
         )
-        leader_config.smartCurrentLimit(80, freeLimit=5700)  # set to 5700 for max
+        leader_config.smartCurrentLimit(80)  # set to 5700 for max
 
         leader_config.closedLoop.setFeedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(
-            0.0001, 0.0, 0.0
-        ).velocityFF(0.000175).outputRange(-1, 1)
+            0.0000, 0.0, 0.0
+        ).velocityFF(0.263 * 50).outputRange(-1, 1)
 
         leader_config.closedLoop.maxMotion.maxVelocity(5700).maxAcceleration(
             10000
@@ -50,7 +50,7 @@ class Shooter(Subsystem):
         )
         follower_config.smartCurrentLimit(80, freeLimit=5700)  # set to 5700 for max
 
-        follower_config.follow(self.flywheel_motor_left_leader, False)
+        follower_config.follow(self.flywheel_motor_left_leader, True)
 
         self.flywheel_motor_right_follower.configure(
             follower_config,
@@ -66,7 +66,7 @@ class Shooter(Subsystem):
 
     def set_velocity(self, target_velocity: float = 9.5):
 
-        radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES  # inches
+        radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES * SI.inches_to_meters  # inches
         setRPM = (60 * target_velocity) / (2 * math.pi * radius)
 
         self.flywheel_target_velocity = setRPM
@@ -89,6 +89,7 @@ class Shooter(Subsystem):
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_velocity", float(self.get_current_velocity())
         )
+        
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_target_velocity",
             float(self.flywheel_target_velocity),

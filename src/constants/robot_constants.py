@@ -54,7 +54,7 @@ class IntakeConstants:
 class ShooterConstants:
     FLYWHEEL_MOTOR = DCMotor.neoVortex(1)  # TODO: verify motor type
     FLYWHEEL_GEARING = 1.0  # TODO: measure actual gear ratio
-    FLYWHEEL_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
+    FLYWHEEL_MOI = 0.002651  # TODO: calculate from roller mass/geometry (kg*m^2)
 
     FLYWHEEL_RPM_CONSTANT = 5700
     FLYWHEEL_VELOCITY_CONSTANT = 9.5

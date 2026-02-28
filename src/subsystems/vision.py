@@ -121,7 +121,7 @@ class Vision(Subsystem):
 
             for cam_cfg in self._cameras:
                 cam_props = SimCameraProperties()
-                cam_props.setFPS(15)
+                cam_props.setFPS(1)
                 cam_props.setCalibrationFromFOV(
                     800, 600, Rotation2d(SI.degrees_to_radians * 97)
                 )
