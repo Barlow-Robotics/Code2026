@@ -1,3 +1,34 @@
+class RobotFeatures:
+    HAS_DRIVETRAIN = True
+    HAS_VISION = True
+    HAS_SHOOTER = True
+    HAS_TURRET = True
+    HAS_INTAKE = True
+    HAS_SPINDEX = True
+    HAS_FEEDER = True
+
+    @classmethod
+    def configure(cls):
+        from wpilib import RobotBase
+
+        if RobotBase.isReal():
+            cls.HAS_DRIVETRAIN = True
+            cls.HAS_VISION = True
+            cls.HAS_SHOOTER = True
+            cls.HAS_TURRET = True
+            cls.HAS_INTAKE = True
+            cls.HAS_SPINDEX = True
+            cls.HAS_FEEDER = True
+        else:
+            cls.HAS_DRIVETRAIN = True
+            cls.HAS_VISION = True
+            cls.HAS_SHOOTER = True
+            cls.HAS_TURRET = True
+            cls.HAS_INTAKE = True
+            cls.HAS_SPINDEX = True
+            cls.HAS_FEEDER = True
+
+
 from robotpy_apriltag import AprilTagField
 from wpimath.geometry import Transform3d, Translation3d, Rotation3d
 from wpimath import units

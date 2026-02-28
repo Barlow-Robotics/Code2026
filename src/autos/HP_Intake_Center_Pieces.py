@@ -3,12 +3,12 @@ from pathplannerlib.path import PathPlannerPath
 from pathplannerlib.auto import AutoBuilder
 
 from autos import AutoRoutine
+from constants import RobotFeatures
 
-from commands2 import SequentialCommandGroup, ParallelCommandGroup
+from commands2 import SequentialCommandGroup, ParallelCommandGroup, cmd
 
 if typing.TYPE_CHECKING:
     from core import RobotContainer
-from subsystems import IntakePositions
 
 path_name = "HP_Intake_Center_Pieces"
 
@@ -20,6 +20,19 @@ class HP_Intake_Center_Pieces:
         ]
         self.container = container
 
+        if RobotFeatures.HAS_INTAKE:
+            from subsystems import IntakePositions
+
+            deploy_cmd = self.container.intake.goto_position_command[
+                IntakePositions.DEPLOYED
+            ]
+            stow_cmd = self.container.intake.goto_position_command[
+                IntakePositions.STOWED
+            ]
+        else:
+            deploy_cmd = cmd.none()
+            stow_cmd = cmd.none()
+
         self.command = SequentialCommandGroup(
             self.container.shoot_command_factory().withTimeout(5),
             ParallelCommandGroup(
@@ -27,11 +40,11 @@ class HP_Intake_Center_Pieces:
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[1]),
-                self.container.intake.goto_position_command[IntakePositions.DEPLOYED],
+                deploy_cmd,
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[2]),
-                self.container.intake.goto_position_command[IntakePositions.STOWED],
+                stow_cmd,
             ),
             self.container.shoot_command_factory().withTimeout(5),
         )
