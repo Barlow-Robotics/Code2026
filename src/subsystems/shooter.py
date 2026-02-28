@@ -29,11 +29,11 @@ class Shooter(Subsystem):
         leader_config.setIdleMode(
             leader_config.IdleMode(SparkBaseConfig.IdleMode.kCoast)
         )
-        leader_config.smartCurrentLimit(80)  # set to 5700 for max
+        leader_config.smartCurrentLimit(80, freeLimit=5700)  # set to 5700 for max
 
         leader_config.closedLoop.setFeedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(
-            0.0000, 0.0, 0.0
-        ).velocityFF(0.263 * 50).outputRange(-1, 1)
+            0.002, 0.0, 0.0
+        ).velocityFF(0.00174895).outputRange(-1, 1)
 
         leader_config.closedLoop.maxMotion.maxVelocity(5700).maxAcceleration(
             10000
@@ -76,6 +76,9 @@ class Shooter(Subsystem):
 
     def get_current_rpm(self) -> float:
         return self.flywheel_motor_left_leader.getEncoder().getVelocity()
+    
+    def get_current_rpm_follower(self) -> float:
+        return self.flywheel_motor_right_follower.getEncoder().getVelocity()
 
     def get_current_velocity(self) -> float:
         radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES  # inches
@@ -87,13 +90,25 @@ class Shooter(Subsystem):
 
     def periodic(self):
         PyKitLogger.recordOutput(
-            "Shooter/flywheel_motor_left_velocity", float(self.get_current_velocity())
+            "Shooter/flywheel_motor_left_velocity", float(self.get_current_rpm())
+        )
+        
+        PyKitLogger.recordOutput(
+            "Shooter/flywheel_motor_right_velocity", float(self.get_current_rpm_follower())
         )
         
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_target_velocity",
             float(self.flywheel_target_velocity),
         )
+        PyKitLogger.recordOutput(
+            "Shooter/flywheel_motor_current_limit",
+            float(self.flywheel_motor_left_leader.getOutputCurrent()),
+        )
+        # PyKitLogger.recordOutput(
+        #     "Shooter/flywheel_motor_current_volts",
+        #     float(self.flywheel_motor_left_leader.getAppliedOutput()),
+        # )
 
     # 1. flywheel motor spins up to speed.
     # both at same time
