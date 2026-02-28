@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from subsystems.feeder import Feeder
     from subsystems import Spindex
 
-RPM_TOLERANCE = 50
+VELOCITY_TOLERANCE = 9.4
 
 
 class ShootCommand(Command):
@@ -21,13 +21,13 @@ class ShootCommand(Command):
 
     def initialize(self):
         self._feeding = False
-        self.shooter.setRPM(ShooterConstants.FLYWHEEL_RPM_CONSTANT)
+        self.shooter.set_velocity(ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT)
 
     def execute(self):
         if self._feeding:
             return
         current_rpm = self.shooter.get_current_rpm()
-        if abs(current_rpm - ShooterConstants.FLYWHEEL_RPM_CONSTANT) <= RPM_TOLERANCE:
+        if abs(current_rpm - ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT) <= VELOCITY_TOLERANCE:
             self.feeder.move()
             self.spindex.move()
             self._feeding = True
