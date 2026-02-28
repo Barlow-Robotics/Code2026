@@ -1,3 +1,4 @@
+import typing
 from pathplannerlib.path import PathPlannerPath
 from pathplannerlib.auto import AutoBuilder
 
@@ -5,14 +6,15 @@ from autos import AutoRoutine
 
 from commands2 import SequentialCommandGroup, ParallelCommandGroup
 
-from core import RobotContainer
+if typing.TYPE_CHECKING:
+    from core import RobotContainer
 
 
 path_name = "Leave_Shoot"
 
 
 class Leave_Shoot:
-    def __init__(self, container: RobotContainer):
+    def __init__(self, container: "RobotContainer"):
         self.paths = [
             PathPlannerPath.fromChoreoTrajectory(path_name, i) for i in range(1)
         ]

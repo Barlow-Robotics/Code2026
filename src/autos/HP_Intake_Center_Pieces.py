@@ -1,3 +1,4 @@
+import typing
 from pathplannerlib.path import PathPlannerPath
 from pathplannerlib.auto import AutoBuilder
 
@@ -5,14 +6,15 @@ from autos import AutoRoutine
 
 from commands2 import SequentialCommandGroup, ParallelCommandGroup
 
-from core import RobotContainer
+if typing.TYPE_CHECKING:
+    from core import RobotContainer
 from subsystems import IntakePositions
 
 path_name = "HP_Intake_Center_Pieces"
 
 
 class HP_Intake_Center_Pieces:
-    def __init__(self, container: RobotContainer):
+    def __init__(self, container: "RobotContainer"):
         self.paths = [
             PathPlannerPath.fromChoreoTrajectory(path_name, i) for i in range(3)
         ]

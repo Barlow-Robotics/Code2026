@@ -17,6 +17,7 @@ from wpilib import DriverStation, RobotBase, SendableChooser
 from utils import should_flip
 import wpilib
 from pykit.logger import Logger as PyKitLogger
+from autos import HP_Intake_Center_Pieces, Leave_Shoot
 
 
 class RobotContainer:
@@ -71,14 +72,12 @@ class RobotContainer:
         self.configure_autos()
 
     def configure_autos(self):
-        from autos import HP_Intake_Center_Pieces, Leave_Shoot
 
         self.auto_selection = SendableChooser()
 
         self.auto_selection.setDefaultOption(
             "HP_Intake_Center_Pieces", HP_Intake_Center_Pieces(self).get_command()
         )
-        # self.auto_selection.addOption("kenny path", autos.example_path_auto)
 
         self.auto_selection.addOption("Leave", Leave_Shoot(self).get_command())
 
