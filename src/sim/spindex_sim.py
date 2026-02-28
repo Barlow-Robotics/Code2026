@@ -11,20 +11,6 @@ class SpindexSim:
             SpindexConstants.GEARING,
             SpindexConstants.MOI,
         )
-        self._feeder_motor_alt = FlywheelMotorSim(
-            spindex.motor_feeder_alternating,
-            SpindexConstants.MOTOR,
-            SpindexConstants.GEARING,
-            SpindexConstants.MOI,
-        )
-        self._feeder_motor_const = FlywheelMotorSim(
-            spindex.motor_feeder_constant,
-            SpindexConstants.MOTOR,
-            SpindexConstants.GEARING,
-            SpindexConstants.MOI,
-        )
 
     def update_sim(self, now: float, tm_diff: float) -> None:
         self._motor.update(tm_diff)
-        self._feeder_motor_alt.update(tm_diff)
-        self._feeder_motor_const.update(tm_diff)

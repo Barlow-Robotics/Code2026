@@ -77,6 +77,14 @@ class SpindexConstants:
     PID = {"kP": 0.11, "kI": 0, "kD": 0, "kF": 0, "kA": 0}  # TODO: tune PID
 
 
+class FeederConstants:
+    MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
+    GEARING = 4.0  # TODO: measure actual gear ratio
+    MOI = 0.005  # TODO: calculate from mechanism mass/geometry (kg*m^2)
+
+    PID = {"kP": 0.11, "kI": 0, "kD": 0, "kF": 0, "kA": 0}  # TODO: tune PID
+
+
 class DriveConstants:
     TOTAL_WIDTH_INCHES = 27.0  # IN
     TOTAL_WIDTH_INCHES_BUMPERS = 34.5  # IN
