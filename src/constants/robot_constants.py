@@ -50,6 +50,14 @@ class IntakeConstants:
 
 
 class ShooterConstants:
+    FLYWHEEL_MOTOR = DCMotor.neoVortex(1)  # TODO: verify motor type
+    FLYWHEEL_GEARING = 1.0  # TODO: measure actual gear ratio
+    FLYWHEEL_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
+
+    FLYWHEEL_RPM_CONSTANT = 5700
+
+
+class TurretConstants:
     TURRET_MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
     TURRET_GEARING = 1.0  # TODO: measure actual gear ratio
     TURRET_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
@@ -58,15 +66,9 @@ class ShooterConstants:
     HOOD_GEARING = 1.0  # TODO: measure actual gear ratio
     HOOD_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
 
-    FLYWHEEL_MOTOR = DCMotor.neoVortex(1)  # TODO: verify motor type
-    FLYWHEEL_GEARING = 1.0  # TODO: measure actual gear ratio
-    FLYWHEEL_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
-
     SHOOTER_HEIGHT_FOR_FUEL_IN = 20.57
     SHOOTER_HEIGHT_FOR_FUEL_M = 20.57 * SI.inches_to_meters
     SHOOTER_SET_VELOCITY_CONSTANT = 9.5
-
-    FLYWHEEL_RPM_CONSTANT = 5700
 
 
 class SpindexConstants:

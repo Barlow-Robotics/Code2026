@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 from wpilib import RobotBase
 
-from sim import DrivetrainSim, IntakeSim, SpindexSim, FeederSim, ShooterSim
+from sim import DrivetrainSim, IntakeSim, SpindexSim, FeederSim, ShooterSim, TurretSim
 
 if TYPE_CHECKING:
     from robot import Robot
@@ -27,6 +27,7 @@ class PhysicsEngine:
             self.spindex_sim = SpindexSim(robot.container.spindex)
             self.feeder_sim = FeederSim(robot.container.feeder)
             self.shooter_sim = ShooterSim(robot.container.shooter)
+            self.turret_sim = TurretSim(robot.container.turret)
 
     def update_sim(self, now: float, tm_diff: float) -> None:
         """
@@ -45,4 +46,5 @@ class PhysicsEngine:
                 self.spindex_sim.update_sim(now, dt)
                 self.feeder_sim.update_sim(now, dt)
                 self.shooter_sim.update_sim(now, dt)
+                self.turret_sim.update_sim(now, dt)
             remaining -= dt
