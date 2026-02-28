@@ -7,7 +7,7 @@ from commands2.button import CommandXboxController, CommandJoystick, Trigger
 
 import wpilib
 from phoenix6 import swerve
-from wpilib import DriverStation, RobotBase
+from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
 from constants import DriveConstants, RobotFeatures
 
@@ -66,54 +66,12 @@ class Controller:
         # Intake and spindex bindings (driver joystick)
         # self._driver.button(2).onTrue(container.intake.set_velocity_command)
 
-        if RobotBase.isReal() is False:
-            # self._driver.button(1).onTrue(
-            #     container.shooter.sysIdDynamicTurret(SysIdRoutine.Direction.kForward)
-            # )
-            # self._driver.button(2).onTrue(
-            #     container.shooter.sysIdDynamicTurret(SysIdRoutine.Direction.kReverse)
-            # )
-
-            # self._driver.button(3).onTrue(
-            #     container.shooter.sysIdQuasistaticTurret(
-            #         SysIdRoutine.Direction.kForward
-            #     )
-            # )
-            # self._driver.button(4).onTrue(
-            #     container.shooter.sysIdQuasistaticTurret(
-            #         SysIdRoutine.Direction.kReverse
-            #     )
-            # )
-
-            # self._operator.button(3).onTrue(
-            #     container.shooter.sysIdDynamicHood(SysIdRoutine.Direction.kForward)
-            # )
-            # self._operator.button(4).onTrue(
-            #     container.shooter.sysIdDynamicHood(SysIdRoutine.Direction.kReverse)
-            # )
-
-            # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse))
-            # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward))
-            # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse))
-            # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward))
-
-            if RobotFeatures.HAS_VISION:
-                self._driver.button(2).onTrue(container.vision.auto_align_command)
-            if RobotFeatures.HAS_SHOOTER:
-                self._driver.button(3).onTrue(
-                    container.shooter.start_flywheel_command
-                )
-
-            # self._driver.button(3).onTrue(container.intake.stop_command)
-            # self._driver.button(4).onTrue(
-            #     container.intake.goto_position_cmmand[IntakePositions.DEPLOYED]
-            # )
-            # self._driver.button(5).onTrue(
-            #     container.intake.goto_position_cmmand[IntakePositions.STOWED]
-            # )
-            # self._driver.button(6).onTrue(
-            #     container.intake.goto_position_cmmand[IntakePositions.HOME]
-            # )
+        if RobotFeatures.HAS_VISION:
+            self._driver.button(2).onTrue(container.vision.auto_align_command)
+        if RobotFeatures.HAS_SHOOTER:
+            self._driver.button(3).onTrue(
+                container.shooter.start_flywheel_command
+            )
 
         # Periodically warn about missing controllers during teleop
         Trigger(DriverStation.isTeleopEnabled).whileTrue(
