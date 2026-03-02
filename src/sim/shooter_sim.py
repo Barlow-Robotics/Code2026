@@ -18,7 +18,6 @@ class ShooterSim:
             ShooterConstants.FLYWHEEL_MOI,
         )
 
-
     def update_sim(self, now: float, tm_diff: float) -> None:
         self._flywheel_leader.update(tm_diff)
         self._flywheel_follower.update(tm_diff)

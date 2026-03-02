@@ -27,7 +27,7 @@ class MotorIDs:
     # SHOOTER
     motor_id_hood = 58
     motor_id_turret = 59
-    motor_id_flywheel_left = 60
+    motor_id_flywheel_left = 60  # from hood position to left flywheel
     motor_id_flywheel_right = 61
 
 
@@ -38,13 +38,25 @@ class IntakeConstants:
     ROLLER_CIRCUMFERENCE = (
         1.374 * 3.14159
     )  # TODO: measure actual roller diameter (inches)
+    ARM_MOTOR = DCMotor.krakenX60(1)
+    ARM_GEARING = 1
+    ARM_MOI = 0.01
+    HEAD_MOTOR = DCMotor.krakenX60(1)
+    HEAD_GEARING = 1
+    HEAD_MOI = 0.01
+    ARM_LENGTH = 10.5 * SI.inches_to_meters
+    ARM_MIN_ANGLE = 0.0 * SI.degrees_to_radians  # TODO: calibrate
+    ARM_MAX_ANGLE = 180.0 * SI.degrees_to_radians  # TODO: calibrate
+    ARM_STARTING_ANGLE = 90.0 * SI.degrees_to_radians  # TODO: calibrate
 
-    ARM_HOME_ROTATIONS = 0  # TODO: calibrate
-    ARM_DEPLOYED_ROTATIONS = 10  # TODO: gear-ratio * target-angle
-    ARM_STOWED_ROTATIONS = 5  # TODO: calibrate
-    HEAD_HOME_ROTATIONS = 0  # TODO: calibrate
-    HEAD_DEPLOYED_ROTATIONS = 20  # TODO: calibrate
-    HEAD_STOWED_ROTATIONS = 7  # TODO: calibrate
+    ARM_HOME_ROTATIONS = 90 * SI.degrees_to_rotations  # TODO: calibrate
+    ARM_DEPLOYED_ROTATIONS = (
+        180 * SI.degrees_to_rotations
+    )  # TODO: gear-ratio * target-angle
+    ARM_STOWED_ROTATIONS = 135 * SI.degrees_to_rotations  # TODO: calibrate
+    HEAD_HOME_ROTATIONS = 90 * SI.degrees_to_rotations  # TODO: calibrate
+    HEAD_DEPLOYED_ROTATIONS = 180 * SI.degrees_to_rotations  # TODO: calibrate
+    HEAD_STOWED_ROTATIONS = 135 * SI.degrees_to_rotations  # TODO: calibrate
 
     INTAKE_VELOCITY_CONSTANT = 1  # ft/sec
 
