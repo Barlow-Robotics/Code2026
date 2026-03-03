@@ -7,6 +7,8 @@ from wpimath.units import rotationsToRadians
 from constants import SI
 from pathplannerlib.config import PIDConstants
 
+class Constants:
+    robotTesting = True
 
 class MotorIDs:
     foc_active = False
