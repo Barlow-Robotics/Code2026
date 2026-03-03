@@ -16,7 +16,8 @@ from commands import FollowTrajectoryCommand
 
 from pykit.logger import Logger as PyKitLogger
 from utils.trajectory_generator import CreateTrajectory
-from photonlibpy.simulation import PhotonCameraSim, SimCameraProperties, VisionSystemSim
+if not RobotBase.isReal():
+    from photonlibpy.simulation import PhotonCameraSim, SimCameraProperties, VisionSystemSim
 
 XY_STD_DEV_COEFFICIENT = 0.005  # Base xy std dev coefficient
 THETA_STD_DEV_COEFFICIENT = 0.01  # Base theta std dev coefficient

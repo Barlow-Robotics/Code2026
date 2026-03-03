@@ -10,6 +10,7 @@ from phoenix6 import swerve
 from wpilib import DriverStation, RobotBase
 from wpimath.geometry import Rotation2d
 from constants import DriveConstants
+from subsystems.intake import IntakePositions
 
 if TYPE_CHECKING:
     from core import RobotContainer
@@ -19,52 +20,55 @@ class Controller:
     _OPERATOR_PORT = 1
     _DRIVER_PORT = 0
 
-    def __init__(self, container: RobotContainer):
+    def __init__(self, container: "RobotContainer"):
         self._operator = CommandXboxController(self._OPERATOR_PORT)
         self._driver = CommandJoystick(self._DRIVER_PORT)
 
         # Drivetrain default command (field-centric drive)
         # Note that X is forward and Y is left per WPILib convention.
-        container.drivetrain.setDefaultCommand(
-            container.drivetrain.apply_request(
-                lambda: (
-                    container.drivetrain.movement.with_velocity_x(
-                        self._driver.getRawAxis(1)
-                        * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                    )
-                    .with_velocity_y(
-                        self._driver.getRawAxis(0)
-                        * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                    )
-                    .with_rotational_rate(
-                        -self._driver.getRawAxis(2)
-                        * DriveConstants.MAX_ANGULAR_VELOCITY
-                    )
-                )
-            )
-        )
+        # container.drivetrain.setDefaultCommand(
+        #     container.drivetrain.apply_request(register_telemetry
+        #         lambda: (
+        #             container.drivetrain.movement.with_velocity_x(
+        #                 self._driver.getRawAxis(1)
+        #                 * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+        #             )
+        #             .with_velocity_y(
+        #                 self._driver.getRawAxis(0)
+        #                 * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+        #             )
+        #             .with_rotational_rate(
+        #                 -self._driver.getRawAxis(2)
+        #                 * DriveConstants.MAX_ANGULAR_VELOCITY
+        #             )
+        #         )
+        #     )
+        # )
 
-        # Idle while the robot is disabled. This ensures the configured
-        # neutral mode is applied to the drive motors while disabled.
-        idle = swerve.requests.Idle()
-        Trigger(DriverStation.isDisabled).whileTrue(
-            container.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
-        )
+        # # Idle while the robot is disabled. This ensures the configured
+        # # neutral mode is applied to the drive motors while disabled.
+        # idle = swerve.requests.Idle()
+        # Trigger(DriverStation.isDisabled).whileTrue(
+        #     container.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
+        # )
 
-        # Drivetrain button bindings (xbox controller)
-        self._operator.a().whileTrue(
-            container.drivetrain.apply_request(lambda: container.brake)
-        )
-        self._operator.b().whileTrue(
-            container.drivetrain.apply_request(
-                lambda: container.point.with_module_direction(
-                    Rotation2d(-self._operator.getLeftY(), -self._operator.getLeftX())
-                )
-            )
-        )
+        # # Drivetrain button bindings (xbox controller)
+        # self._operator.a().whileTrue(
+        #     container.drivetrain.apply_request(lambda: container.brake)
+        # )
+        # self._operator.b().whileTrue(
+        #     container.drivetrain.apply_request(
+        #         lambda: container.point.with_module_direction(
+        #             Rotation2d(-self._operator.getLeftY(), -self._operator.getLeftX())
+        #         )
+        #     )
+        # )
 
         # Intake and spindex bindings (driver joystick)
         # self._driver.button(2).onTrue(container.intake.set_velocity_command)
+        self._driver.button(4).onTrue(
+            container.intake.goto_position_command_factory(IntakePositions.DEPLOYED)
+        )
 
         if RobotBase.isReal() is False:
             # self._driver.button(1).onTrue(
@@ -96,14 +100,15 @@ class Controller:
             # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward))
             # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse))
             # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward))
+            # self._driver.button(1).onTrue(container.vision.auto_align_command)
 
             self._driver.button(2).onTrue(container.vision.auto_align_command)
             self._driver.button(3).onTrue(container.shooter.start_flywheel_command)
 
             # self._driver.button(3).onTrue(container.intake.stop_command)
-            # self._driver.button(4).onTrue(
-            #     container.intake.goto_position_cmmand[IntakePositions.DEPLOYED]
-            # )
+            self._driver.button(1).onTrue(
+                container.intake.goto_position_command[IntakePositions.DEPLOYED]
+            )
             # self._driver.button(5).onTrue(
             #     container.intake.goto_position_cmmand[IntakePositions.STOWED]
             # )

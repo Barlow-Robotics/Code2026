@@ -37,43 +37,47 @@ class RobotContainer:
         self.point = swerve.requests.PointWheelsAt()
 
         # Subsystems
-        self.drivetrain = TunerConstants.create_drivetrain()
-        if RobotBase.isReal() is False:
-            from subsystems import Vision, Shooter, Turret, Intake, Spindex, Feeder
+        from subsystems import Intake
 
-            self.vision = Vision(drive_sub=self.drivetrain)
-            self.shooter = Shooter()
-            self.turret = Turret(driveSub=self.drivetrain)
-            self.intake = Intake()
-            self.spindex = Spindex()
-            self.feeder = Feeder()
+        # self.drivetrain = TunerConstants.create_drivetrain()
+
+        self.intake = Intake()
+        # self.shooter = Shooter()
+        # self.turret = Turret(driveSub=self.drivetrain)
+        # self.intake = Intake()
+        # self.spindex = Spindex()
+        # self.feeder = Feeder()
+        # self.vision = Vision(drive_sub=self.drivetrain)
+
+        # if RobotBase.isReal() is False:
+
 
         # Telemetry
-        self._swerve_telemetry = SwerveTelemetry(
-            DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-        )
-        self.drivetrain.register_telemetry(
-            lambda state: self._swerve_telemetry.telemeterize(state)
-        )
-        AutoBuilder.configure(
-            self.drivetrain.get_pose,
-            self.drivetrain.reset_odometry_auto,
-            self.drivetrain.get_speeds,
-            lambda spds, ffs: self.drivetrain.set_robot_centric_velocities(spds),
-            PPHolonomicDriveController(
-                AutoConstants.auto_translation_pid,
-                AutoConstants.auto_rotation_pid,
-                AutoConstants.period,
-            ),
-            RobotConfig.fromGUISettings(),
-            should_flip,
-            self.drivetrain,
-        )
+        # self._swerve_telemetry = SwerveTelemetry(
+        #     DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+        # )
+        # self.drivetrain.register_telemetry(
+        #     lambda state: self._swerve_telemetry.telemeterize(state)
+        # )
+        # AutoBuilder.configure(
+        #     self.drivetrain.get_pose,
+        #     self.drivetrain.reset_odometry_auto,
+        #     self.drivetrain.get_speeds,
+        #     lambda spds, ffs: self.drivetrain.set_robot_centric_velocities(spds),
+        #     PPHolonomicDriveController(
+        #         AutoConstants.auto_translation_pid,
+        #         AutoConstants.auto_rotation_pid,
+        #         AutoConstants.period,
+        #     ),
+        #     RobotConfig.fromGUISettings(),
+        #     should_flip,
+        #     self.drivetrain,
+        # )
 
         # Controller bindings
         self.controller = Controller(self)
-        self.create_commands()
-        self.configure_autos()
+        # self.create_commands()
+        # self.configure_autos()
 
     def configure_autos(self):
 
