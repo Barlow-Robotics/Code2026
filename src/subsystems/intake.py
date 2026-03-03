@@ -154,10 +154,12 @@ class Intake(commands2.Subsystem):
         self.set_velocity_command = cmd.runOnce(self.set_velocity)
         self.stop_command = cmd.runOnce(self.stop)
 
-        self.goto_position_command = {
-            pos: cmd.runOnce(lambda p=pos: self.go_to_position(p))
-            for pos in IntakePositions
-        }
+        # self.goto_position_command = {
+        #     pos: cmd.runOnce(lambda p=pos: self.go_to_position(p))
+        #     for pos in IntakePositions
+        # }
+        self.goto_position_command_factory = lambda pos: cmd.runOnce(lambda: self.go_to_position(pos))
+
         self._POSITION_MAP = {
             IntakePositions.HOME: (
                 IntakeConstants.ARM_HOME_ROTATIONS,
