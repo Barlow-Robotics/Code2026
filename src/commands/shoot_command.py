@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from subsystems.feeder import Feeder
     from subsystems import Spindex
 
-VELOCITY_TOLERANCE = 9.4
+VELOCITY_TOLERANCE = 0.1
 
 
 class ShootCommand(Command):

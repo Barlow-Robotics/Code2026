@@ -8,7 +8,7 @@ from constants import SI
 from pathplannerlib.config import PIDConstants
 
 class Constants:
-    robotTesting = True
+    robotTesting = False
 
 class MotorIDs:
     foc_active = False

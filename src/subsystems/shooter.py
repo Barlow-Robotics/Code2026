@@ -58,6 +58,7 @@ class Shooter(Subsystem):
             PersistMode.kPersistParameters,
         )
 
+        self.flywheel_target_RPM = 0.0
         self.flywheel_target_velocity = 0.0
 
         self.start_flywheel_command = cmd.runOnce(
@@ -65,11 +66,11 @@ class Shooter(Subsystem):
         )
 
     def set_velocity(self, target_velocity: float = 9.5):
-
-        radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES * SI.inches_to_meters  # inches
+        self.flywheel_target_velocity = target_velocity
+        radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES * SI.inches_to_meters  # meters
         setRPM = (60 * target_velocity) / (2 * math.pi * radius)
 
-        self.flywheel_target_velocity = setRPM
+        self.flywheel_target_RPM = setRPM
         self.flywheel_motor_left_leader.getClosedLoopController().setReference(
             setRPM, SparkFlex.ControlType.kMAXMotionVelocityControl
         )
@@ -81,26 +82,38 @@ class Shooter(Subsystem):
         return self.flywheel_motor_right_follower.getEncoder().getVelocity()
 
     def get_current_velocity(self) -> float:
-        radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES  # inches
+        radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES * SI.inches_to_meters  # meters
         current_rpm = self.get_current_rpm()
         return (2 * math.pi * radius * current_rpm) / 60
 
     def stop_flywheel(self):
         self.flywheel_motor_left_leader.set(0)
+        self.flywheel_target_RPM = 0.0
+        self.flywheel_target_velocity = 0.0
+
 
     def periodic(self):
         PyKitLogger.recordOutput(
-            "Shooter/flywheel_motor_left_velocity", float(self.get_current_rpm())
+            "Shooter/flywheel_motor_left_RPM", float(self.get_current_rpm())
         )
         
         PyKitLogger.recordOutput(
-            "Shooter/flywheel_motor_right_velocity", float(self.get_current_rpm_follower())
+            "Shooter/flywheel_motor_right_RPM", float(self.get_current_rpm_follower())
         )
         
+        PyKitLogger.recordOutput(
+            "Shooter/flywheel_motor_left_current_velocity",
+            float(self.get_current_velocity()),
+        )
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_target_velocity",
             float(self.flywheel_target_velocity),
         )
+        PyKitLogger.recordOutput(
+            "Shooter/flywheel_motor_left_target_RPM",
+            float(self.flywheel_target_RPM),
+        )
+
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_current_limit",
             float(self.flywheel_motor_left_leader.getOutputCurrent()),
