@@ -158,7 +158,9 @@ class Intake(commands2.Subsystem):
         #     pos: cmd.runOnce(lambda p=pos: self.go_to_position(p))
         #     for pos in IntakePositions
         # }
-        self.goto_position_command_factory = lambda pos: cmd.runOnce(lambda: self.go_to_position(pos))
+        self.goto_position_command_factory = lambda pos: cmd.runOnce(
+            lambda: self.go_to_position(pos)
+        )
 
         self._POSITION_MAP = {
             IntakePositions.HOME: (

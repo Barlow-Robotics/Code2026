@@ -28,7 +28,6 @@ class Controller:
                 container.intake.goto_position_command_factory(IntakePositions.DEPLOYED)
             )
         else:
-
             # Drivetrain default command (field-centric drive)
             # Note that X is forward and Y is left per WPILib convention.
             container.drivetrain.setDefaultCommand(
@@ -64,11 +63,12 @@ class Controller:
             self._operator.b().whileTrue(
                 container.drivetrain.apply_request(
                     lambda: container.point.with_module_direction(
-                        Rotation2d(-self._operator.getLeftY(), -self._operator.getLeftX())
+                        Rotation2d(
+                            -self._operator.getLeftY(), -self._operator.getLeftX()
+                        )
                     )
                 )
             )
-
 
             # Intake and spindex bindings (driver joystick)
             self._driver.button(2).onTrue(container.intake.set_velocity_command)
@@ -76,48 +76,47 @@ class Controller:
             self._driver.button(4).onTrue(container.shooter.start_flywheel_command)
 
             # if RobotBase.isReal() is False:
-                # self._driver.button(1).onTrue(
-                #     container.shooter.sysIdDynamicTurret(SysIdRoutine.Direction.kForward)
-                # )
-                # self._driver.button(2).onTrue(
-                #     container.shooter.sysIdDynamicTurret(SysIdRoutine.Direction.kReverse)
-                # )
+            # self._driver.button(1).onTrue(
+            #     container.shooter.sysIdDynamicTurret(SysIdRoutine.Direction.kForward)
+            # )
+            # self._driver.button(2).onTrue(
+            #     container.shooter.sysIdDynamicTurret(SysIdRoutine.Direction.kReverse)
+            # )
 
-                # self._driver.button(3).onTrue(
-                #     container.shooter.sysIdQuasistaticTurret(
-                #         SysIdRoutine.Direction.kForward
-                #     )
-                # )
-                # self._driver.button(4).onTrue(
-                #     container.shooter.sysIdQuasistaticTurret(
-                #         SysIdRoutine.Direction.kReverse
-                #     )
-                # )
+            # self._driver.button(3).onTrue(
+            #     container.shooter.sysIdQuasistaticTurret(
+            #         SysIdRoutine.Direction.kForward
+            #     )
+            # )
+            # self._driver.button(4).onTrue(
+            #     container.shooter.sysIdQuasistaticTurret(
+            #         SysIdRoutine.Direction.kReverse
+            #     )
+            # )
 
-                # self._operator.button(3).onTrue(
-                #     container.shooter.sysIdDynamicHood(SysIdRoutine.Direction.kForward)
-                # )
-                # self._operator.button(4).onTrue(
-                #     container.shooter.sysIdDynamicHood(SysIdRoutine.Direction.kReverse)
-                # )
+            # self._operator.button(3).onTrue(
+            #     container.shooter.sysIdDynamicHood(SysIdRoutine.Direction.kForward)
+            # )
+            # self._operator.button(4).onTrue(
+            #     container.shooter.sysIdDynamicHood(SysIdRoutine.Direction.kReverse)
+            # )
 
-                # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse))
-                # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward))
-                # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse))
-                # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward))
-                # self._driver.button(1).onTrue(container.vision.auto_align_command)
+            # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse))
+            # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward))
+            # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse))
+            # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward))
+            # self._driver.button(1).onTrue(container.vision.auto_align_command)
 
-
-                # self._driver.button(3).onTrue(container.intake.stop_command)
-                # self._driver.button(1).onTrue(
-                #     container.intake.goto_position_command[IntakePositions.DEPLOYED]
-                # )
-                # self._driver.button(5).onTrue(
-                #     container.intake.goto_position_cmmand[IntakePositions.STOWED]
-                # )
-                # self._driver.button(6).onTrue(
-                #     container.intake.goto_position_cmmand[IntakePositions.HOME]
-                # )
+            # self._driver.button(3).onTrue(container.intake.stop_command)
+            # self._driver.button(1).onTrue(
+            #     container.intake.goto_position_command[IntakePositions.DEPLOYED]
+            # )
+            # self._driver.button(5).onTrue(
+            #     container.intake.goto_position_cmmand[IntakePositions.STOWED]
+            # )
+            # self._driver.button(6).onTrue(
+            #     container.intake.goto_position_cmmand[IntakePositions.HOME]
+            # )
 
         # Periodically warn about missing controllers during teleop
         Trigger(DriverStation.isTeleopEnabled).whileTrue(

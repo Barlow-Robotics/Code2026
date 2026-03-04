@@ -44,9 +44,9 @@ class RobotContainer:
             self.controller = Controller(self)
         else:
             from subsystems import Intake, Shooter, Turret, Spindex, Feeder, Vision
+
             self.drivetrain = TunerConstants.create_drivetrain()
 
-            
             self.shooter = Shooter()
             self.turret = Turret(driveSub=self.drivetrain)
             self.intake = Intake()

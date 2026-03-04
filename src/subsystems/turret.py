@@ -36,14 +36,17 @@ class Turret(Subsystem):
                 kP=10, kI=0, kD=10, kF=0, kA=1, brake_mode=True
             )
 
-
         self.hood_motor = TalonFX(MotorIDs.motor_id_hood)
         self.turret_motor = TalonFX(MotorIDs.motor_id_turret)
 
         HOOD_MOTOR_CONFIG._apply_settings(self.hood_motor, inverted=False)
         TURRET_MOTOR_CONFIG._apply_settings(self.turret_motor, inverted=False)
 
-        self._motion_magic_position_voltage = controls.MotionMagicVoltage(
+        self._motion_magic_position_voltage_hood = controls.MotionMagicVoltage(
+            0, enable_foc=MotorIDs.foc_active
+        )
+
+        self._motion_magic_position_voltage_turret = controls.MotionMagicVoltage(
             0, enable_foc=MotorIDs.foc_active
         )
 
@@ -60,7 +63,7 @@ class Turret(Subsystem):
     def set_angle_hood(self, angle_deg: float):
         self.target_hood_angle = angle_deg
         self.hood_motor.set_control(
-            self._motion_magic_position_voltage.with_position(
+            self._motion_magic_position_voltage_hood.with_position(
                 SI.degrees_to_rotations * angle_deg
             )
         )
@@ -68,7 +71,7 @@ class Turret(Subsystem):
     def set_angle_turret(self, angle_deg: float):
         self.target_turret_yaw = angle_deg
         self.turret_motor.set_control(
-            self._motion_magic_position_voltage.with_position(
+            self._motion_magic_position_voltage_turret.with_position(
                 SI.degrees_to_rotations * angle_deg
             )
         )

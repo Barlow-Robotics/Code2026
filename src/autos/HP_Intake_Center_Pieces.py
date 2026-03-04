@@ -27,11 +27,15 @@ class HP_Intake_Center_Pieces:
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[1]),
-                self.container.intake.goto_position_command_factory(IntakePositions.DEPLOYED),
+                self.container.intake.goto_position_command_factory(
+                    IntakePositions.DEPLOYED
+                ),
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[2]),
-                self.container.intake.goto_position_command_factory(IntakePositions.STOWED),
+                self.container.intake.goto_position_command_factory(
+                    IntakePositions.STOWED
+                ),
             ),
             self.container.shoot_command_factory().withTimeout(5),
         )

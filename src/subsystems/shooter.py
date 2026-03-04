@@ -77,7 +77,7 @@ class Shooter(Subsystem):
 
     def get_current_rpm(self) -> float:
         return self.flywheel_motor_left_leader.getEncoder().getVelocity()
-    
+
     def get_current_rpm_follower(self) -> float:
         return self.flywheel_motor_right_follower.getEncoder().getVelocity()
 
@@ -91,16 +91,15 @@ class Shooter(Subsystem):
         self.flywheel_target_RPM = 0.0
         self.flywheel_target_velocity = 0.0
 
-
     def periodic(self):
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_RPM", float(self.get_current_rpm())
         )
-        
+
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_right_RPM", float(self.get_current_rpm_follower())
         )
-        
+
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_current_velocity",
             float(self.get_current_velocity()),
