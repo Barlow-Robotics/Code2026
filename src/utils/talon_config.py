@@ -1,6 +1,5 @@
 from phoenix6 import StatusCode, configs, signals
 
-
 class TalonConfig:
     kP: float
     kI: float

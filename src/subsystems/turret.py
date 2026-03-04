@@ -31,6 +31,11 @@ class Turret(Subsystem):
         TURRET_MOTOR_CONFIG = TalonConfig(
             kP=0.2, kI=0, kD=0, kF=0, kA=0, brake_mode=True
         )
+        if not RobotBase.isReal():
+            TURRET_MOTOR_CONFIG = TalonConfig(
+                kP=10, kI=0, kD=10, kF=0, kA=1, brake_mode=True
+            )
+
 
         self.hood_motor = TalonFX(MotorIDs.motor_id_hood)
         self.turret_motor = TalonFX(MotorIDs.motor_id_turret)
@@ -87,11 +92,11 @@ class Turret(Subsystem):
             "Turret/target_turret_yaw", float(self.target_turret_yaw)
         )
         PyKitLogger.recordOutput(
-            "Turret/hood_motor_position",
+            "Turret/actual_hood_angle",
             float(self.hood_motor.get_position().value) * SI.rotations_to_degrees,
         )
         PyKitLogger.recordOutput(
-            "Turret/turret_motor_position",
+            "Turret/actual_turret_yaw",
             float(self.turret_motor.get_position().value) * SI.rotations_to_degrees,
         )
         PyKitLogger.recordOutput(
@@ -190,8 +195,8 @@ class Turret(Subsystem):
 
         PyKitLogger.recordOutput("Turret/calc_valid", True)
         PyKitLogger.recordOutput("Turret/calc_failure_reason", "")
-        PyKitLogger.recordOutput("Turret/hood_angle", float(hood_angle_deg))
-        PyKitLogger.recordOutput("Turret/turret_yaw", float(turret_yaw_deg))
+        PyKitLogger.recordOutput("Turret/target_hood_angle", float(hood_angle_deg))
+        PyKitLogger.recordOutput("Turret/target_turret_yaw", float(turret_yaw_deg))
         PyKitLogger.recordOutput("Turret/hub_dx", float(hub_pose.X() - robot_pose.X()))
         PyKitLogger.recordOutput("Turret/hub_dy", float(hub_pose.Y() - robot_pose.Y()))
         PyKitLogger.recordOutput(
@@ -206,7 +211,7 @@ class Turret(Subsystem):
 
     @staticmethod
     def find_v_fixed():
-        G = 9.81
+        G = 9.80665
         height_needed = 1.8288
         height_of_shooter = 0.5224
         dz = height_needed - height_of_shooter
