@@ -105,7 +105,9 @@ class RobotContainer:
                 HP_Intake_Center_Pieces(self).get_command(),
             )
         else:
-            self.auto_selection.setDefaultOption("Leave", Leave_Shoot(self).get_command())
+            self.auto_selection.setDefaultOption(
+                "Leave", Leave_Shoot(self).get_command()
+            )
 
         self.auto_selection.addOption("Leave", Leave_Shoot(self).get_command())
 

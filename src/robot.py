@@ -16,7 +16,7 @@ from utils import (
 
 from core import RobotContainer
 from phoenix6 import HootAutoReplay
-from wpilib import DriverStation
+from wpilib import DriverStation, RobotBase
 
 if typing.TYPE_CHECKING:
     from autos import AutoRoutine
@@ -36,7 +36,10 @@ class Robot(
     def __init__(self):
 
         super().__init__()
-        SignalLogger.set_path("logs")
+        if RobotBase.isReal():
+            SignalLogger.set_path("/home/lvuser/logs")
+        else:
+            SignalLogger.set_path("logs")
         self.useTiming = configure_pykit(type(self).__name__)
         SignalLogger.start()
 

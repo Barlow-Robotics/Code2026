@@ -10,6 +10,7 @@ from phoenix6 import swerve
 from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
 from constants import DriveConstants, RobotFeatures
+from subsystems.intake import IntakePositions
 
 if TYPE_CHECKING:
     from core import RobotContainer
@@ -19,7 +20,7 @@ class Controller:
     _OPERATOR_PORT = 1
     _DRIVER_PORT = 0
 
-    def __init__(self, container: RobotContainer):
+    def __init__(self, container: "RobotContainer"):
         self._operator = CommandXboxController(self._OPERATOR_PORT)
         self._driver = CommandJoystick(self._DRIVER_PORT)
 
@@ -58,18 +59,25 @@ class Controller:
         self._operator.b().whileTrue(
             container.drivetrain.apply_request(
                 lambda: container.point.with_module_direction(
-                    Rotation2d(-self._operator.getLeftY(), -self._operator.getLeftX())
+                    Rotation2d(
+                        -self._operator.getLeftY(), -self._operator.getLeftX()
+                    )
                 )
             )
         )
 
-        # Intake and spindex bindings (driver joystick)
-        # self._driver.button(2).onTrue(container.intake.set_velocity_command)
-
+        # Subsystem button bindings (driver joystick)
+        if RobotFeatures.HAS_INTAKE:
+            self._driver.button(2).onTrue(container.intake.set_velocity_command)
+            self._driver.button(4).onTrue(
+                container.intake.goto_position_command_factory(
+                    IntakePositions.DEPLOYED
+                )
+            )
         if RobotFeatures.HAS_VISION:
-            self._driver.button(2).onTrue(container.vision.auto_align_command)
+            self._driver.button(3).onTrue(container.vision.auto_align_command)
         if RobotFeatures.HAS_SHOOTER:
-            self._driver.button(3).onTrue(
+            self._driver.button(4).onTrue(
                 container.shooter.start_flywheel_command
             )
 

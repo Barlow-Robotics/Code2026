@@ -1,7 +1,7 @@
 import math
 from commands2 import Subsystem
 from constants.robot_constants import MotorIDs
-from constants import ShooterConstants
+from constants import SI, ShooterConstants
 from rev import (
     FeedbackSensor,
     SparkBaseConfig,
@@ -32,8 +32,8 @@ class Shooter(Subsystem):
         leader_config.smartCurrentLimit(80, freeLimit=5700)  # set to 5700 for max
 
         leader_config.closedLoop.setFeedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(
-            0.0001, 0.0, 0.0
-        ).velocityFF(0.000175).outputRange(-1, 1)
+            0.002, 0.0, 0.0
+        ).velocityFF(0.00174895).outputRange(-1, 1)
 
         leader_config.closedLoop.maxMotion.maxVelocity(5700).maxAcceleration(
             10000
@@ -50,7 +50,7 @@ class Shooter(Subsystem):
         )
         follower_config.smartCurrentLimit(80, freeLimit=5700)  # set to 5700 for max
 
-        follower_config.follow(self.flywheel_motor_left_leader, False)
+        follower_config.follow(self.flywheel_motor_left_leader, True)
 
         self.flywheel_motor_right_follower.configure(
             follower_config,
@@ -58,6 +58,7 @@ class Shooter(Subsystem):
             PersistMode.kPersistParameters,
         )
 
+        self.flywheel_target_RPM = 0.0
         self.flywheel_target_velocity = 0.0
 
         self.start_flywheel_command = cmd.runOnce(
@@ -65,11 +66,11 @@ class Shooter(Subsystem):
         )
 
     def set_velocity(self, target_velocity: float = 9.5):
-
-        radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES  # inches
+        self.flywheel_target_velocity = target_velocity
+        radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES * SI.inches_to_meters  # meters
         setRPM = (60 * target_velocity) / (2 * math.pi * radius)
 
-        self.flywheel_target_velocity = setRPM
+        self.flywheel_target_RPM = setRPM
         self.flywheel_motor_left_leader.getClosedLoopController().setReference(
             setRPM, SparkFlex.ControlType.kMAXMotionVelocityControl
         )
@@ -77,22 +78,49 @@ class Shooter(Subsystem):
     def get_current_rpm(self) -> float:
         return self.flywheel_motor_left_leader.getEncoder().getVelocity()
 
+    def get_current_rpm_follower(self) -> float:
+        return self.flywheel_motor_right_follower.getEncoder().getVelocity()
+
     def get_current_velocity(self) -> float:
-        radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES  # inches
+        radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES * SI.inches_to_meters  # meters
         current_rpm = self.get_current_rpm()
         return (2 * math.pi * radius * current_rpm) / 60
 
     def stop_flywheel(self):
         self.flywheel_motor_left_leader.set(0)
+        self.flywheel_target_RPM = 0.0
+        self.flywheel_target_velocity = 0.0
 
     def periodic(self):
         PyKitLogger.recordOutput(
-            "Shooter/flywheel_motor_left_velocity", float(self.get_current_velocity())
+            "Shooter/flywheel_motor_left_RPM", float(self.get_current_rpm())
+        )
+
+        PyKitLogger.recordOutput(
+            "Shooter/flywheel_motor_right_RPM", float(self.get_current_rpm_follower())
+        )
+
+        PyKitLogger.recordOutput(
+            "Shooter/flywheel_motor_left_current_velocity",
+            float(self.get_current_velocity()),
         )
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_target_velocity",
             float(self.flywheel_target_velocity),
         )
+        PyKitLogger.recordOutput(
+            "Shooter/flywheel_motor_left_target_RPM",
+            float(self.flywheel_target_RPM),
+        )
+
+        PyKitLogger.recordOutput(
+            "Shooter/flywheel_motor_current_limit",
+            float(self.flywheel_motor_left_leader.getOutputCurrent()),
+        )
+        # PyKitLogger.recordOutput(
+        #     "Shooter/flywheel_motor_current_volts",
+        #     float(self.flywheel_motor_left_leader.getAppliedOutput()),
+        # )
 
     # 1. flywheel motor spins up to speed.
     # both at same time

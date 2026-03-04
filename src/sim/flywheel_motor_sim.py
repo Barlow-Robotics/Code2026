@@ -1,7 +1,7 @@
 import math
 from phoenix6.hardware import TalonFX
 from rev import SparkFlex, SparkFlexSim
-from wpilib.simulation import FlywheelSim
+from wpilib.simulation import FlywheelSim, SingleJointedArmSim
 from wpimath.system.plant import DCMotor, LinearSystemId
 from wpimath.units import radiansToRotations
 
@@ -26,6 +26,43 @@ class FlywheelMotorSim:
         self._position_rot += velocity_rps * tm_diff
 
         self._sim_state.set_raw_rotor_position(self._position_rot)
+        self._sim_state.set_rotor_velocity(velocity_rps)
+
+
+class ArmMotorSim:
+    def __init__(
+        self,
+        motor: TalonFX,
+        motor_model: DCMotor,
+        gearing: float,
+        moi: float,
+        arm_length: float,
+        min_angle: float,
+        max_angle: float,
+        starting_angle: float = 0.0,
+    ):
+        self._sim_state = motor.sim_state
+        plant = LinearSystemId.singleJointedArmSystem(motor_model, moi, gearing)
+        self._arm = SingleJointedArmSim(
+            plant,
+            motor_model,
+            gearing,
+            arm_length,
+            min_angle,
+            max_angle,
+            simulateGravity=True,
+            startingAngle=starting_angle,
+        )
+
+    def update(self, tm_diff: float) -> None:
+        self._sim_state.set_supply_voltage(12.0)
+        self._arm.setInputVoltage(self._sim_state.motor_voltage)
+        self._arm.update(tm_diff)
+
+        velocity_rps = radiansToRotations(self._arm.getVelocity())
+        position_rot = radiansToRotations(self._arm.getAngle())
+
+        self._sim_state.set_raw_rotor_position(position_rot)
         self._sim_state.set_rotor_velocity(velocity_rps)
 
 

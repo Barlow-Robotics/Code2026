@@ -23,12 +23,12 @@ class HP_Intake_Center_Pieces:
         if RobotFeatures.HAS_INTAKE:
             from subsystems import IntakePositions
 
-            deploy_cmd = self.container.intake.goto_position_command[
+            deploy_cmd = self.container.intake.goto_position_command_factory(
                 IntakePositions.DEPLOYED
-            ]
-            stow_cmd = self.container.intake.goto_position_command[
+            )
+            stow_cmd = self.container.intake.goto_position_command_factory(
                 IntakePositions.STOWED
-            ]
+            )
         else:
             deploy_cmd = cmd.none()
             stow_cmd = cmd.none()

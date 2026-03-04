@@ -16,7 +16,13 @@ from commands import FollowTrajectoryCommand
 
 from pykit.logger import Logger as PyKitLogger
 from utils.trajectory_generator import CreateTrajectory
-from photonlibpy.simulation import PhotonCameraSim, SimCameraProperties, VisionSystemSim
+
+if not RobotBase.isReal():
+    from photonlibpy.simulation import (
+        PhotonCameraSim,
+        SimCameraProperties,
+        VisionSystemSim,
+    )
 
 XY_STD_DEV_COEFFICIENT = 0.005  # Base xy std dev coefficient
 THETA_STD_DEV_COEFFICIENT = 0.01  # Base theta std dev coefficient
@@ -121,7 +127,7 @@ class Vision(Subsystem):
 
             for cam_cfg in self._cameras:
                 cam_props = SimCameraProperties()
-                cam_props.setFPS(15)
+                cam_props.setFPS(1)
                 cam_props.setCalibrationFromFOV(
                     800, 600, Rotation2d(SI.degrees_to_radians * 97)
                 )

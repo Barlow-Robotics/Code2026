@@ -5,6 +5,7 @@ from phoenix6 import controls
 from phoenix6.hardware import TalonFX
 import commands2
 from pykit.logger import Logger as PyKitLogger
+import wpilib
 
 from utils import TalonConfig, generateSysIdProfile
 from constants import MotorIDs, IntakeConstants
@@ -12,6 +13,12 @@ from commands2 import cmd
 from enum import Enum
 
 from commands2.sysid import SysIdRoutine
+
+from wpilib import (
+    Mechanism2d,
+    Color8Bit,
+    RobotBase,
+)
 
 
 @dataclass
@@ -52,11 +59,46 @@ class IntakePositions(Enum):
 class Intake(commands2.Subsystem):
     def __init__(self):
         super().__init__()
+
+        self.mechanism = Mechanism2d(4, 3)  # wider canvas to show horizontal reach
+
+        # Position root toward right-center of robot, low mount point
+        root = self.mechanism.getRoot("IntakeRoot", 2.5, 0.3)
+
+        # Arm starts angled upward, adjust starting angle to match stowed position
+        self.arm_ligament = root.appendLigament(
+            "Arm",
+            1.2,
+            75,
+            8,
+            Color8Bit(0, 200, 0),  # green like your CAD
+        )
+
+        # Head/roller assembly at end of arm, perpendicular
+        self.head_ligament = self.arm_ligament.appendLigament(
+            "Head",
+            0.4,
+            -90,
+            10,
+            Color8Bit(0, 150, 0),  # darker green, wider = roller
+        )
+        wpilib.SmartDashboard.putData("Intake/Mechanism2d", self.mechanism)
+
         INTAKE_CONFIG_ARM = TalonConfig(
-            kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True
+            kP=0.11,
+            kI=0,
+            kD=0,
+            kF=0,
+            kA=0,
+            brake_mode=True,
         )
         INTAKE_CONFIG_HEAD = TalonConfig(
-            kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True
+            kP=0.11,
+            kI=0,
+            kD=0,
+            kF=0,
+            kA=0,
+            brake_mode=True,
         )
 
         INTAKE_CONFIG_ROLLER_TOP = TalonConfig(
@@ -88,10 +130,18 @@ class Intake(commands2.Subsystem):
             self.motor_roller_bottom, inverted=False
         )
 
-        self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
+        self._motion_magic_velocity_voltage_roller_top = (
+            controls.MotionMagicVelocityVoltage(0, enable_foc=MotorIDs.foc_active)
+        )
+
+        self._motion_magic_velocity_voltage_roller_bottom = (
+            controls.MotionMagicVelocityVoltage(0, enable_foc=MotorIDs.foc_active)
+        )
+
+        self._motion_magic_position_voltage_arm = controls.MotionMagicVoltage(
             0, enable_foc=MotorIDs.foc_active
         )
-        self._motion_magic_position_voltage = controls.MotionMagicVoltage(
+        self._motion_magic_position_voltage_head = controls.MotionMagicVoltage(
             0, enable_foc=MotorIDs.foc_active
         )
 
@@ -104,10 +154,14 @@ class Intake(commands2.Subsystem):
         self.set_velocity_command = cmd.runOnce(self.set_velocity)
         self.stop_command = cmd.runOnce(self.stop)
 
-        self.goto_position_command = {
-            pos: cmd.runOnce(lambda: self.go_to_position(pos))
-            for pos in IntakePositions
-        }
+        # self.goto_position_command = {
+        #     pos: cmd.runOnce(lambda p=pos: self.go_to_position(p))
+        #     for pos in IntakePositions
+        # }
+        self.goto_position_command_factory = lambda pos: cmd.runOnce(
+            lambda: self.go_to_position(pos)
+        )
+
         self._POSITION_MAP = {
             IntakePositions.HOME: (
                 IntakeConstants.ARM_HOME_ROTATIONS,
@@ -137,14 +191,21 @@ class Intake(commands2.Subsystem):
     def go_to_position(self, position: IntakePositions):
         self._target_position_name = position.name
         arm_rot, head_rot = self._POSITION_MAP[position]
+        print(arm_rot, head_rot)
+
         self.motor_arm.set_control(
-            self._motion_magic_position_voltage.with_position(arm_rot)
+            self._motion_magic_position_voltage_arm.with_position(arm_rot)
         )
+
         self.motor_head.set_control(
-            self._motion_magic_position_voltage.with_position(head_rot)
+            self._motion_magic_position_voltage_head.with_position(head_rot)
         )
         if position == IntakePositions.DEPLOYED:
+            print("Deploying intake, setting rollers to velocity")
             self.set_velocity(IntakeConstants.INTAKE_VELOCITY_CONSTANT)
+        else:
+            print("Stowing intake, stopping rollers")
+            self.stop()
 
     def set_velocity(self, velocity: float = IntakeConstants.INTAKE_VELOCITY_CONSTANT):
         self._commanded_velocity_ft_per_sec = float(velocity)
@@ -158,13 +219,13 @@ class Intake(commands2.Subsystem):
         self._converted_velocity_rps = float(velocity)
 
         self.motor_roller_top.set_control(
-            self._motion_magic_velocity_voltage.with_velocity(
+            self._motion_magic_velocity_voltage_roller_top.with_velocity(
                 velocity
             ).with_acceleration(0.1)
         )
 
         self.motor_roller_bottom.set_control(
-            self._motion_magic_velocity_voltage.with_velocity(
+            self._motion_magic_velocity_voltage_roller_bottom.with_velocity(
                 velocity
             ).with_acceleration(0.1)
         )
@@ -178,11 +239,15 @@ class Intake(commands2.Subsystem):
         self.target_velocity = 0.0
 
         self.motor_roller_top.set_control(
-            self._motion_magic_velocity_voltage.with_velocity(0).with_acceleration(0.1)
+            self._motion_magic_velocity_voltage_roller_top.with_velocity(
+                0
+            ).with_acceleration(0.1)
         )
 
         self.motor_roller_bottom.set_control(
-            self._motion_magic_velocity_voltage.with_velocity(0).with_acceleration(0.1)
+            self._motion_magic_velocity_voltage_roller_bottom.with_velocity(
+                0
+            ).with_acceleration(0.1)
         )
 
     def _log_dataclass(self, prefix: str, data: object):
@@ -203,6 +268,15 @@ class Intake(commands2.Subsystem):
     def periodic(self):
         intake_prefix = "Intake/Telemetry"
         command_prefix = "Intake/Command"
+        if not RobotBase.isReal():
+            arm_degrees = self.motor_arm.get_position().value * 360
+            head_degrees = self.motor_head.get_position().value * 360
+
+            self.arm_ligament.setAngle(
+                75 + arm_degrees
+            )  # offset by your starting angle
+            self.head_ligament.setAngle(-90 + head_degrees)
+            # SmartDashboard.putData("Intake/Mechanism2d", self.mechanism)
 
         self._log_dataclass(
             intake_prefix,
