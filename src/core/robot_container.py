@@ -38,10 +38,12 @@ class RobotContainer:
 
         # Subsystems
         if Constants.robotTesting and RobotBase.isReal():
-            from subsystems import Intake
-
-            self.intake = Intake()
+            from subsystems import Vision
+            # self.intake = Intake()
+            self.drivetrain = TunerConstants.create_drivetrain()
+            self.vision = Vision(drive_sub=self.drivetrain)
             self.controller = Controller(self)
+
         else:
             from subsystems import Intake, Shooter, Turret, Spindex, Feeder, Vision
 

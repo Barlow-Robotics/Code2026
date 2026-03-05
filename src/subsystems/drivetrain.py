@@ -136,7 +136,7 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             swerve.requests.FieldCentric()
             .with_deadband(DriveConstants.MAX_TRANSLATIONAL_VELOCITY * 0.1)
             .with_rotational_deadband(
-                DriveConstants.MAX_ANGULAR_VELOCITY * 0.1
+                DriveConstants.MAX_ANGULAR_VELOCITY * 0.2
             )  # Add a 10% deadband
             .with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
@@ -383,3 +383,7 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             .with_velocity_y(speeds.vy)
             .with_rotational_rate(speeds.omega)
         )
+
+    def reset_gyro(self):
+        pose = self.get_pose()
+        self.reset_pose(Pose2d(pose.X, pose.Y, Rotation2d(0 if DriverStation.getAlliance() == DriverStation.Alliance.kBlue else 180)))

@@ -9,7 +9,7 @@ from pathplannerlib.config import PIDConstants
 
 
 class Constants:
-    robotTesting = False
+    robotTesting = True
 
 
 class MotorIDs:
@@ -123,7 +123,7 @@ class DriveConstants:
         )
         / 12
     )  # kg·m^2 assuming sqaure robot
-    MAX_TRANSLATIONAL_VELOCITY = 1.0 * TunerConstants.speed_at_12_volts  # m/s
+    MAX_TRANSLATIONAL_VELOCITY = 3.0 * TunerConstants.speed_at_12_volts  # m/s
     MAX_ACCL = 3  # m/s^2
     MAX_ANGULAR_VELOCITY = rotationsToRadians(
         0.75

@@ -24,9 +24,51 @@ class Controller:
         self._operator = CommandXboxController(self._OPERATOR_PORT)
         self._driver = CommandJoystick(self._DRIVER_PORT)
         if RobotBase.isReal() and Constants.robotTesting:
-            self._driver.button(4).onTrue(
-                container.intake.goto_position_command_factory(IntakePositions.DEPLOYED)
+            # self._driver.button(4).onTrue(
+            #     container.intake.goto_position_command_factory(IntakePositions.DEPLOYED)
+            # )
+            container.drivetrain.setDefaultCommand(
+                container.drivetrain.apply_request(
+                    lambda: (
+                        container.drivetrain.movement.with_velocity_x(
+                            self._driver.getRawAxis(1)
+                            * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                        )
+                        .with_velocity_y(
+                            self._driver.getRawAxis(0)
+                            * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                        )
+                        .with_rotational_rate(
+                            -self._driver.getRawAxis(2)
+                            * DriveConstants.MAX_ANGULAR_VELOCITY
+                        )
+                    )
+                )
             )
+
+            # Idle while the robot is disabled. This ensures the configured
+            # neutral mode is applied to the drive motors while disabled.
+            idle = swerve.requests.Idle()
+            Trigger(DriverStation.isDisabled).whileTrue(
+                container.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
+            )
+
+            # Drivetrain button bindings (xbox controller)
+            self._operator.a().whileTrue(
+                container.drivetrain.apply_request(lambda: container.brake)
+            )
+            self._operator.b().whileTrue(
+                container.drivetrain.apply_request(
+                    lambda: container.point.with_module_direction(
+                        Rotation2d(
+                            -self._operator.getLeftY(), -self._operator.getLeftX()
+                        )
+                    )
+                )
+            )
+            self._driver.button(3).onTrue(container.vision.auto_align_command)
+            self._driver.button(12).onTrue(lambda: container.drivetrain.reset_gyro())
+
         else:
             # Drivetrain default command (field-centric drive)
             # Note that X is forward and Y is left per WPILib convention.
