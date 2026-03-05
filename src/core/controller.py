@@ -39,14 +39,14 @@ class Controller:
                     .with_velocity_y(
                         -self._driver.getRawAxis(0)
                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                        * ((self._driver.getRawAxis(3) + 1) * (1 - 0.4))
+                        * ((self._driver.getThrottle() + 1) * (1 - 0.4))
                         / 2
                         + 0.4
                     )
                     .with_rotational_rate(
                         -self._driver.getRawAxis(2)
                         * DriveConstants.MAX_ANGULAR_VELOCITY
-                        * ((self._driver.getRawAxis(3) + 1) * (1 - 0.4))
+                        * ((self._driver.getThrottle() + 1) * (1 - 0.4))
                         / 2
                         + 0.4
                     )
