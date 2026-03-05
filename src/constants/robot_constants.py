@@ -156,13 +156,10 @@ class DriveConstants:
         )
         / 12
     )  # kg·m^2 assuming sqaure robot
-    MAX_TRANSLATIONAL_VELOCITY = 0.2 * TunerConstants.speed_at_12_volts  # m/s
-    MAX_ACCL = 3  # m/s^2
-    MAX_ANGULAR_VELOCITY = rotationsToRadians(
-        0.75
-    )  # 3/4 of a rotation per second max angular velocity
-
-
+    MAX_TRANSLATIONAL_VELOCITY = TunerConstants.speed_at_12_volts
+    MAX_ACCL = TunerConstants.accl_at_12_volts  # m/s^2
+    MAX_ANGULAR_VELOCITY = TunerConstants.max_angular_velocity_at_12_volts
+    MAX_ANGULAR_ACCL = TunerConstants.max_angular_accl_at_12_volts
 class VisionConstants:
     FIELD_LAYOUT = AprilTagField.k2026RebuiltAndyMark
 
