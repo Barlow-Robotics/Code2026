@@ -31,8 +31,15 @@ class Turret(Subsystem):
 
         if not RobotBase.isReal():
             TURRET_MOTOR_CONFIG = TalonConfig(
-                kP=0.85, kI=0, kD=0.6, kF=0.0, kA=0.03, kV=0.11, brake_mode=True,
-                motion_magic_cruise_velocity=8, motion_magic_acceleration=30,
+                kP=0.85,
+                kI=0,
+                kD=0.6,
+                kF=0.0,
+                kA=0.03,
+                kV=0.11,
+                brake_mode=True,
+                motion_magic_cruise_velocity=8,
+                motion_magic_acceleration=30,
             )
         else:
             TURRET_MOTOR_CONFIG = TalonConfig(
@@ -103,7 +110,10 @@ class Turret(Subsystem):
         )
         PyKitLogger.recordOutput(
             "Turret/actual_turret_yaw",
-            float(self.turret_motor.get_position().value / TurretConstants.TURRET_GEARING) * SI.rotations_to_degrees,
+            float(
+                self.turret_motor.get_position().value / TurretConstants.TURRET_GEARING
+            )
+            * SI.rotations_to_degrees,
         )
         PyKitLogger.recordOutput(
             "Turret/hood_motor_voltage",
@@ -115,7 +125,7 @@ class Turret(Subsystem):
         )
         PyKitLogger.recordOutput(
             "Turret/turret_motor_current",
-            float(self.turret_motor.get_stator_current().value_as_double)
+            float(self.turret_motor.get_stator_current().value_as_double),
         )
 
     def _optimal_angle_calc(
@@ -142,7 +152,9 @@ class Turret(Subsystem):
         G = 9.81
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
             hub_pose = get_red_pose(Hub.TOP_CENTER_POINT.toTranslation2d())
-            hub_pose = Translation3d(hub_pose.X(), hub_pose.Y(), Hub.TOP_CENTER_POINT.Z())
+            hub_pose = Translation3d(
+                hub_pose.X(), hub_pose.Y(), Hub.TOP_CENTER_POINT.Z()
+            )
         else:
             hub_pose = Hub.TOP_CENTER_POINT
         if hub_pose is None:

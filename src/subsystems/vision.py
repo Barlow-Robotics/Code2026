@@ -101,7 +101,7 @@ class Vision(Subsystem):
                 robot_to_camera=VisionConstants.BACK_RIGHT_SWERVE_TO_ROBOT,
             ),
         ]
-        self._cameras = self._cameras[0:RobotFeatures.vision_camera_count]
+        self._cameras = self._cameras[0 : RobotFeatures.vision_camera_count]
 
         self.disabled_vision = False
         self._last_pose_estimate: Optional[Pose2d] = None

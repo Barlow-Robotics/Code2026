@@ -44,7 +44,7 @@ class TalonConfig:
     def _apply_settings(self, motor, inverted: bool = False):
         print("applying settings to Talon")
         talon_config = configs.TalonFXConfiguration()
-        
+
         # PID
         pid = talon_config.slot0
         pid.k_p = self.kP

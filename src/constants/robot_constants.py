@@ -1,3 +1,13 @@
+from robotpy_apriltag import AprilTagField
+from wpimath.geometry import Transform3d, Translation3d, Rotation3d
+from wpimath import units
+from wpimath.system.plant import DCMotor
+from constants.tuner_constants import TunerConstants
+from wpimath.units import rotationsToRadians
+from constants import SI
+from pathplannerlib.config import PIDConstants
+
+
 class RobotFeatures:
     HAS_DRIVETRAIN = True
     HAS_VISION = True
@@ -29,16 +39,6 @@ class RobotFeatures:
             cls.HAS_INTAKE = True
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
-
-
-from robotpy_apriltag import AprilTagField
-from wpimath.geometry import Transform3d, Translation3d, Rotation3d
-from wpimath import units
-from wpimath.system.plant import DCMotor
-from constants.tuner_constants import TunerConstants
-from wpimath.units import rotationsToRadians
-from constants import SI
-from pathplannerlib.config import PIDConstants
 
 
 class MotorIDs:
@@ -138,7 +138,9 @@ class FeederConstants:
 
 class DriveConstants:
     TOTAL_HEIGHT_INCHES_FROM_FLOOR = 3.8125
-    TOTAL_HEIGHT_METERS_FROM_FLOOR = SI.inches_to_meters * TOTAL_HEIGHT_INCHES_FROM_FLOOR
+    TOTAL_HEIGHT_METERS_FROM_FLOOR = (
+        SI.inches_to_meters * TOTAL_HEIGHT_INCHES_FROM_FLOOR
+    )
     TOTAL_WIDTH_INCHES = 27.0  # IN
     TOTAL_WIDTH_INCHES_BUMPERS = 34.5  # IN
     CENTER_WHEEL_TO_CENTER_WHEEL = 21.75  # IN
@@ -175,12 +177,13 @@ class VisionConstants:
     HALF_WIDTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)
     HALF_LENGTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)
     HEIGHT = units.inchesToMeters(12.625)
-    
+
     FRONT_LEFT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
             -2.5 * SI.inches_to_meters,
-            HALF_WIDTH + 0.5 * SI.inches_to_meters, # LEFT
-            DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR + SI.inches_to_meters * 22.0625,
+            HALF_WIDTH + 0.5 * SI.inches_to_meters,  # LEFT
+            DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR
+            + SI.inches_to_meters * 22.0625,
         ),
         Rotation3d(0, 0, units.degreesToRadians(0)),
     )
@@ -188,8 +191,9 @@ class VisionConstants:
     FRONT_RIGHT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
             -2.5 * SI.inches_to_meters,
-            -HALF_WIDTH - 0.5 * SI.inches_to_meters, # RIGHT
-            DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR + SI.inches_to_meters * 22.0625,
+            -HALF_WIDTH - 0.5 * SI.inches_to_meters,  # RIGHT
+            DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR
+            + SI.inches_to_meters * 22.0625,
         ),
         Rotation3d(0, 0, units.degreesToRadians(0)),
     )

@@ -32,14 +32,17 @@ class Controller:
                     container.drivetrain.movement.with_velocity_x(
                         -self._driver.getRawAxis(1)
                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                        * (((self._driver.getThrottle() + 1) * (1 - 0.4)) / 2 + 0.4)
                     )
                     .with_velocity_y(
                         -self._driver.getRawAxis(0)
                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                        * (((self._driver.getThrottle() + 1) * (1 - 0.4)) / 2 + 0.4)
                     )
                     .with_rotational_rate(
                         -self._driver.getRawAxis(2)
                         * DriveConstants.MAX_ANGULAR_VELOCITY
+                        * (((self._driver.getThrottle() + 1) * (1 - 0.4)) / 2 + 0.4)
                     )
                 )
             )
@@ -59,9 +62,7 @@ class Controller:
         self._operator.b().whileTrue(
             container.drivetrain.apply_request(
                 lambda: container.point.with_module_direction(
-                    Rotation2d(
-                        -self._operator.getLeftY(), -self._operator.getLeftX()
-                    )
+                    Rotation2d(-self._operator.getLeftY(), -self._operator.getLeftX())
                 )
             )
         )
@@ -70,20 +71,14 @@ class Controller:
         if RobotFeatures.HAS_INTAKE:
             self._driver.button(2).onTrue(container.intake.set_velocity_command)
             self._driver.button(4).onTrue(
-                container.intake.goto_position_command_factory(
-                    IntakePositions.DEPLOYED
-                )
+                container.intake.goto_position_command_factory(IntakePositions.DEPLOYED)
             )
         if RobotFeatures.HAS_VISION:
             self._driver.button(3).onTrue(container.vision.auto_align_command)
         if RobotFeatures.HAS_SHOOTER:
-            self._driver.button(4).onTrue(
-                container.shooter.start_flywheel_command
-            )
+            self._driver.button(4).onTrue(container.shooter.start_flywheel_command)
 
-        self._driver.button(12).onTrue(
-            cmd.runOnce(container.drivetrain.reset_gyro)
-        )
+        self._driver.button(12).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
 
         # SysId bindings (uncomment as needed)
         # self._driver.button(1).onTrue(
