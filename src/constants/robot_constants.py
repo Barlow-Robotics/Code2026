@@ -1,3 +1,34 @@
+class RobotFeatures:
+    HAS_DRIVETRAIN = True
+    HAS_VISION = True
+    HAS_SHOOTER = True
+    HAS_TURRET = True
+    HAS_INTAKE = True
+    HAS_SPINDEX = True
+    HAS_FEEDER = True
+
+    @classmethod
+    def configure(cls):
+        from wpilib import RobotBase
+
+        if RobotBase.isReal():
+            cls.HAS_DRIVETRAIN = True
+            cls.HAS_VISION = False
+            cls.HAS_SHOOTER = False
+            cls.HAS_TURRET = False
+            cls.HAS_INTAKE = False
+            cls.HAS_SPINDEX = False
+            cls.HAS_FEEDER = False
+        else:
+            cls.HAS_DRIVETRAIN = True
+            cls.HAS_VISION = True
+            cls.HAS_SHOOTER = True
+            cls.HAS_TURRET = True
+            cls.HAS_INTAKE = True
+            cls.HAS_SPINDEX = True
+            cls.HAS_FEEDER = True
+
+
 from robotpy_apriltag import AprilTagField
 from wpimath.geometry import Transform3d, Translation3d, Rotation3d
 from wpimath import units
@@ -6,10 +37,6 @@ from constants.tuner_constants import TunerConstants
 from wpimath.units import rotationsToRadians
 from constants import SI
 from pathplannerlib.config import PIDConstants
-
-
-class Constants:
-    robotTesting = True
 
 
 class MotorIDs:

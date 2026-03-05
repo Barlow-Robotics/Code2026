@@ -3,18 +3,19 @@
 # Open Source Software; you can modify and/or share it under the terms of
 # the WPILib BSD license file in the root directory of this project.
 #
+from commands2 import cmd
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import RobotConfig
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.logging import PathPlannerLogging
 from commands.shoot_command import ShootCommand
-from constants import TunerConstants, DriveConstants, AutoConstants, Constants
+from constants import TunerConstants, DriveConstants, AutoConstants, RobotFeatures
 from utils import SwerveTelemetry
 
 from phoenix6 import swerve
 
 from core.controller import Controller
-from wpilib import DriverStation, RobotBase, SendableChooser
+from wpilib import DriverStation, SendableChooser
 from utils import should_flip
 import wpilib
 from pykit.logger import Logger as PyKitLogger
@@ -30,6 +31,7 @@ class RobotContainer:
     """
 
     def __init__(self) -> None:
+        RobotFeatures.configure()
         DriverStation.silenceJoystickConnectionWarning(True)
 
         # Swerve drive requests
@@ -37,59 +39,75 @@ class RobotContainer:
         self.point = swerve.requests.PointWheelsAt()
 
         # Subsystems
-        if Constants.robotTesting and RobotBase.isReal():
-            from subsystems import Vision
-            # self.intake = Intake()
-            self.drivetrain = TunerConstants.create_drivetrain()
+        self.drivetrain = TunerConstants.create_drivetrain()
+
+        self.vision = None
+        self.shooter = None
+        self.turret = None
+        self.intake = None
+        self.spindex = None
+        self.feeder = None
+
+        from subsystems import Vision, Shooter, Turret, Intake, Spindex, Feeder
+
+        if RobotFeatures.HAS_VISION:
             self.vision = Vision(drive_sub=self.drivetrain)
-            self.controller = Controller(self)
-
-        else:
-            from subsystems import Intake, Shooter, Turret, Spindex, Feeder, Vision
-
-            self.drivetrain = TunerConstants.create_drivetrain()
-
+        if RobotFeatures.HAS_SHOOTER:
             self.shooter = Shooter()
+        if RobotFeatures.HAS_TURRET:
             self.turret = Turret(driveSub=self.drivetrain)
+        if RobotFeatures.HAS_INTAKE:
             self.intake = Intake()
+        if RobotFeatures.HAS_SPINDEX:
             self.spindex = Spindex()
+        if RobotFeatures.HAS_FEEDER:
             self.feeder = Feeder()
-            self.vision = Vision(drive_sub=self.drivetrain)
 
-            # Telemetry
-            self._swerve_telemetry = SwerveTelemetry(
-                DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-            )
-            self.drivetrain.register_telemetry(
-                lambda state: self._swerve_telemetry.telemeterize(state)
-            )
-            AutoBuilder.configure(
-                self.drivetrain.get_pose,
-                self.drivetrain.reset_odometry_auto,
-                self.drivetrain.get_speeds,
-                lambda spds, ffs: self.drivetrain.set_robot_centric_velocities(spds),
-                PPHolonomicDriveController(
-                    AutoConstants.auto_translation_pid,
-                    AutoConstants.auto_rotation_pid,
-                    AutoConstants.period,
-                ),
-                RobotConfig.fromGUISettings(),
-                should_flip,
-                self.drivetrain,
-            )
+        # Telemetry
+        self._swerve_telemetry = SwerveTelemetry(
+            DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+        )
+        self.drivetrain.register_telemetry(
+            lambda state: self._swerve_telemetry.telemeterize(state)
+        )
+        AutoBuilder.configure(
+            self.drivetrain.get_pose,
+            self.drivetrain.reset_odometry_auto,
+            self.drivetrain.get_speeds,
+            lambda spds, ffs: self.drivetrain.set_robot_centric_velocities(spds),
+            PPHolonomicDriveController(
+                AutoConstants.auto_translation_pid,
+                AutoConstants.auto_rotation_pid,
+                AutoConstants.period,
+            ),
+            RobotConfig.fromGUISettings(),
+            should_flip,
+            self.drivetrain,
+        )
 
-            # Controller bindings
-            self.controller = Controller(self)
-            self.create_commands()
-            self.configure_autos()
+        # Controller bindings
+        self.controller = Controller(self)
+        self.create_commands()
+        self.configure_autos()
 
     def configure_autos(self):
 
         self.auto_selection = SendableChooser()
 
-        self.auto_selection.setDefaultOption(
-            "HP_Intake_Center_Pieces", HP_Intake_Center_Pieces(self).get_command()
-        )
+        if (
+            RobotFeatures.HAS_INTAKE
+            and RobotFeatures.HAS_SHOOTER
+            and RobotFeatures.HAS_FEEDER
+            and RobotFeatures.HAS_SPINDEX
+        ):
+            self.auto_selection.setDefaultOption(
+                "HP_Intake_Center_Pieces",
+                HP_Intake_Center_Pieces(self).get_command(),
+            )
+        else:
+            self.auto_selection.setDefaultOption(
+                "Leave", Leave_Shoot(self).get_command()
+            )
 
         self.auto_selection.addOption("Leave", Leave_Shoot(self).get_command())
 
@@ -113,6 +131,13 @@ class RobotContainer:
         )
 
     def create_commands(self):
-        self.shoot_command_factory = lambda: ShootCommand(
-            self.shooter, self.feeder, self.spindex
-        )
+        if (
+            RobotFeatures.HAS_SHOOTER
+            and RobotFeatures.HAS_FEEDER
+            and RobotFeatures.HAS_SPINDEX
+        ):
+            self.shoot_command_factory = lambda: ShootCommand(
+                self.shooter, self.feeder, self.spindex
+            )
+        else:
+            self.shoot_command_factory = lambda: cmd.none()
