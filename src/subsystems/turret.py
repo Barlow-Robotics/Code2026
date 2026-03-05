@@ -1,7 +1,8 @@
 from commands2 import Subsystem
 from commands2.sysid import SysIdRoutine
 from phoenix6 import controls
-from wpilib import RobotBase
+from wpilib import DriverStation, RobotBase
+from wpimath.geometry import Translation3d
 from constants.robot_constants import MotorIDs
 from subsystems import Drivetrain
 from constants import Hub
@@ -12,7 +13,7 @@ from pykit.logger import Logger as PyKitLogger
 
 from utils.talon_config import TalonConfig
 from phoenix6.hardware import TalonFX
-from utils import generateSysIdProfile
+from utils import generateSysIdProfile, get_red_pose
 
 
 class Turret(Subsystem):
@@ -133,8 +134,15 @@ class Turret(Subsystem):
             return -1, -1, -1
 
         G = 9.81
-        hub_pose = Hub.TOP_CENTER_POINT
-
+        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+            hub_pose = get_red_pose(Hub.TOP_CENTER_POINT.toTranslation2d())
+            hub_pose = Translation3d(hub_pose.X(), hub_pose.Y(), Hub.TOP_CENTER_POINT.Z())
+        else:
+            hub_pose = Hub.TOP_CENTER_POINT
+        if hub_pose is None:
+            PyKitLogger.recordOutput("Turret/calc_valid", False)
+            PyKitLogger.recordOutput("Turret/calc_failure_reason", "hub_pose_is_none")
+            return -1, -1, -1
         dx = hub_pose.X() - robot_pose.X()
         dy = hub_pose.Y() - robot_pose.Y()
         dz = hub_pose.Z() - TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M
