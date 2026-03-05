@@ -29,12 +29,14 @@ class Turret(Subsystem):
                 kP=10, kI=0, kD=6, kF=0, kA=0, brake_mode=True
             )
 
-        TURRET_MOTOR_CONFIG = TalonConfig(
-            kP=0.2, kI=0, kD=0, kF=0, kA=0, brake_mode=True
-        )
         if not RobotBase.isReal():
             TURRET_MOTOR_CONFIG = TalonConfig(
-                kP=10, kI=0, kD=10, kF=0, kA=1, brake_mode=True
+                kP=0.85, kI=0, kD=0.6, kF=0.0, kA=0.03, kV=0.11, brake_mode=True,
+                motion_magic_cruise_velocity=8, motion_magic_acceleration=30,
+            )
+        else:
+            TURRET_MOTOR_CONFIG = TalonConfig(
+                kP=0.2, kI=0, kD=0, kF=0, kA=0, brake_mode=True
             )
 
         self.hood_motor = TalonFX(MotorIDs.motor_id_hood)
@@ -73,7 +75,7 @@ class Turret(Subsystem):
         self.target_turret_yaw = angle_deg
         self.turret_motor.set_control(
             self._motion_magic_position_voltage_turret.with_position(
-                SI.degrees_to_rotations * angle_deg
+                SI.degrees_to_rotations * angle_deg * TurretConstants.TURRET_GEARING
             )
         )
 
@@ -101,7 +103,7 @@ class Turret(Subsystem):
         )
         PyKitLogger.recordOutput(
             "Turret/actual_turret_yaw",
-            float(self.turret_motor.get_position().value) * SI.rotations_to_degrees,
+            float(self.turret_motor.get_position().value / TurretConstants.TURRET_GEARING) * SI.rotations_to_degrees,
         )
         PyKitLogger.recordOutput(
             "Turret/hood_motor_voltage",
@@ -110,6 +112,10 @@ class Turret(Subsystem):
         PyKitLogger.recordOutput(
             "Turret/turret_motor_voltage",
             float(self.turret_motor.get_motor_voltage().value_as_double),
+        )
+        PyKitLogger.recordOutput(
+            "Turret/turret_motor_current",
+            float(self.turret_motor.get_stator_current().value_as_double)
         )
 
     def _optimal_angle_calc(

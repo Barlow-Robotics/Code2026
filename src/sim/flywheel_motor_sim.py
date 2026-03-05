@@ -13,6 +13,7 @@ class FlywheelMotorSim:
         self, motor: TalonFX, motor_model: DCMotor, gearing: float, moi: float
     ):
         self._sim_state = motor.sim_state
+        self._gearing = gearing
         plant = LinearSystemId.flywheelSystem(motor_model, moi, gearing)
         self._flywheel = FlywheelSim(plant, motor_model)
         self._position_rot = 0.0
@@ -25,8 +26,8 @@ class FlywheelMotorSim:
         velocity_rps = radiansToRotations(self._flywheel.getAngularVelocity())
         self._position_rot += velocity_rps * tm_diff
 
-        self._sim_state.set_raw_rotor_position(self._position_rot)
-        self._sim_state.set_rotor_velocity(velocity_rps)
+        self._sim_state.set_raw_rotor_position(self._position_rot * self._gearing)
+        self._sim_state.set_rotor_velocity(velocity_rps * self._gearing)
 
 
 class ArmMotorSim:
@@ -42,6 +43,7 @@ class ArmMotorSim:
         starting_angle: float = 0.0,
     ):
         self._sim_state = motor.sim_state
+        self._gearing = gearing
         plant = LinearSystemId.singleJointedArmSystem(motor_model, moi, gearing)
         self._arm = SingleJointedArmSim(
             plant,
@@ -62,8 +64,8 @@ class ArmMotorSim:
         velocity_rps = radiansToRotations(self._arm.getVelocity())
         position_rot = radiansToRotations(self._arm.getAngle())
 
-        self._sim_state.set_raw_rotor_position(position_rot)
-        self._sim_state.set_rotor_velocity(velocity_rps)
+        self._sim_state.set_raw_rotor_position(position_rot * self._gearing)
+        self._sim_state.set_rotor_velocity(velocity_rps * self._gearing)
 
 
 class FlywheelMotorSimSparkFlex:

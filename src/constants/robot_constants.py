@@ -108,12 +108,12 @@ class ShooterConstants:
 
 class TurretConstants:
     TURRET_MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
-    TURRET_GEARING = 1.0  # TODO: measure actual gear ratio
-    TURRET_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
+    TURRET_GEARING = 10.0  # TODO: measure actual gear ratio
+    TURRET_MOI = 0.4  # TODO: calculate from roller mass/geometry (kg*m^2)
 
     HOOD_MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
     HOOD_GEARING = 1.0  # TODO: measure actual gear ratio
-    HOOD_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
+    HOOD_MOI = 0.1  # TODO: calculate from roller mass/geometry (kg*m^2)
 
     SHOOTER_HEIGHT_FOR_FUEL_IN = 20.57
     SHOOTER_HEIGHT_FOR_FUEL_M = 20.57 * SI.inches_to_meters
