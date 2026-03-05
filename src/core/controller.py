@@ -76,10 +76,39 @@ class Controller:
             )
         if RobotFeatures.HAS_VISION:
             self._driver.button(3).onTrue(container.vision.auto_align_command)
+
         if RobotFeatures.HAS_SHOOTER:
             self._driver.button(4).onTrue(
                 container.shooter.start_flywheel_command
             )
+
+        # SysId bindings (uncomment as needed)
+        # self._driver.button(1).onTrue(
+        #     container.shooter.sysIdDynamicTurret(SysIdRoutine.Direction.kForward)
+        # )
+        # self._driver.button(2).onTrue(
+        #     container.shooter.sysIdDynamicTurret(SysIdRoutine.Direction.kReverse)
+        # )
+        # self._driver.button(3).onTrue(
+        #     container.shooter.sysIdQuasistaticTurret(
+        #         SysIdRoutine.Direction.kForward
+        #     )
+        # )
+        # self._driver.button(4).onTrue(
+        #     container.shooter.sysIdQuasistaticTurret(
+        #         SysIdRoutine.Direction.kReverse
+        #     )
+        # )
+        # self._operator.button(3).onTrue(
+        #     container.shooter.sysIdDynamicHood(SysIdRoutine.Direction.kForward)
+        # )
+        # self._operator.button(4).onTrue(
+        #     container.shooter.sysIdDynamicHood(SysIdRoutine.Direction.kReverse)
+        # )
+        # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse))
+        # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward))
+        # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse))
+        # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward))
 
         # Periodically warn about missing controllers during teleop
         Trigger(DriverStation.isTeleopEnabled).whileTrue(
