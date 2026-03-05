@@ -9,7 +9,7 @@ from robotpy_apriltag import AprilTagFieldLayout
 from wpilib._wpilib import RobotBase
 from wpimath.geometry import Pose2d, Rotation2d, Transform3d
 from wpilib import DriverStation
-from constants import SI, VisionConstants
+from constants import SI, VisionConstants, RobotFeatures
 from subsystems import Drivetrain
 from commands2 import Subsystem, cmd
 from commands import FollowTrajectoryCommand
@@ -69,23 +69,23 @@ class Vision(Subsystem):
 
         self._cameras: List[_CameraConfig] = [
             _CameraConfig(
-                camera=PhotonCamera(VisionConstants.FRONT_LEFT_SWERVE_NAME),
+                camera=PhotonCamera(VisionConstants.CAMERA_1_NAME),
                 estimator=PhotonPoseEstimator(
                     field_layout, VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT
                 ),
-                name="front_left_swerve",
+                name="left_cam_swerve",
                 robot_to_camera=VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT,
             ),
             _CameraConfig(
-                camera=PhotonCamera(VisionConstants.FRONT_RIGHT_SWERVE_NAME),
+                camera=PhotonCamera(VisionConstants.CAMERA_2_NAME),
                 estimator=PhotonPoseEstimator(
                     field_layout, VisionConstants.FRONT_RIGHT_SWERVE_TO_ROBOT
                 ),
-                name="front_right_swerve",
+                name="right_cam_swerve",
                 robot_to_camera=VisionConstants.FRONT_RIGHT_SWERVE_TO_ROBOT,
             ),
             _CameraConfig(
-                camera=PhotonCamera(VisionConstants.BACK_LEFT_SWERVE_NAME),
+                camera=PhotonCamera(VisionConstants.CAMERA_3_NAME),
                 estimator=PhotonPoseEstimator(
                     field_layout, VisionConstants.BACK_LEFT_SWERVE_TO_ROBOT
                 ),
@@ -93,7 +93,7 @@ class Vision(Subsystem):
                 robot_to_camera=VisionConstants.BACK_LEFT_SWERVE_TO_ROBOT,
             ),
             _CameraConfig(
-                camera=PhotonCamera(VisionConstants.BACK_RIGHT_SWERVE_NAME),
+                camera=PhotonCamera(VisionConstants.CAMERA_4_NAME),
                 estimator=PhotonPoseEstimator(
                     field_layout, VisionConstants.BACK_RIGHT_SWERVE_TO_ROBOT
                 ),
@@ -101,6 +101,7 @@ class Vision(Subsystem):
                 robot_to_camera=VisionConstants.BACK_RIGHT_SWERVE_TO_ROBOT,
             ),
         ]
+        self._cameras = self._cameras[0:RobotFeatures.vision_camera_count]
 
         self.disabled_vision = False
         self._last_pose_estimate: Optional[Pose2d] = None

@@ -14,6 +14,7 @@ class RobotFeatures:
         if RobotBase.isReal():
             cls.HAS_DRIVETRAIN = True
             cls.HAS_VISION = True
+            cls.vision_camera_count = 2
             cls.HAS_SHOOTER = False
             cls.HAS_TURRET = False
             cls.HAS_INTAKE = False
@@ -21,6 +22,7 @@ class RobotFeatures:
             cls.HAS_FEEDER = False
         else:
             cls.HAS_DRIVETRAIN = True
+            cls.vision_camera_count = 4
             cls.HAS_VISION = True
             cls.HAS_SHOOTER = True
             cls.HAS_TURRET = True
@@ -135,6 +137,8 @@ class FeederConstants:
 
 
 class DriveConstants:
+    TOTAL_HEIGHT_INCHES_FROM_FLOOR = 3.8125
+    TOTAL_HEIGHT_METERS_FROM_FLOOR = SI.inches_to_meters * TOTAL_HEIGHT_INCHES_FROM_FLOOR
     TOTAL_WIDTH_INCHES = 27.0  # IN
     TOTAL_WIDTH_INCHES_BUMPERS = 34.5  # IN
     CENTER_WHEEL_TO_CENTER_WHEEL = 21.75  # IN
@@ -161,33 +165,33 @@ class VisionConstants:
     FIELD_LAYOUT = AprilTagField.k2026RebuiltAndyMark
 
     # Camera configuration
-    BACK_LEFT_SWERVE_NAME = "Back_Left_Swerve"
-    FRONT_LEFT_SWERVE_NAME = "Front_Left_Swerve"
-    BACK_RIGHT_SWERVE_NAME = "Back_Right_Swerve"
-    FRONT_RIGHT_SWERVE_NAME = "Front_Right_Swerve"
+    CAMERA_1_NAME = "Left_Cam_Swerve"
+    CAMERA_2_NAME = "Right_Cam_Swerve"
+    CAMERA_3_NAME = "Back_Left_Swerve"
+    CAMERA_4_NAME = "Back_Right_Swerve"
 
     VISION_SIM = True
 
     HALF_WIDTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)
     HALF_LENGTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)
     HEIGHT = units.inchesToMeters(12.625)
-
+    
     FRONT_LEFT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
-            HALF_LENGTH,
-            HALF_WIDTH,
-            HEIGHT,
+            -2.5 * SI.inches_to_meters,
+            HALF_WIDTH + 0.5 * SI.inches_to_meters, # LEFT
+            DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR + SI.inches_to_meters * 22.0625,
         ),
-        Rotation3d(0, 0, units.degreesToRadians(45)),
+        Rotation3d(0, 0, units.degreesToRadians(0)),
     )
 
     FRONT_RIGHT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
-            HALF_LENGTH,
-            -HALF_WIDTH,
-            HEIGHT,
+            -2.5 * SI.inches_to_meters,
+            -HALF_WIDTH - 0.5 * SI.inches_to_meters, # RIGHT
+            DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR + SI.inches_to_meters * 22.0625,
         ),
-        Rotation3d(0, 0, units.degreesToRadians(-45)),
+        Rotation3d(0, 0, units.degreesToRadians(0)),
     )
 
     BACK_LEFT_SWERVE_TO_ROBOT = Transform3d(
