@@ -82,7 +82,7 @@ class Controller:
             )
 
         self._driver.button(12).onTrue(
-            cmd.runOnce(lambda: container.drivetrain.reset_gyro)
+            cmd.runOnce(container.drivetrain.reset_gyro)
         )
 
         # SysId bindings (uncomment as needed)
