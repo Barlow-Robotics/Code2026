@@ -7,7 +7,7 @@ from wpilib import DriverStation
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Pose2d, Rotation2d
 
-from constants import TunerSwerveDrivetrain, DriveConstants
+from constants import SI, TunerSwerveDrivetrain, DriveConstants
 import ntcore
 from wpimath.kinematics import ChassisSpeeds
 
@@ -385,5 +385,4 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         )
 
     def reset_gyro(self):
-        pose = self.get_pose()
-        self.reset_pose(Pose2d(pose.X, pose.Y, Rotation2d(0 if DriverStation.getAlliance() == DriverStation.Alliance.kBlue else 180)))
+        self.reset_rotation(Rotation2d(0 if DriverStation.getAlliance() == DriverStation.Alliance.kBlue else 180 * SI.degrees_to_radians))

@@ -67,7 +67,7 @@ class Controller:
                 )
             )
             self._driver.button(3).onTrue(container.vision.auto_align_command)
-            self._driver.button(12).onTrue(lambda: container.drivetrain.reset_gyro())
+            self._driver.button(12).onTrue(cmd.runOnce(lambda: container.drivetrain.reset_gyro))
 
         else:
             # Drivetrain default command (field-centric drive)
