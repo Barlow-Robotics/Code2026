@@ -1,13 +1,3 @@
-from robotpy_apriltag import AprilTagField
-from wpimath.geometry import Transform3d, Translation3d, Rotation3d
-from wpimath import units
-from wpimath.system.plant import DCMotor
-from constants.tuner_constants import TunerConstants
-from wpimath.units import rotationsToRadians
-from constants import SI
-from pathplannerlib.config import PIDConstants
-
-
 class RobotFeatures:
     HAS_DRIVETRAIN = True
     HAS_VISION = True
@@ -37,6 +27,16 @@ class RobotFeatures:
             cls.HAS_INTAKE = True
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
+
+
+from robotpy_apriltag import AprilTagField
+from wpimath.geometry import Transform3d, Translation3d, Rotation3d
+from wpimath import units
+from wpimath.system.plant import DCMotor
+from constants.tuner_constants import TunerConstants
+from wpimath.units import rotationsToRadians
+from constants import SI
+from pathplannerlib.config import PIDConstants
 
 
 class MotorIDs:

@@ -385,10 +385,4 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         )
 
     def reset_gyro(self):
-        self.reset_rotation(
-            Rotation2d(
-                0
-                if DriverStation.getAlliance() == DriverStation.Alliance.kBlue
-                else 180 * SI.degrees_to_radians
-            )
-        )
+        self.reset_rotation(Rotation2d(0 if DriverStation.getAlliance() == DriverStation.Alliance.kBlue else 180 * SI.degrees_to_radians))
