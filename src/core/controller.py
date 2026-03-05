@@ -30,11 +30,11 @@ class Controller:
             container.drivetrain.apply_request(
                 lambda: (
                     container.drivetrain.movement.with_velocity_x(
-                        self._driver.getRawAxis(1)
+                        -self._driver.getRawAxis(1)
                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
                     )
                     .with_velocity_y(
-                        self._driver.getRawAxis(0)
+                        -self._driver.getRawAxis(0)
                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
                     )
                     .with_rotational_rate(
