@@ -3,7 +3,6 @@ from wpimath.geometry import Transform3d, Translation3d, Rotation3d
 from wpimath import units
 from wpimath.system.plant import DCMotor
 from constants.tuner_constants import TunerConstants
-from wpimath.units import rotationsToRadians
 from constants import SI
 from pathplannerlib.config import PIDConstants
 
@@ -160,6 +159,8 @@ class DriveConstants:
     MAX_ACCL = TunerConstants.accl_at_12_volts  # m/s^2
     MAX_ANGULAR_VELOCITY = TunerConstants.max_angular_velocity_at_12_volts
     MAX_ANGULAR_ACCL = TunerConstants.max_angular_accl_at_12_volts
+
+
 class VisionConstants:
     FIELD_LAYOUT = AprilTagField.k2026RebuiltAndyMark
 
