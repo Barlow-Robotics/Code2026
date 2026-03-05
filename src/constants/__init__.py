@@ -1,3 +1,4 @@
+from .robot_constants import RobotFeatures as RobotFeatures
 from .robot_constants import MotorIDs as MotorIDs
 from .robot_constants import DriveConstants as DriveConstants
 from .robot_constants import VisionConstants as VisionConstants
@@ -10,4 +11,3 @@ from .robot_constants import AutoConstants as AutoConstants
 from .field_constants import Hub as Hub
 from .robot_constants import ShooterConstants as ShooterConstants
 from .robot_constants import TurretConstants as TurretConstants
-from .robot_constants import Constants as Constants

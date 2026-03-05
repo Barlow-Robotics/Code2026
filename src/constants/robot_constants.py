@@ -3,13 +3,41 @@ from wpimath.geometry import Transform3d, Translation3d, Rotation3d
 from wpimath import units
 from wpimath.system.plant import DCMotor
 from constants.tuner_constants import TunerConstants
-from wpimath.units import rotationsToRadians
 from constants import SI
 from pathplannerlib.config import PIDConstants
 
 
-class Constants:
-    robotTesting = False
+class RobotFeatures:
+    HAS_DRIVETRAIN = True
+    HAS_VISION = True
+    HAS_SHOOTER = True
+    HAS_TURRET = True
+    HAS_INTAKE = True
+    HAS_SPINDEX = True
+    HAS_FEEDER = True
+
+    @classmethod
+    def configure(cls):
+        from wpilib import RobotBase
+
+        if RobotBase.isReal():
+            cls.HAS_DRIVETRAIN = True
+            cls.HAS_VISION = True
+            cls.vision_camera_count = 2
+            cls.HAS_SHOOTER = False
+            cls.HAS_TURRET = False
+            cls.HAS_INTAKE = False
+            cls.HAS_SPINDEX = False
+            cls.HAS_FEEDER = False
+        else:
+            cls.HAS_DRIVETRAIN = True
+            cls.vision_camera_count = 4
+            cls.HAS_VISION = True
+            cls.HAS_SHOOTER = True
+            cls.HAS_TURRET = True
+            cls.HAS_INTAKE = True
+            cls.HAS_SPINDEX = True
+            cls.HAS_FEEDER = True
 
 
 class MotorIDs:
@@ -79,12 +107,12 @@ class ShooterConstants:
 
 class TurretConstants:
     TURRET_MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
-    TURRET_GEARING = 1.0  # TODO: measure actual gear ratio
-    TURRET_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
+    TURRET_GEARING = 10.0  # TODO: measure actual gear ratio
+    TURRET_MOI = 0.4  # TODO: calculate from roller mass/geometry (kg*m^2)
 
     HOOD_MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
     HOOD_GEARING = 1.0  # TODO: measure actual gear ratio
-    HOOD_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
+    HOOD_MOI = 0.1  # TODO: calculate from roller mass/geometry (kg*m^2)
 
     SHOOTER_HEIGHT_FOR_FUEL_IN = 20.57
     SHOOTER_HEIGHT_FOR_FUEL_M = 20.57 * SI.inches_to_meters
@@ -108,6 +136,10 @@ class FeederConstants:
 
 
 class DriveConstants:
+    TOTAL_HEIGHT_INCHES_FROM_FLOOR = 3.8125
+    TOTAL_HEIGHT_METERS_FROM_FLOOR = (
+        SI.inches_to_meters * TOTAL_HEIGHT_INCHES_FROM_FLOOR
+    )
     TOTAL_WIDTH_INCHES = 27.0  # IN
     TOTAL_WIDTH_INCHES_BUMPERS = 34.5  # IN
     CENTER_WHEEL_TO_CENTER_WHEEL = 21.75  # IN
@@ -123,21 +155,20 @@ class DriveConstants:
         )
         / 12
     )  # kg·m^2 assuming sqaure robot
-    MAX_TRANSLATIONAL_VELOCITY = 1.0 * TunerConstants.speed_at_12_volts  # m/s
-    MAX_ACCL = 3  # m/s^2
-    MAX_ANGULAR_VELOCITY = rotationsToRadians(
-        0.75
-    )  # 3/4 of a rotation per second max angular velocity
+    MAX_TRANSLATIONAL_VELOCITY = TunerConstants.speed_at_12_volts
+    MAX_ACCL = TunerConstants.accl_at_12_volts  # m/s^2
+    MAX_ANGULAR_VELOCITY = TunerConstants.max_angular_velocity_at_12_volts
+    MAX_ANGULAR_ACCL = TunerConstants.max_angular_accl_at_12_volts
 
 
 class VisionConstants:
     FIELD_LAYOUT = AprilTagField.k2026RebuiltAndyMark
 
     # Camera configuration
-    BACK_LEFT_SWERVE_NAME = "Back_Left_Swerve"
-    FRONT_LEFT_SWERVE_NAME = "Front_Left_Swerve"
-    BACK_RIGHT_SWERVE_NAME = "Back_Right_Swerve"
-    FRONT_RIGHT_SWERVE_NAME = "Front_Right_Swerve"
+    CAMERA_1_NAME = "Left_Cam_Swerve"
+    CAMERA_2_NAME = "Right_Cam_Swerve"
+    CAMERA_3_NAME = "Back_Left_Swerve"
+    CAMERA_4_NAME = "Back_Right_Swerve"
 
     VISION_SIM = True
 
@@ -147,20 +178,22 @@ class VisionConstants:
 
     FRONT_LEFT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
-            HALF_LENGTH,
-            HALF_WIDTH,
-            HEIGHT,
+            -2.5 * SI.inches_to_meters,
+            HALF_WIDTH + 0.5 * SI.inches_to_meters,  # LEFT
+            DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR
+            + SI.inches_to_meters * 22.0625,
         ),
-        Rotation3d(0, 0, units.degreesToRadians(45)),
+        Rotation3d(0, 0, units.degreesToRadians(0)),
     )
 
     FRONT_RIGHT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
-            HALF_LENGTH,
-            -HALF_WIDTH,
-            HEIGHT,
+            -2.5 * SI.inches_to_meters,
+            -HALF_WIDTH - 0.5 * SI.inches_to_meters,  # RIGHT
+            DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR
+            + SI.inches_to_meters * 22.0625,
         ),
-        Rotation3d(0, 0, units.degreesToRadians(-45)),
+        Rotation3d(0, 0, units.degreesToRadians(0)),
     )
 
     BACK_LEFT_SWERVE_TO_ROBOT = Transform3d(
