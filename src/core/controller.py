@@ -76,11 +76,14 @@ class Controller:
             )
         if RobotFeatures.HAS_VISION:
             self._driver.button(3).onTrue(container.vision.auto_align_command)
-
         if RobotFeatures.HAS_SHOOTER:
             self._driver.button(4).onTrue(
                 container.shooter.start_flywheel_command
             )
+
+        self._driver.button(12).onTrue(
+            cmd.runOnce(lambda: container.drivetrain.reset_gyro)
+        )
 
         # SysId bindings (uncomment as needed)
         # self._driver.button(1).onTrue(
