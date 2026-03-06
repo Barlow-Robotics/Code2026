@@ -47,7 +47,7 @@ class TalonConfig:
         print("applying settings to Talon")
         talon_config = configs.TalonFXConfiguration()
         # PID
-        talon_config.feedback.sensor_to_mechanism_ratio = self.gear_ratio 
+        talon_config.feedback.sensor_to_mechanism_ratio = self.gear_ratio
         pid = talon_config.slot0
         pid.k_p = self.kP
         pid.k_i = self.kI
