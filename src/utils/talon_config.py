@@ -26,6 +26,7 @@ class TalonConfig:
         motion_magic_cruise_velocity=20,
         motion_magic_acceleration=600,
         motion_magic_jerk=6000,
+        gear_ratio=1,
     ):
         self.kP = kP
         self.kI = kI
@@ -40,12 +41,13 @@ class TalonConfig:
         self.motion_magic_cruise_velocity = motion_magic_cruise_velocity
         self.motion_magic_acceleration = motion_magic_acceleration
         self.motion_magic_jerk = motion_magic_jerk
+        self.gear_ratio = gear_ratio
 
     def _apply_settings(self, motor, inverted: bool = False):
         print("applying settings to Talon")
         talon_config = configs.TalonFXConfiguration()
-
         # PID
+        talon_config.feedback.sensor_to_mechanism_ratio = self.gear_ratio 
         pid = talon_config.slot0
         pid.k_p = self.kP
         pid.k_i = self.kI
