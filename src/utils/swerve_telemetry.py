@@ -1,5 +1,12 @@
 from phoenix6 import SignalLogger, swerve, units
-from wpilib import Color, Color8Bit, Mechanism2d, MechanismLigament2d, SmartDashboard
+from wpilib import (
+    Color,
+    Color8Bit,
+    Field2d,
+    Mechanism2d,
+    MechanismLigament2d,
+    SmartDashboard,
+)
 from wpimath.geometry import Pose2d
 from wpimath.kinematics import ChassisSpeeds, SwerveModulePosition, SwerveModuleState
 
@@ -9,6 +16,9 @@ from pykit.logger import Logger as PyKitLogger
 class SwerveTelemetry:
     def __init__(self, max_speed: units.meters_per_second):
         self._max_speed = max_speed
+
+        self._field = Field2d()
+        SmartDashboard.putData("Field", self._field)
 
         self._module_mechanisms: list[Mechanism2d] = [
             Mechanism2d(1, 1),
@@ -61,6 +71,7 @@ class SwerveTelemetry:
         )
 
         # Field2d for SmartDashboard/Shuffleboard
+        self._field.setRobotPose(state.pose)
         PyKitLogger.recordOutput("Pose/robotPose", state.pose)
 
         # Write to .hoot log file (keep for Phoenix Tuner X compatibility)
@@ -78,7 +89,6 @@ class SwerveTelemetry:
         SignalLogger.write_double(
             "DriveState/OdometryPeriod", state.odometry_period, "seconds"
         )
-        PyKitLogger.recordOutput(".type", "Field2d")
         for i, module_state in enumerate(state.module_states):
             self._module_speeds[i].setAngle(module_state.angle.degrees())
             self._module_directions[i].setAngle(module_state.angle.degrees())

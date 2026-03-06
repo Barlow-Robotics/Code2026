@@ -1,7 +1,7 @@
 from commands2 import Subsystem
 from commands2.sysid import SysIdRoutine
 from phoenix6 import controls
-from wpilib import DriverStation, RobotBase
+from wpilib import DriverStation, Mechanism2d, Color8Bit, RobotBase, SmartDashboard
 from wpimath.geometry import Translation3d
 from constants.robot_constants import MotorIDs
 from subsystems import Drivetrain
@@ -63,6 +63,22 @@ class Turret(Subsystem):
         self.target_hood_angle = 0.0
         self.target_turret_yaw = 0.0
 
+        # Mechanism2d — top-down view: base = robot heading, turret = yaw, length = hood
+        self.mechanism = Mechanism2d(3, 3)
+        turret_root = self.mechanism.getRoot("TurretRoot", 1.5, 1.5)
+
+        # Robot base — rotates with robot heading (0° = right)
+        self.base_ligament = turret_root.appendLigament(
+            "Base", 0.4, 0, 4, Color8Bit(100, 100, 100)
+        )
+
+        # Turret — rotates relative to base with turret yaw, length scales with hood angle
+        self.turret_ligament = self.base_ligament.appendLigament(
+            "Turret", 1.0, 0, 8, Color8Bit(0, 150, 255)
+        )
+
+        SmartDashboard.putData("Turret/Mechanism2d", self.mechanism)
+
         self.sys_id_routine_hood = generateSysIdProfile(
             self, self.hood_motor, name="Hood_Motor"
         )
@@ -98,6 +114,24 @@ class Turret(Subsystem):
 
     def periodic(self):
         self.set_target_hood_and_turret()
+
+        actual_turret_yaw = (
+            float(self.turret_motor.get_position().value / TurretConstants.TURRET_GEARING)
+            * SI.rotations_to_degrees
+        )
+        actual_hood_angle = (
+            float(self.hood_motor.get_position().value) * SI.rotations_to_degrees
+        )
+
+        # Update Mechanism2d
+        robot_pose = self.driveSub.get_pose()
+        if robot_pose is not None:
+            self.base_ligament.setAngle(robot_pose.rotation().degrees())
+        self.turret_ligament.setAngle(actual_turret_yaw)
+        # Hood angle controls turret length — 0° = min length, 90° = max length
+        hood_fraction = max(0, min(actual_hood_angle, 90)) / 90.0
+        self.turret_ligament.setLength(0.3 + hood_fraction * 0.9)
+
         PyKitLogger.recordOutput(
             "Turret/target_hood_angle", float(self.target_hood_angle)
         )
