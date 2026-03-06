@@ -116,7 +116,9 @@ class Turret(Subsystem):
         self.set_target_hood_and_turret()
 
         actual_turret_yaw = (
-            float(self.turret_motor.get_position().value / TurretConstants.TURRET_GEARING)
+            float(
+                self.turret_motor.get_position().value / TurretConstants.TURRET_GEARING
+            )
             * SI.rotations_to_degrees
         )
         actual_hood_angle = (

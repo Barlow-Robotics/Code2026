@@ -8,6 +8,7 @@ from commands2 import SequentialCommandGroup, ParallelCommandGroup
 
 if typing.TYPE_CHECKING:
     from core import RobotContainer
+from commands import IntakePositionCommand
 from subsystems import IntakePositions
 
 path_name = "Depot_intake_path"
@@ -26,15 +27,19 @@ class Depot_intake_center_path:
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[1]),
-                self.container.intake.goto_position_command_factory(
+                IntakePositionCommand(
+                    self.container.drivetrain,
+                    self.container.intake,
                     IntakePositions.DEPLOYED
-                ),
+                ).withTimeout(3),
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[2]),
-                self.container.intake.goto_position_command_factory(
+                IntakePositionCommand(
+                    self.container.drivetrain,
+                    self.container.intake,
                     IntakePositions.STOWED
-                ),
+                ).withTimeout(3),
             ),
             self.container.shoot_command_factory().withTimeout(5),
         )

@@ -4,3 +4,6 @@ from .follow_trajectory_command import (
 from .shoot_command import (
     ShootCommand as ShootCommand,
 )
+from .go_to_position_command import (
+    IntakePositionCommand as IntakePositionCommand,
+)

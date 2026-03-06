@@ -18,8 +18,6 @@ class IntakeSim:
             IntakeConstants.ARM_MOI,
         )
 
-
-
     def update_sim(self, now: float, tm_diff: float) -> None:
         self._roller_top.update(tm_diff)
         self._arm.update(tm_diff)

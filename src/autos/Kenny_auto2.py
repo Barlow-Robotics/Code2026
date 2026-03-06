@@ -8,9 +8,11 @@ from commands2 import SequentialCommandGroup, ParallelCommandGroup
 
 if typing.TYPE_CHECKING:
     from core import RobotContainer
+from commands import IntakePositionCommand
 from subsystems import IntakePositions
 
 path_name = "N_Kenny_Path"
+
 
 class Kenny_auto2:
     def __init__(self, container: "RobotContainer"):
@@ -26,30 +28,38 @@ class Kenny_auto2:
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[1]),
-                self.container.intake.goto_position_command_factory(
-                    IntakePositions.DEPLOYED
-                ),
+                IntakePositionCommand(
+                    self.container.drivetrain,
+                    self.container.intake,
+                    IntakePositions.DEPLOYED,
+                ).withTimeout(3),
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[2]),
-                self.container.intake.goto_position_command_factory(
-                    IntakePositions.STOWED
-                ),
+                IntakePositionCommand(
+                    self.container.drivetrain,
+                    self.container.intake,
+                    IntakePositions.STOWED,
+                ).withTimeout(3),
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[3]),
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[4]),
-                self.container.intake.goto_position_command_factory(
-                    IntakePositions.DEPLOYED
-                ),
+                IntakePositionCommand(
+                    self.container.drivetrain,
+                    self.container.intake,
+                    IntakePositions.DEPLOYED,
+                ).withTimeout(3),
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[5]),
-                self.container.intake.goto_position_command_factory(
-                    IntakePositions.STOWED
-                ),
+                IntakePositionCommand(
+                    self.container.drivetrain,
+                    self.container.intake,
+                    IntakePositions.STOWED,
+                ).withTimeout(3),
             ),
             self.container.shoot_command_factory().withTimeout(5),
         )

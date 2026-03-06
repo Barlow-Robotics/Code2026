@@ -21,6 +21,7 @@ class FollowTrajectoryCommand(Command):
         self.visionSub = visionSub
         self.trajectory = trajectory
         self.timer = Timer()
+        self.addRequirements(visionSub.drive_sub)
 
     def initialize(self):
         """Start the timer when the command is initialized."""

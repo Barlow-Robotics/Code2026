@@ -3,6 +3,7 @@ from pathplannerlib.path import PathPlannerPath
 from pathplannerlib.auto import AutoBuilder
 
 from autos import AutoRoutine
+from commands import IntakePositionCommand
 from constants import RobotFeatures
 
 from commands2 import SequentialCommandGroup, ParallelCommandGroup, cmd
@@ -23,12 +24,14 @@ class HP_Intake_Center_Pieces:
         if RobotFeatures.HAS_INTAKE:
             from subsystems import IntakePositions
 
-            deploy_cmd = self.container.intake.goto_position_command_factory(
-                IntakePositions.DEPLOYED
-            )
-            stow_cmd = self.container.intake.goto_position_command_factory(
-                IntakePositions.STOWED
-            )
+            deploy_cmd = IntakePositionCommand(
+                self.container.drivetrain,
+                self.container.intake,
+                IntakePositions.DEPLOYED,
+            ).withTimeout(3)
+            stow_cmd = IntakePositionCommand(
+                self.container.drivetrain, self.container.intake, IntakePositions.STOWED
+            ).withTimeout(3)
         else:
             deploy_cmd = cmd.none()
             stow_cmd = cmd.none()

@@ -9,6 +9,7 @@ import wpilib
 from phoenix6 import swerve
 from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
+from commands import IntakePositionCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
 
@@ -70,14 +71,22 @@ class Controller:
         # Subsystem button bindings (driver joystick)
         if RobotFeatures.HAS_INTAKE:
             current_speeds = container.drivetrain.get_speeds()
-            overall_velocity = (current_speeds.vx**2 + current_speeds.vy**2)**0.5
-            self._driver.button(2).onTrue(container.intake.go_to_velocity_command_factory(overall_velocity))
+            overall_velocity = (current_speeds.vx**2 + current_speeds.vy**2) ** 0.5
+            self._driver.button(2).onTrue(
+                container.intake.go_to_velocity_command_factory(overall_velocity)
+            )
             self._driver.button(4).onTrue(
-                container.intake.goto_position_command_factory(IntakePositions.DEPLOYED)
+                IntakePositionCommand(
+                    container.drivetrain, container.intake, IntakePositions.STOWED
+                )
             )
         if RobotFeatures.HAS_VISION:
             self._driver.button(3).onTrue(container.vision.auto_align_command)
-        if RobotFeatures.HAS_SHOOTER and RobotFeatures.HAS_FEEDER and RobotFeatures.HAS_SPINDEX:
+        if (
+            RobotFeatures.HAS_SHOOTER
+            and RobotFeatures.HAS_FEEDER
+            and RobotFeatures.HAS_SPINDEX
+        ):
             self._driver.button(5).whileTrue(container.shoot_command_factory())
 
         self._driver.button(12).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
