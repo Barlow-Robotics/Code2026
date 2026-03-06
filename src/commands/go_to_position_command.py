@@ -28,8 +28,6 @@ class IntakePositionCommand(Command):
             current_speeds = self.drive_sub.get_speeds()
             overall_velocity = (current_speeds.vx**2 + current_speeds.vy**2) ** 0.5
             self.intake_sub.set_velocity(overall_velocity)
-        else:
-            self.intake_sub.set_velocity(0)
 
     def isFinished(self):
         pass

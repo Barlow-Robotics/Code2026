@@ -77,6 +77,10 @@ class Controller:
             )
             self._driver.button(4).onTrue(
                 IntakePositionCommand(
+                    container.drivetrain, container.intake, IntakePositions.DEPLOYED
+                )
+            ).onFalse(
+                IntakePositionCommand(
                     container.drivetrain, container.intake, IntakePositions.STOWED
                 )
             )

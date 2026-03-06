@@ -144,6 +144,8 @@ class Intake(commands2.Subsystem):
         )
         if position == IntakePositions.DEPLOYED:
             self.set_velocity(current_velocity)
+        else:
+            self.stop()
         self.target_rot: float = arm_rot
 
     def _log_dataclass(self, prefix: str, data: object):
