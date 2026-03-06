@@ -15,7 +15,13 @@ from utils import SwerveTelemetry
 from phoenix6 import swerve
 
 from core.controller import Controller
-from wpilib import DriverStation, SendableChooser
+from wpilib import (
+    Color8Bit,
+    DriverStation,
+    Mechanism2d,
+    SendableChooser,
+    SmartDashboard,
+)
 from utils import should_flip
 import wpilib
 from pykit.logger import Logger as PyKitLogger
@@ -63,6 +69,9 @@ class RobotContainer:
         if RobotFeatures.HAS_FEEDER:
             self.feeder = Feeder()
 
+        # Combined shooter/feeder/spindex mechanism
+        self._setup_scoring_mechanism()
+
         # Telemetry
         self._swerve_telemetry = SwerveTelemetry(
             DriveConstants.MAX_TRANSLATIONAL_VELOCITY
@@ -86,8 +95,8 @@ class RobotContainer:
         )
 
         # Controller bindings
-        self.controller = Controller(self)
         self.create_commands()
+        self.controller = Controller(self)
         self.configure_autos()
 
     def configure_autos(self):
@@ -141,3 +150,50 @@ class RobotContainer:
             )
         else:
             self.shoot_command_factory = lambda: cmd.none()
+
+    def _setup_scoring_mechanism(self):
+        if not (self.spindex and self.feeder and self.shooter):
+            return
+
+        self.scoring_mechanism = Mechanism2d(3, 2)
+
+        # Spindex at (0.5, 0.5)
+        spindex_root = self.scoring_mechanism.getRoot("SpindexRoot", 0.5, 0.5)
+        self._spindex_ligament = spindex_root.appendLigament(
+            "Spindex", 0.3, 0, 6, Color8Bit(255, 255, 0)
+        )
+
+        # Feeder at (1.5, 0.5)
+        feeder_root = self.scoring_mechanism.getRoot("FeederRoot", 1.5, 0.5)
+        self._feeder_ligament = feeder_root.appendLigament(
+            "Feeder", 0.3, 0, 6, Color8Bit(0, 200, 0)
+        )
+
+        # Shooter at (2.5, 1.5)
+        shooter_root = self.scoring_mechanism.getRoot("ShooterRoot", 2.5, 1.5)
+        self._shooter_ligament = shooter_root.appendLigament(
+            "Shooter", 0.4, 0, 8, Color8Bit(255, 50, 50)
+        )
+
+        SmartDashboard.putData("Scoring/Mechanism2d", self.scoring_mechanism)
+
+        self._spindex_angle = 0.0
+        self._feeder_angle = 0.0
+        self._shooter_angle = 0.0
+
+    def update_scoring_mechanism(self):
+        if not hasattr(self, "scoring_mechanism"):
+            return
+        # Spin each ligament based on current motor velocity
+        spindex_vel = float(self.spindex.motor_spindex.get_velocity().value)
+        feeder_vel = float(self.feeder.motor_feeder_constant.get_velocity().value)
+        shooter_vel = self.shooter.get_current_rpm()
+
+        # Scale velocities to visible rotation rates (degrees per cycle)
+        self._spindex_angle += spindex_vel * 3.6
+        self._feeder_angle += feeder_vel * 3.6
+        self._shooter_angle += shooter_vel * 0.12
+
+        self._spindex_ligament.setAngle(self._spindex_angle % 360)
+        self._feeder_ligament.setAngle(self._feeder_angle % 360)
+        self._shooter_ligament.setAngle(self._shooter_angle % 360)

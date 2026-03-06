@@ -75,8 +75,8 @@ class Controller:
             )
         if RobotFeatures.HAS_VISION:
             self._driver.button(3).onTrue(container.vision.auto_align_command)
-        if RobotFeatures.HAS_SHOOTER:
-            self._driver.button(4).onTrue(container.shooter.start_flywheel_command)
+        if RobotFeatures.HAS_SHOOTER and RobotFeatures.HAS_FEEDER and RobotFeatures.HAS_SPINDEX:
+            self._driver.button(5).whileTrue(container.shoot_command_factory())
 
         self._driver.button(12).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
 

@@ -64,6 +64,7 @@ class Robot(
         self._time_and_joystick_replay.update()
 
         commands2.CommandScheduler.getInstance().run()
+        self.container.update_scoring_mechanism()
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""
