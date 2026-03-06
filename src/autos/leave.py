@@ -8,7 +8,6 @@ from commands2 import SequentialCommandGroup, ParallelCommandGroup
 
 if typing.TYPE_CHECKING:
     from core import RobotContainer
-from subsystems import IntakePositions
 
 
 path_name = "Leave_Shoot"

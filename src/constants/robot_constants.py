@@ -5,6 +5,7 @@ from wpimath.system.plant import DCMotor
 from constants.tuner_constants import TunerConstants
 from constants import SI
 from pathplannerlib.config import PIDConstants
+import math
 
 
 class RobotFeatures:
@@ -65,32 +66,22 @@ class MotorIDs:
 
 class IntakeConstants:
     ROLLER_MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
-    ROLLER_GEARING = 4.0  # TODO: measure actual gear ratio
+    ROLLER_GEARING = 30 / 58  # BW: REAL GEAR RATIO IS 30:58, NOT 1:1
     ROLLER_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
-    ROLLER_CIRCUMFERENCE = (
-        1.374 * 3.14159
-    )  # TODO: measure actual roller diameter (inches)
+    # Diamater is 2in
+    ROLLER_CIRCUMFERENCE_IN = 2 * math.pi  # BW: REAL CIRCUMFRENCE IS 2IN * PI
+    ROLLER_CIRCUMFERENCE_M = (
+        2 * math.pi * SI.inches_to_meters
+    )  # BW: REAL CIRCUMFRENCE IS 2IN * PI
+
     ARM_MOTOR = DCMotor.krakenX60(1)
     ARM_GEARING = 1
     ARM_MOI = 0.01
-    HEAD_MOTOR = DCMotor.krakenX60(1)
-    HEAD_GEARING = 1
-    HEAD_MOI = 0.01
-    ARM_LENGTH = 10.5 * SI.inches_to_meters
-    ARM_MIN_ANGLE = 0.0 * SI.degrees_to_radians  # TODO: calibrate
-    ARM_MAX_ANGLE = 180.0 * SI.degrees_to_radians  # TODO: calibrate
-    ARM_STARTING_ANGLE = 90.0 * SI.degrees_to_radians  # TODO: calibrate
+    ARM_HOME_ROTATIONS = 0
+    ARM_STOWED_ROTATIONS = 0.5  # TODO: measure actual rotations
+    ARM_DEPLOYED_ROTATIONS = 1.0  # TODO: measure actual rotations
 
-    ARM_HOME_ROTATIONS = 90 * SI.degrees_to_rotations  # TODO: calibrate
-    ARM_DEPLOYED_ROTATIONS = (
-        180 * SI.degrees_to_rotations
-    )  # TODO: gear-ratio * target-angle
-    ARM_STOWED_ROTATIONS = 135 * SI.degrees_to_rotations  # TODO: calibrate
-    HEAD_HOME_ROTATIONS = 90 * SI.degrees_to_rotations  # TODO: calibrate
-    HEAD_DEPLOYED_ROTATIONS = 180 * SI.degrees_to_rotations  # TODO: calibrate
-    HEAD_STOWED_ROTATIONS = 135 * SI.degrees_to_rotations  # TODO: calibrate
-
-    INTAKE_VELOCITY_CONSTANT = 1  # ft/sec
+    INTAKE_VELOCITY_CONSTANT = 2.6  # Amplified from robot speed
 
     PID = {"kP": 0.11, "kI": 0, "kD": 0, "kF": 0, "kA": 0}  # TODO: tune PID
 

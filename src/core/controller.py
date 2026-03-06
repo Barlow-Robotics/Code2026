@@ -69,7 +69,9 @@ class Controller:
 
         # Subsystem button bindings (driver joystick)
         if RobotFeatures.HAS_INTAKE:
-            self._driver.button(2).onTrue(container.intake.set_velocity_command)
+            current_speeds = container.drivetrain.get_speeds()
+            overall_velocity = (current_speeds.vx**2 + current_speeds.vy**2)**0.5
+            self._driver.button(2).onTrue(container.intake.go_to_velocity_command_factory(overall_velocity))
             self._driver.button(4).onTrue(
                 container.intake.goto_position_command_factory(IntakePositions.DEPLOYED)
             )
