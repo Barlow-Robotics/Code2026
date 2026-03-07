@@ -55,10 +55,11 @@ RoboRIO: 10.45.72.2
 Vision: 10.45.72.201
 SSH into RoboRIO: admin@roboRIO-4572-frc.local
 
+We use L1 motors. 
 
 TODO at comp:
-AprilTagField.k2026RebuiltAndyMark or AprilTagField.k2026RebuiltWelded depending on comp. 
-Change motors from L2 to L1 or L3
-
-9. Need to update deploy/pathplanner/settings.json
-12. Update Constants 
+1. AprilTagField.k2026RebuiltAndyMark or AprilTagField.k2026RebuiltWelded depending on comp. 
+2. Need to update deploy/pathplanner/settings.json
+3. Update Constants 
+4. Update mech 2d of Intake
+5. test vision perfomance. 
