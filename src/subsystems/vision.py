@@ -388,9 +388,7 @@ class Vision(Subsystem):
             # if all targets have the same angle and the angle is small, increase the std dev to account for gyro drift causing large errors
             abs_min_val = float("inf")
             for tag in tags:
-                minium_val = min(abs(estimated.estimatedPose.toPose2d().rotation().radians()) - tag.getYaw() * SI.degrees_to_radians)
-                if abs_min_val > minium_val:
-                    abs_min_val = minium_val
+                abs_min_val = min(abs_min_val, abs(estimated.estimatedPose.toPose2d().rotation().radians() - tag.getYaw() * SI.degrees_to_radians))
             PyKitLogger.recordOutput(
                 f"{prefix}/abs_min_val", abs_min_val * SI.radians_to_degrees 
             )
