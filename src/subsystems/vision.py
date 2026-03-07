@@ -24,9 +24,9 @@ if not RobotBase.isReal():
         VisionSystemSim,
     )
 
-XY_STD_DEV_COEFFICIENT = 0.005  # Base xy std dev coefficient
+XY_STD_DEV_COEFFICIENT = 0.05  # Base xy std dev coefficient
 THETA_STD_DEV_COEFFICIENT = 0.01  # Base theta std dev coefficient
-DISTANCE_EXPONENT = 1.2  # How aggressively distance degrades trust
+DISTANCE_EXPONENT = 1.9  # How aggressively distance degrades trust
 TAG_COUNT_EXPONENT = 2.0  # How aggressively tag count improves trust
 FIELD_BORDER_MARGIN = 0.5  # Metres outside field to still accept a pose
 TIMESTAMP_OFFSET = 0.0  # Adjust if clocks drift between coprocessor/RIO
@@ -34,6 +34,9 @@ CAMERA_HEIGHT_TOLERANCE = 1  # Metres of tolerance on the camera Z value
 POSE_AMBIGUITY = 0.2  # Minimum pose ambiguity to accept from a single-tag detection (0-1, lower is more strict)
 MAX_ANGULAR_VELOCITY_DEGREES = 90
 MAX_ANGLE_DIFFERENCE_FOR_GYRO_DISAMBIGUATION_DEGREES = 30
+
+
+
 
 
 @dataclass
@@ -69,20 +72,20 @@ class Vision(Subsystem):
 
         self._cameras: List[_CameraConfig] = [
             _CameraConfig(
-                camera=PhotonCamera(VisionConstants.CAMERA_1_NAME),
-                estimator=PhotonPoseEstimator(
-                    field_layout, VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT
-                ),
-                name="left_cam_swerve",
-                robot_to_camera=VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT,
-            ),
-            _CameraConfig(
                 camera=PhotonCamera(VisionConstants.CAMERA_2_NAME),
                 estimator=PhotonPoseEstimator(
                     field_layout, VisionConstants.FRONT_RIGHT_SWERVE_TO_ROBOT
                 ),
                 name="right_cam_swerve",
                 robot_to_camera=VisionConstants.FRONT_RIGHT_SWERVE_TO_ROBOT,
+            ),
+            _CameraConfig(
+                camera=PhotonCamera(VisionConstants.CAMERA_1_NAME),
+                estimator=PhotonPoseEstimator(
+                    field_layout, VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT
+                ),
+                name="left_cam_swerve",
+                robot_to_camera=VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT,
             ),
             _CameraConfig(
                 camera=PhotonCamera(VisionConstants.CAMERA_3_NAME),
@@ -232,6 +235,7 @@ class Vision(Subsystem):
             PyKitLogger.recordOutput(f"{prefix}/targets_seen", float(len(targets)))
 
             if len(targets) == 1 and targets[0].getPoseAmbiguity() > POSE_AMBIGUITY:
+                # continue
                 target = targets[0]
 
                 PyKitLogger.recordOutput(

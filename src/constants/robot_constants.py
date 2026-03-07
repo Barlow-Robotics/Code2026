@@ -24,7 +24,7 @@ class RobotFeatures:
         if RobotBase.isReal():
             cls.HAS_DRIVETRAIN = True
             cls.HAS_VISION = True
-            cls.vision_camera_count = 2
+            cls.vision_camera_count = 1
             cls.HAS_SHOOTER = False
             cls.HAS_TURRET = False
             cls.HAS_INTAKE = False
