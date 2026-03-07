@@ -372,7 +372,7 @@ class Vision(Subsystem):
                 estimated.estimatedPose.toPose2d(), tags, cam_cfg.estimator
             )
 
-            if self._should_reject_by_z(estimated) and avg_distance > 2.7:
+            if self._should_reject_by_z(estimated):
                 PyKitLogger.recordOutput(f"{prefix}/rejected_bad_z", True)
                 PyKitLogger.recordOutput(
                     f"{prefix}/rejected_bad_z_value", estimated.estimatedPose.Z()
