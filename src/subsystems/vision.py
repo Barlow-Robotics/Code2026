@@ -385,9 +385,16 @@ class Vision(Subsystem):
             PyKitLogger.recordOutput(
                 f"{prefix}/currentRadians", abs(estimated.estimatedPose.toPose2d().rotation().radians())
             )
-
-            # for target in targets:
-            #     target
+            # if all targets have the same angle and the angle is small, increase the std dev to account for gyro drift causing large errors
+            abs_min_val = float("inf")
+            for tag in tags:
+                minium_val = min(abs(estimated.estimatedPose.toPose2d().rotation().radians()) - tag.getYaw() * SI.degrees_to_radians)
+                if abs_min_val > minium_val:
+                    abs_min_val = minium_val
+            PyKitLogger.recordOutput(
+                f"{prefix}/abs_min_val", abs_min_val * SI.radians_to_degrees 
+            )
+                    
             # if abs(estimated.estimatedPose.toPose2d().rotation().radians()) < 0.3 and avg_distance > 2.8:
             #     std_devs[0] = std_devs[0] + 1
             #     std_devs[1] = std_devs[1] + 1
