@@ -303,6 +303,16 @@ class Vision(Subsystem):
                 PyKitLogger.recordOutput(
                     f"{prefix}/using_single_tag_gyro_disambiguation", False
                 )
+                broken = False
+                for target in targets:
+                    ambiguity = target.getPoseAmbiguity()
+                    if ambiguity < 0.5:
+                        broken = True
+                        break
+                if not broken:
+                    continue
+                
+                    
                 estimated = self._get_best_pose_estimate(result, cam_cfg.estimator)
                 if estimated is None:
                     PyKitLogger.recordOutput(
