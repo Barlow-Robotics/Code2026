@@ -368,6 +368,9 @@ class Vision(Subsystem):
             # if self._should_reject_by_alliance(estimated.targetsUsed):
             #     PyKitLogger.recordOutput(f"{prefix}/rejected_wrong_alliance_tag", True)
             #     continue
+            avg_distance = self._average_tag_distance(
+                estimated.estimatedPose.toPose2d(), tags, cam_cfg.estimator
+            )
 
             if self._should_reject_by_z(estimated):
                 PyKitLogger.recordOutput(f"{prefix}/rejected_bad_z", True)
@@ -376,9 +379,6 @@ class Vision(Subsystem):
                 )
                 continue
 
-            avg_distance = self._average_tag_distance(
-                estimated.estimatedPose.toPose2d(), tags, cam_cfg.estimator
-            )
             std_devs = self._calculate_std_devs(
                 avg_distance, tag_count, cam_cfg.std_dev_factor
             )
