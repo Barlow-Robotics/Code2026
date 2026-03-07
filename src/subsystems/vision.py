@@ -381,8 +381,6 @@ class Vision(Subsystem):
                 )
                 continue
             timestamp = estimated.timestampSeconds + TIMESTAMP_OFFSET
-
-            distance_between_estimated_pose_and_drive_pose = pose_2d.distance(drive_pose)
             
             PyKitLogger.recordOutput(f"{prefix}/accepted_avg_distance_m", avg_distance)
             PyKitLogger.recordOutput(f"{prefix}/accepted_xy_std_dev", std_devs[0])
