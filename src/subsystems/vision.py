@@ -382,6 +382,16 @@ class Vision(Subsystem):
             std_devs = self._calculate_std_devs(
                 avg_distance, tag_count, cam_cfg.std_dev_factor
             )
+            PyKitLogger.recordOutput(
+                f"{prefix}/currentRadians", abs(estimated.estimatedPose.toPose2d().rotation().radians())
+            )
+
+            # for target in targets:
+            #     target
+            # if abs(estimated.estimatedPose.toPose2d().rotation().radians()) < 0.3 and avg_distance > 2.8:
+            #     std_devs[0] = std_devs[0] + 1
+            #     std_devs[1] = std_devs[1] + 1
+            #     std_devs[2] = std_devs[2] + 1
             if avg_distance > 4.2:
                 PyKitLogger.recordOutput(
                     f"{prefix}/rejected_too_far_from_tags", True
@@ -391,6 +401,8 @@ class Vision(Subsystem):
                 )
                 continue
             timestamp = estimated.timestampSeconds + TIMESTAMP_OFFSET
+            
+
             
             PyKitLogger.recordOutput(f"{prefix}/accepted_avg_distance_m", avg_distance)
             PyKitLogger.recordOutput(f"{prefix}/accepted_xy_std_dev", std_devs[0])
