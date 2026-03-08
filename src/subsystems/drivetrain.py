@@ -3,7 +3,7 @@ from commands2.sysid import SysIdRoutine
 import math
 from phoenix6 import SignalLogger, swerve, units, utils
 from typing import Callable, overload
-from wpilib import DriverStation
+from wpilib import DriverStation, RobotBase
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Pose2d, Rotation2d
 
@@ -132,6 +132,11 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         TunerSwerveDrivetrain.__init__(
             self, drivetrain_constants, arg0, arg1, arg2, arg3
         )
+        if not RobotBase.isReal():
+            # Disable CAN warnings in sim
+            for module in self.modules:
+                module.drive_motor.sim_state  # just accessing it quiets stale warnings
+
         self.movement = (
             swerve.requests.FieldCentric()
             .with_deadband(DriveConstants.MAX_TRANSLATIONAL_VELOCITY * 0.1)
@@ -142,6 +147,13 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )  # Use open-loop control for drive motors
         )
+        self.facing_angle = (
+            swerve.requests.FieldCentricFacingAngle()
+            .with_drive_request_type(
+                swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
+            )
+        )
+        self.facing_angle.heading_controller.setPID(8, 0, 3)  
 
         self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""
@@ -277,6 +289,7 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         return self._sys_id_routine_to_apply.dynamic(direction)
 
     def periodic(self):
+        self.determine_turret_state()
         # Periodically try to apply the operator perspective.
         # If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
         # This allows us to correct the perspective in case the robot code restarts mid-match.
@@ -383,6 +396,29 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             .with_velocity_y(speeds.vy)
             .with_rotational_rate(speeds.omega)
         )
+    def determine_turret_state(self):
+        drivePose = self.get_pose()
+        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+            threshold_to_turret = drivePose.X() >= 10.682
+        else:
+            threshold_to_turret = drivePose.X() <= 5.834
+            
+        if threshold_to_turret:
+            self.allow_center_auto_align = False
+        else:
+            self.allow_center_auto_align = True
+            
+    def point_at_pose(self, target_pose: Pose2d):
+        current_pose = self.get_pose()
+        if current_pose is not None:
+            angle_to_target = math.atan2(
+                target_pose.Y() - current_pose.Y(), target_pose.X() - current_pose.X()
+            )
+            print("Angle to target (degrees): ", math.degrees(angle_to_target))
+            self.set_control(
+                self.facing_angle.with_target_direction(Rotation2d(angle_to_target))
+            )
+
 
     def reset_gyro(self):
         self.reset_rotation(

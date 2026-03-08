@@ -86,6 +86,11 @@ class Controller:
             )
         if RobotFeatures.HAS_VISION:
             self._driver.button(3).onTrue(container.vision.auto_align_command)
+            self._driver.button(6).onTrue(
+                cmd.run(container.vision.position_to_pose_align)
+                .until(lambda: container.vision.is_aligned(tolerance_degrees=0.7))
+                .withTimeout(1.0)
+            )
         if (
             RobotFeatures.HAS_SHOOTER
             and RobotFeatures.HAS_FEEDER

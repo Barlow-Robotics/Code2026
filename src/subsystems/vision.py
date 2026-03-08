@@ -35,7 +35,9 @@ CAMERA_HEIGHT_TOLERANCE = 0.3  # Metres of tolerance on the camera Z value
 POSE_AMBIGUITY = 0.2  # Minimum pose ambiguity to accept from a single-tag detection (0-1, lower is more strict)
 MAX_ANGULAR_VELOCITY_DEGREES = 90
 MAX_ANGLE_DIFFERENCE_FOR_GYRO_DISAMBIGUATION_DEGREES = 30
-
+MIN_ANGLE_FOR_STD_DEV_INCREASE_DEGREES = 30
+MAX_VELOCITY_FOR_STD_DEV_INCREASE_MPS = 2.8
+MINIUM_POSE_AMBIGUITY_FOR_MULTI_POSE = 0.5
 
 
 
@@ -160,7 +162,7 @@ class Vision(Subsystem):
                 "Vision/elevator_camera_pose", self._last_pose_estimate
             )
 
-        closest_tag = self.find_pose_of_tag_closest_to_robot(self.drive_sub.get_pose())
+        closest_tag = self.find_trench_pose_of_tag_closest_to_robot(self.drive_sub.get_pose())
         if closest_tag is not None:
             PyKitLogger.recordOutput("Vision/closest_april_tag", closest_tag)
 
@@ -257,6 +259,10 @@ class Vision(Subsystem):
                         f"{prefix}/rejected_no_tag_pose_in_layout", True
                     )
                     continue
+                else:
+                    PyKitLogger.recordOutput(
+                        f"{prefix}/rejected_no_tag_pose_in_layout", False
+                    )
 
                 camera_to_robot = cam_cfg.estimator.robotToCamera.inverse()
                 robot_pose_best = tag_pose.transformBy(
@@ -300,6 +306,10 @@ class Vision(Subsystem):
                         f"{prefix}/rejected_gyro_disambiguation_too_large", True
                     )
                     continue
+                else:
+                    PyKitLogger.recordOutput(
+                        f"{prefix}/rejected_gyro_disambiguation_too_large", False
+                    )
             else:
                 PyKitLogger.recordOutput(
                     f"{prefix}/using_single_tag_gyro_disambiguation", False
@@ -307,7 +317,7 @@ class Vision(Subsystem):
                 broken = False
                 for target in targets:
                     ambiguity = target.getPoseAmbiguity()
-                    if ambiguity < 0.5:
+                    if ambiguity < MINIUM_POSE_AMBIGUITY_FOR_MULTI_POSE:
                         broken = True
                         break
                 if not broken:
@@ -320,6 +330,10 @@ class Vision(Subsystem):
                         f"{prefix}/rejected_no_valid_estimate", True
                     )
                     continue
+                else:
+                    PyKitLogger.recordOutput(
+                        f"{prefix}/rejected_no_valid_estimate", False
+                    )
 
             tags = estimated.targetsUsed
             tag_count = len(tags)
@@ -328,6 +342,8 @@ class Vision(Subsystem):
             if tag_count == 0:
                 PyKitLogger.recordOutput(f"{prefix}/rejected_zero_tags", True)
                 continue
+            else:
+                PyKitLogger.recordOutput(f"{prefix}/rejected_zero_tags", False)
 
             pose_2d = estimated.estimatedPose.toPose2d()
 
@@ -353,6 +369,8 @@ class Vision(Subsystem):
                     f"{prefix}/rejected_out_of_bounds_y", pose_2d.Y()
                 )
                 continue
+            else:
+                PyKitLogger.recordOutput(f"{prefix}/rejected_out_of_bounds", False)
             if (
                 self.drive_sub.get_speeds().omega
                 > SI.degrees_to_radians * MAX_ANGULAR_VELOCITY_DEGREES
@@ -365,6 +383,10 @@ class Vision(Subsystem):
                     self.drive_sub.get_speeds().omega,
                 )
                 continue
+            else:
+                PyKitLogger.recordOutput(
+                    f"{prefix}/rejected_excessive_angular_velocity", False
+                )
 
             # if self._should_reject_by_alliance(estimated.targetsUsed):
             #     PyKitLogger.recordOutput(f"{prefix}/rejected_wrong_alliance_tag", True)
@@ -379,6 +401,8 @@ class Vision(Subsystem):
                     f"{prefix}/rejected_bad_z_value", estimated.estimatedPose.Z()
                 )
                 continue
+            else:
+                PyKitLogger.recordOutput(f"{prefix}/rejected_bad_z", False)
 
             std_devs = self._calculate_std_devs(
                 avg_distance, tag_count, cam_cfg.std_dev_factor
@@ -395,7 +419,7 @@ class Vision(Subsystem):
                 f"{prefix}/abs_min_val", abs_min_val * SI.radians_to_degrees 
             )
                     
-            if abs_min_val < 30 and avg_distance > 2.8:
+            if abs_min_val < MIN_ANGLE_FOR_STD_DEV_INCREASE_DEGREES and avg_distance > MAX_VELOCITY_FOR_STD_DEV_INCREASE_MPS:
                 std_devs[0] = std_devs[0] + 1
                 std_devs[1] = std_devs[1] + 1
                 std_devs[2] = std_devs[2] + 1
@@ -407,6 +431,12 @@ class Vision(Subsystem):
                     f"{prefix}/rejected_too_far_from_tags_distance", avg_distance
                 )
                 continue
+            else:
+                PyKitLogger.recordOutput(
+                    f"{prefix}/rejected_too_far_from_tags", False
+                )
+
+                
             timestamp = estimated.timestampSeconds + TIMESTAMP_OFFSET
             
 
@@ -508,15 +538,15 @@ class Vision(Subsystem):
     def disable_the_vision(self, val: bool):
         self.disabled_vision = val
 
-    def find_pose_of_tag_closest_to_robot(self, drive_pose: Pose2d) -> Optional[Pose2d]:
+    def find_trench_pose_of_tag_closest_to_robot(self, drive_pose: Pose2d) -> Optional[Pose2d]:
         alliance = DriverStation.getAlliance()
         if alliance is None:
             return None
 
         if alliance == DriverStation.Alliance.kBlue:
-            april_tag_list = VisionConstants.BLUE_APRIL_TAG_LIST
+            april_tag_list = VisionConstants.BLUE_APRIL_TAG_TRENCH_LIST
         elif alliance == DriverStation.Alliance.kRed:
-            april_tag_list = VisionConstants.RED_APRIL_TAG_LIST
+            april_tag_list = VisionConstants.RED_APRIL_TAG_TRENCH_LIST
         else:
             return None
 
@@ -570,3 +600,36 @@ class Vision(Subsystem):
             Rotation2d(target_pose.rotation().radians()),
         )
         FollowTrajectoryCommand(self, trajectory_obj).schedule()
+        
+    def position_to_pose_align(self):
+        if self.drive_sub.allow_center_auto_align:
+            current_pose = self.drive_sub.get_pose()
+            pose = self.find_trench_pose_of_tag_closest_to_robot(current_pose)
+            self.trench_align_pose = pose
+            if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                pose = Pose2d(pose.X() - 0.6, pose.Y(), pose.rotation())
+            else:
+                pose = Pose2d(pose.X() + 0.6, pose.Y(), pose.rotation())
+            self.drive_sub.point_at_pose(pose)
+            
+
+    def is_aligned(self, tolerance_degrees: float = 5.0) -> bool:
+        current_pose = self.drive_sub.get_pose()
+        if not hasattr(self, "trench_align_pose"):
+            target_pose = self.find_trench_pose_of_tag_closest_to_robot(current_pose)
+        else:
+            target_pose = self.trench_align_pose
+        
+        if target_pose is None:
+            return True
+        
+        dx = target_pose.X() - current_pose.X()
+        dy = target_pose.Y() - current_pose.Y()
+        
+        desired_angle = Rotation2d(math.atan2(dy, dx))
+        PyKitLogger.recordOutput("Vision/alignment_desired_angle", desired_angle.degrees())
+        current_angle = current_pose.rotation()
+        PyKitLogger.recordOutput("Vision/alignment_current_angle", current_angle.degrees())
+        
+        error_degrees = abs((desired_angle - current_angle).degrees())
+        return error_degrees < tolerance_degrees

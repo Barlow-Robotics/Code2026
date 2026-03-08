@@ -112,8 +112,9 @@ class Turret(Subsystem):
         self.set_angle_turret(turret_yaw_deg)
         return v_fixed, hood_angle_deg, turret_yaw_deg
 
-    def periodic(self):
-        self.set_target_hood_and_turret()
+    def periodic(self):            
+        if not self.driveSub.allow_center_auto_align:
+            self.set_target_hood_and_turret()
 
         actual_turret_yaw = (
             float(
@@ -273,6 +274,8 @@ class Turret(Subsystem):
         PyKitLogger.recordOutput("Turret/discriminant", float(discriminant))
 
         return v_fixed, hood_angle_deg, turret_yaw_deg
+
+
 
     @staticmethod
     def find_v_fixed():

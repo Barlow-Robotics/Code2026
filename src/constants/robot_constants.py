@@ -209,6 +209,9 @@ class VisionConstants:
 
     BLUE_APRIL_TAG_LIST = range(17, 33)
     RED_APRIL_TAG_LIST = range(1, 17)
+    BLUE_APRIL_TAG_TRENCH_LIST = [17, 22]
+    RED_APRIL_TAG_TRENCH_LIST = [1, 6]
+    # BW: https://firstfrc.blob.core.windows.net/frc2026/FieldAssets/2026-apriltag-images-user-guide.pdf
 
 
 class AutoConstants:

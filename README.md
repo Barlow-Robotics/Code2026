@@ -62,4 +62,4 @@ TODO at comp:
 2. Need to update deploy/pathplanner/settings.json
 3. Update Constants 
 4. Update mech 2d of Intake
-5. test vision perfomance. 
+5. Restrict turret to be 180 degrees 
