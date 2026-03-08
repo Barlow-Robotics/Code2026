@@ -40,8 +40,6 @@ MAX_VELOCITY_FOR_STD_DEV_INCREASE_MPS = 2.8
 MINIUM_POSE_AMBIGUITY_FOR_MULTI_POSE = 0.5
 
 
-
-
 @dataclass
 class CameraStats:
     std_dev: float
@@ -162,7 +160,9 @@ class Vision(Subsystem):
                 "Vision/elevator_camera_pose", self._last_pose_estimate
             )
 
-        closest_tag = self.find_trench_pose_of_tag_closest_to_robot(self.drive_sub.get_pose())
+        closest_tag = self.find_trench_pose_of_tag_closest_to_robot(
+            self.drive_sub.get_pose()
+        )
         if closest_tag is not None:
             PyKitLogger.recordOutput("Vision/closest_april_tag", closest_tag)
 
@@ -322,8 +322,7 @@ class Vision(Subsystem):
                         break
                 if not broken:
                     continue
-                
-                    
+
                 estimated = self._get_best_pose_estimate(result, cam_cfg.estimator)
                 if estimated is None:
                     PyKitLogger.recordOutput(
@@ -408,39 +407,39 @@ class Vision(Subsystem):
                 avg_distance, tag_count, cam_cfg.std_dev_factor
             )
             PyKitLogger.recordOutput(
-                f"{prefix}/currentRadians", abs(estimated.estimatedPose.toPose2d().rotation().radians())
+                f"{prefix}/currentRadians",
+                abs(estimated.estimatedPose.toPose2d().rotation().radians()),
             )
             # if all targets have the same angle and the angle is small, increase the std dev to account for gyro drift causing large errors
             abs_min_val = float("inf")
             for tag in tags:
-                diff = estimated.estimatedPose.toPose2d().rotation().radians() - (180-tag.getYaw()) * SI.degrees_to_radians
+                diff = (
+                    estimated.estimatedPose.toPose2d().rotation().radians()
+                    - (180 - tag.getYaw()) * SI.degrees_to_radians
+                )
                 abs_min_val = min(abs_min_val, abs(math.remainder(diff, 2 * math.pi)))
             PyKitLogger.recordOutput(
-                f"{prefix}/abs_min_val", abs_min_val * SI.radians_to_degrees 
+                f"{prefix}/abs_min_val", abs_min_val * SI.radians_to_degrees
             )
-                    
-            if abs_min_val < MIN_ANGLE_FOR_STD_DEV_INCREASE_DEGREES and avg_distance > MAX_VELOCITY_FOR_STD_DEV_INCREASE_MPS:
+
+            if (
+                abs_min_val < MIN_ANGLE_FOR_STD_DEV_INCREASE_DEGREES
+                and avg_distance > MAX_VELOCITY_FOR_STD_DEV_INCREASE_MPS
+            ):
                 std_devs[0] = std_devs[0] + 1
                 std_devs[1] = std_devs[1] + 1
                 std_devs[2] = std_devs[2] + 1
             if avg_distance > 4.2:
-                PyKitLogger.recordOutput(
-                    f"{prefix}/rejected_too_far_from_tags", True
-                )
+                PyKitLogger.recordOutput(f"{prefix}/rejected_too_far_from_tags", True)
                 PyKitLogger.recordOutput(
                     f"{prefix}/rejected_too_far_from_tags_distance", avg_distance
                 )
                 continue
             else:
-                PyKitLogger.recordOutput(
-                    f"{prefix}/rejected_too_far_from_tags", False
-                )
+                PyKitLogger.recordOutput(f"{prefix}/rejected_too_far_from_tags", False)
 
-                
             timestamp = estimated.timestampSeconds + TIMESTAMP_OFFSET
-            
 
-            
             PyKitLogger.recordOutput(f"{prefix}/accepted_avg_distance_m", avg_distance)
             PyKitLogger.recordOutput(f"{prefix}/accepted_xy_std_dev", std_devs[0])
             PyKitLogger.recordOutput(
@@ -538,7 +537,9 @@ class Vision(Subsystem):
     def disable_the_vision(self, val: bool):
         self.disabled_vision = val
 
-    def find_trench_pose_of_tag_closest_to_robot(self, drive_pose: Pose2d) -> Optional[Pose2d]:
+    def find_trench_pose_of_tag_closest_to_robot(
+        self, drive_pose: Pose2d
+    ) -> Optional[Pose2d]:
         alliance = DriverStation.getAlliance()
         if alliance is None:
             return None
@@ -600,7 +601,7 @@ class Vision(Subsystem):
             Rotation2d(target_pose.rotation().radians()),
         )
         FollowTrajectoryCommand(self, trajectory_obj).schedule()
-        
+
     def position_to_pose_align(self):
         if self.drive_sub.allow_center_auto_align:
             current_pose = self.drive_sub.get_pose()
@@ -611,7 +612,6 @@ class Vision(Subsystem):
             else:
                 pose = Pose2d(pose.X() + 0.6, pose.Y(), pose.rotation())
             self.drive_sub.point_at_pose(pose)
-            
 
     def is_aligned(self, tolerance_degrees: float = 5.0) -> bool:
         current_pose = self.drive_sub.get_pose()
@@ -619,17 +619,21 @@ class Vision(Subsystem):
             target_pose = self.find_trench_pose_of_tag_closest_to_robot(current_pose)
         else:
             target_pose = self.trench_align_pose
-        
+
         if target_pose is None:
             return True
-        
+
         dx = target_pose.X() - current_pose.X()
         dy = target_pose.Y() - current_pose.Y()
-        
+
         desired_angle = Rotation2d(math.atan2(dy, dx))
-        PyKitLogger.recordOutput("Vision/alignment_desired_angle", desired_angle.degrees())
+        PyKitLogger.recordOutput(
+            "Vision/alignment_desired_angle", desired_angle.degrees()
+        )
         current_angle = current_pose.rotation()
-        PyKitLogger.recordOutput("Vision/alignment_current_angle", current_angle.degrees())
-        
+        PyKitLogger.recordOutput(
+            "Vision/alignment_current_angle", current_angle.degrees()
+        )
+
         error_degrees = abs((desired_angle - current_angle).degrees())
         return error_degrees < tolerance_degrees

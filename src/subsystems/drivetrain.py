@@ -148,12 +148,11 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             )  # Use open-loop control for drive motors
         )
         self.facing_angle = (
-            swerve.requests.FieldCentricFacingAngle()
-            .with_drive_request_type(
+            swerve.requests.FieldCentricFacingAngle().with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )
         )
-        self.facing_angle.heading_controller.setPID(8, 0, 3)  
+        self.facing_angle.heading_controller.setPID(8, 0, 3)
 
         self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""
@@ -396,18 +395,19 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             .with_velocity_y(speeds.vy)
             .with_rotational_rate(speeds.omega)
         )
+
     def determine_turret_state(self):
         drivePose = self.get_pose()
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
             threshold_to_turret = drivePose.X() >= 10.682
         else:
             threshold_to_turret = drivePose.X() <= 5.834
-            
+
         if threshold_to_turret:
             self.allow_center_auto_align = False
         else:
             self.allow_center_auto_align = True
-            
+
     def point_at_pose(self, target_pose: Pose2d):
         current_pose = self.get_pose()
         if current_pose is not None:
@@ -418,7 +418,6 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             self.set_control(
                 self.facing_angle.with_target_direction(Rotation2d(angle_to_target))
             )
-
 
     def reset_gyro(self):
         self.reset_rotation(
