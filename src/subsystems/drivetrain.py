@@ -136,7 +136,8 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             # Disable CAN warnings in sim
             for module in self.modules:
                 module.drive_motor.sim_state  # just accessing it quiets stale warnings
-
+        self.last_timestamp = -1
+        self.current_pose = None
         self.movement = (
             swerve.requests.FieldCentric()
             .with_deadband(DriveConstants.MAX_TRANSLATIONAL_VELOCITY * 0.1)
@@ -349,8 +350,14 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         )
 
     def get_pose(self) -> Pose2d | None:
-        return self.get_state().pose
-
+        cur_timestamp = self.get_timestamp()
+        if self.last_timestamp == cur_timestamp:
+            return self.current_pose
+        else:
+            self.current_pose = self.get_state().pose
+            self.last_timestamp = cur_timestamp
+            return self.current_pose
+    
     def get_speeds(self):
         return self.get_state().speeds
 
