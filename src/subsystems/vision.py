@@ -9,7 +9,7 @@ from photonlibpy.targeting.photonTrackedTarget import PhotonTrackedTarget
 from robotpy_apriltag import AprilTagFieldLayout
 from wpilib._wpilib import RobotBase
 from wpimath.geometry import Pose2d, Rotation2d, Transform3d
-from wpilib import DriverStation
+from wpilib import DriverStation, Timer
 from constants import SI, VisionConstants, RobotFeatures
 from subsystems import Drivetrain
 from commands2 import Subsystem, cmd
@@ -118,6 +118,7 @@ class Vision(Subsystem):
         self._auto_align_triggered: bool = False
         self._auto_align_starting_pose: Optional[Pose2d] = None
         self._auto_align_target_pose: Optional[Pose2d] = None
+        self.timer = Timer()
 
         self.auto_align_command = cmd.runOnce(self.auto_align)
 
@@ -167,7 +168,13 @@ class Vision(Subsystem):
             self.simulation_periodic()
 
         if not self.disabled_vision:
+            self.timer.start()
+
             self._update_all_cameras()
+            print(self.timer.get())
+            self.timer.stop()
+
+            self.timer.reset()
 
         if self._last_pose_estimate is not None:
             pass
