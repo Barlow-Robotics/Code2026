@@ -153,13 +153,12 @@ class Vision(Subsystem):
         if not self.disabled_vision:
             self.timer.start()
 
-            self._update_all_cameras()
+            current_pose = self.drive_sub.get_pose()
+            self._update_all_cameras(current_pose)
             print(self.timer.get())
             self.timer.stop()
 
             self.timer.reset()
-            current_pose = self.drive_sub.get_pose()
-            self._update_all_cameras(current_pose)
 
         if self._last_pose_estimate is not None:
             pass
