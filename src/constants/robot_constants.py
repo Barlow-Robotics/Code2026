@@ -24,7 +24,7 @@ class RobotFeatures:
         if RobotBase.isReal():
             cls.HAS_DRIVETRAIN = True
             cls.HAS_VISION = True
-            cls.vision_camera_count = 1
+            cls.vision_camera_count = 2
             cls.HAS_SHOOTER = False
             cls.HAS_TURRET = False
             cls.HAS_INTAKE = False
@@ -137,7 +137,7 @@ class DriveConstants:
     CENTER_WHEEL_TO_CENTER_WHEEL_METERS = (
         SI.inches_to_meters * CENTER_WHEEL_TO_CENTER_WHEEL
     )  # M
-    ROBOT_MASS_KG = 50  # KG
+    ROBOT_MASS_KG = 25  # KG
     ROBOT_MOI = (
         ROBOT_MASS_KG
         * (
