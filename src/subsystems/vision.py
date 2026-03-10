@@ -119,7 +119,11 @@ class Vision(Subsystem):
         self.timer = Timer()
 
         self.auto_align_command = cmd.runOnce(self.auto_align)
-
+        
+        self.tag_pose_cache = {}
+        for i in range(1, 33):
+            self.tag_pose_cache[i] = self.april_tag_field_layout.getTagPose(i)
+            
         # Log camera config on init
         for i, cam_cfg in enumerate(self._cameras):
             PyKitLogger.recordOutput(f"Vision/Config/camera_{i}_name", cam_cfg.name)
@@ -260,7 +264,7 @@ class Vision(Subsystem):
             #     f"{prefix}/single_tag_ambiguity", target.getPoseAmbiguity()
             # )
 
-            tag_pose = self.april_tag_field_layout.getTagPose(
+            tag_pose = self.get_cached_tag_pose(
                 target.getFiducialId()
             )
             if tag_pose is None:
@@ -650,3 +654,7 @@ class Vision(Subsystem):
 
         error_degrees = abs((desired_angle - current_angle).degrees())
         return error_degrees < tolerance_degrees
+    def get_cached_tag_pose(self, tag_id):
+        if tag_id not in self.tag_pose_cache:
+            self.tag_pose_cache[tag_id] = self.april_tag_field_layout.getTagPose(tag_id)
+        return self.tag_pose_cache[tag_id]
