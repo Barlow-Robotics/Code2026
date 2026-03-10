@@ -15,6 +15,7 @@ from constants import SI, VisionConstants, RobotFeatures
 from subsystems import Drivetrain
 from commands2 import Subsystem, cmd
 from commands import FollowTrajectoryCommand
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from pykit.logger import Logger as PyKitLogger
 from utils.trajectory_generator import CreateTrajectory
@@ -150,6 +151,7 @@ class Vision(Subsystem):
                 self._vision_sim.addCamera(cam_cfg.camera_sim, cam_cfg.robot_to_camera)
         else:
             self._vision_sim = None
+        self._executor = ThreadPoolExecutor(max_workers=len(self._cameras))
 
     def periodic(self):
         if not RobotBase.isReal() and VisionConstants.VISION_SIM:
@@ -223,10 +225,14 @@ class Vision(Subsystem):
 
     def _update_all_cameras(self, drive_pose: Pose2d, current_speeds: ChassisSpeeds, current_rotation: Rotation2d):
         all_observations: List[VisionObservation] = []
+        
+        futures = [
+            self._executor.submit(self._get_observations_from_camera, drive_pose, current_speeds, current_rotation, cam_cfg)
+            for cam_cfg in self._cameras
+        ]
 
-        for cam_cfg in self._cameras:
-            obs_list = self._get_observations_from_camera(drive_pose, current_speeds, current_rotation, cam_cfg)
-            all_observations.extend(obs_list)
+        for future in futures:
+            all_observations.extend(future.result())
 
         all_observations.sort(key=lambda o: o.timestamp)
         self._observations_per_cycle = float(len(all_observations))
