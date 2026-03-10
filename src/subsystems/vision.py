@@ -8,8 +8,9 @@ from photonlibpy.targeting.photonPipelineResult import PhotonPipelineResult
 from photonlibpy.targeting.photonTrackedTarget import PhotonTrackedTarget
 from robotpy_apriltag import AprilTagFieldLayout
 from wpilib._wpilib import RobotBase
-from wpimath.geometry import Pose2d, Rotation2d, Transform3d
+from wpimath.geometry import Pose2d, Pose3d, Rotation2d, Transform3d
 from wpilib import DriverStation, Timer
+from wpimath.kinematics import ChassisSpeeds
 from constants import SI, VisionConstants, RobotFeatures
 from subsystems import Drivetrain
 from commands2 import Subsystem, cmd
@@ -158,7 +159,10 @@ class Vision(Subsystem):
             self.timer.start()
 
             current_pose = self.drive_sub.get_pose()
-            self._update_all_cameras(current_pose)
+            current_speeds = self.drive_sub.get_speeds()  # once for all cameras
+            current_rotation = self.drive_sub.get_rotation()  # once for all cameras
+
+            self._update_all_cameras(current_pose, current_speeds, current_rotation)
             print(self.timer.get())
             self.timer.stop()
 
@@ -217,11 +221,11 @@ class Vision(Subsystem):
                 f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
             )
 
-    def _update_all_cameras(self, drive_pose: Pose2d):
+    def _update_all_cameras(self, drive_pose: Pose2d, current_speeds: ChassisSpeeds, current_rotation: Rotation2d):
         all_observations: List[VisionObservation] = []
 
         for cam_cfg in self._cameras:
-            obs_list = self._get_observations_from_camera(drive_pose, cam_cfg)
+            obs_list = self._get_observations_from_camera(drive_pose, current_speeds, current_rotation, cam_cfg)
             all_observations.extend(obs_list)
 
         all_observations.sort(key=lambda o: o.timestamp)
@@ -234,6 +238,8 @@ class Vision(Subsystem):
     def _get_observations_from_camera(
         self,
         drive_pose: Pose2d,
+        current_speeds: ChassisSpeeds,
+        gyro: Rotation2d,
         cam_cfg: _CameraConfig,
     ) -> List[VisionObservation]:
         prefix = f"Vision/{cam_cfg.name}"
@@ -286,7 +292,6 @@ class Vision(Subsystem):
                 target.getAlternateCameraToTarget().inverse()
             ).transformBy(camera_to_robot)
 
-            gyro = self.drive_sub.get_rotation()
             diff_best = abs(
                 (gyro - robot_pose_best.toPose2d().rotation()).radians()
             )
@@ -388,7 +393,7 @@ class Vision(Subsystem):
             pass
             # PyKitLogger.recordOutput(f"{prefix}/rejected_out_of_bounds", False)
         if (
-            self.drive_sub.get_speeds().omega
+            current_speeds.omega
             > SI.degrees_to_radians * MAX_ANGULAR_VELOCITY_DEGREES
         ):
             # PyKitLogger.recordOutput(
@@ -654,7 +659,7 @@ class Vision(Subsystem):
 
         error_degrees = abs((desired_angle - current_angle).degrees())
         return error_degrees < tolerance_degrees
-    def get_cached_tag_pose(self, tag_id):
+    def get_cached_tag_pose(self, tag_id) -> Pose3d:
         if tag_id not in self.tag_pose_cache:
             self.tag_pose_cache[tag_id] = self.april_tag_field_layout.getTagPose(tag_id)
         return self.tag_pose_cache[tag_id]
