@@ -64,6 +64,8 @@ class _CameraConfig:
     robot_to_camera: Transform3d
     std_dev_factor: float = 1.0
     camera_sim: Optional[PhotonCameraSim] = None
+    _last_result_timestamp: float = -1.0
+    is_stale: bool = False
 
 
 class Vision(Subsystem):
@@ -266,6 +268,13 @@ class Vision(Subsystem):
             result = cam_cfg.camera.getLatestResult()
         except IndexError:
             return observations
+        result_timestamp = result.getTimestampSeconds()
+        if result_timestamp == cam_cfg._last_result_timestamp:
+            cam_cfg.is_stale = True
+            return observations
+        cam_cfg._last_result_timestamp = result_timestamp
+        cam_cfg.is_stale = False
+
         # for result in cam_cfg.camera.getAllUnreadResults():
         targets = result.getTargets()
         # PyKitLogger.recordOutput(f"{prefix}/targets_seen", float(len(targets)))
