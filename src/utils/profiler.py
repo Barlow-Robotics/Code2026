@@ -85,12 +85,15 @@ class PeriodicProfiler:
         snakeviz logs/<timestamp>/periodic.prof
     """
 
-    __slots__ = ("_profiler", "_enabled", "_output_path")
+    __slots__ = ("_profiler", "_enabled", "_output_path", "_last_flush_time")
+
+    FLUSH_INTERVAL_S = 10.0
 
     def __init__(self, enabled: bool = False):
         self._enabled = enabled
         self._profiler: cProfile.Profile | None = None
         self._output_path: str = ""
+        self._last_flush_time: float = 0.0
         if enabled:
             self._profiler = cProfile.Profile()
             # Put the .prof next to the other logs
@@ -102,7 +105,7 @@ class PeriodicProfiler:
                 log_dir = f"logs/{ddatetime_obj}"
             os.makedirs(log_dir, exist_ok=True)
             self._output_path = os.path.join(log_dir, "periodic.prof")
-            atexit.register(self._dump)
+            atexit.register(self._flush)
 
     @property
     def enabled(self) -> bool:
@@ -115,8 +118,12 @@ class PeriodicProfiler:
     def stop(self) -> None:
         if self._profiler is not None:
             self._profiler.disable()
+            now = time.perf_counter()
+            if now - self._last_flush_time >= self.FLUSH_INTERVAL_S:
+                self._last_flush_time = now
+                self._flush()
 
-    def _dump(self) -> None:
+    def _flush(self) -> None:
         if self._profiler is not None and self._output_path:
             self._profiler.dump_stats(self._output_path)
             print(f"cProfile data written to {self._output_path}")
