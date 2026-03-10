@@ -42,7 +42,12 @@ class Robot(
             SignalLogger.set_path("/home/lvuser/logs")
         else:
             SignalLogger.set_path("logs")
-        self.useTiming = configure_pykit(type(self).__name__)
+        timing = configure_pykit(type(self).__name__)
+        if timing is not None:
+            # configure_pykit returns None in real/sim mode and False in replay mode. Since None is falsy in Python, self.useTiming = None was disabling the
+            # HAL notifier wait, making the loop run as fast as possible instead of at 50 Hz. Now we only override useTiming when it's explicitly False
+            # (replay mode — where you want uncapped speed).
+            self.useTiming = timing
         SignalLogger.start()
 
     def robotInit(self) -> None:

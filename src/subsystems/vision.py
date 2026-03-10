@@ -140,7 +140,7 @@ class Vision(Subsystem):
 
             for cam_cfg in self._cameras:
                 cam_props = SimCameraProperties()
-                cam_props.setFPS(1)
+                cam_props.setFPS(10)
                 cam_props.setCalibrationFromFOV(
                     800, 600, Rotation2d(SI.degrees_to_radians * 97)
                 )
@@ -164,9 +164,11 @@ class Vision(Subsystem):
             self.timer.start()
 
             current_pose = self.drive_sub.get_pose()
-            self._update_all_cameras(current_pose)
+            current_speeds = self.drive_sub.get_speeds()
+            current_rotation = self.drive_sub.get_rotation()
 
-        #self._total_detected_targets = float(len(self.get_all_detected_targets()))
+            self._update_all_cameras(current_pose, current_speeds, current_rotation)
+            # print(self.timer.get())
 
         if self._last_pose_estimate is not None:
             pass
@@ -223,11 +225,12 @@ class Vision(Subsystem):
 
         self._loop_timer.stop()
 
-    def _update_all_cameras(self,
+    def _update_all_cameras(
+        self,
         drive_pose: Pose2d,
         current_speeds: ChassisSpeeds,
         current_rotation: Rotation2d,
-):
+    ):
         all_observations: List[VisionObservation] = []
 
         for cam_cfg in self._cameras:
@@ -257,7 +260,12 @@ class Vision(Subsystem):
 
         observations: List[VisionObservation] = []
         try:
-            result = cam_cfg.camera.getLatestResult()
+            # Don't use getLatestResult. It will always deserialize a
+            # result even if the loop is running faster than the camera.
+            # This results in extra deserialization overhead and causes
+            # performance issues.
+            result = cam_cfg.camera.getAllUnreadResults()
+            result = result[-1]
         except IndexError:
             return observations
         # for result in cam_cfg.camera.getAllUnreadResults():
