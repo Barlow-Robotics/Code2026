@@ -164,7 +164,13 @@ class Vision(Subsystem):
             self.timer.start()
 
             current_pose = self.drive_sub.get_pose()
-            self._update_all_cameras(current_pose)
+            current_speeds = self.drive_sub.get_speeds()  # once for all cameras
+            current_rotation = self.drive_sub.get_rotation()  # once for all cameras
+
+            self._update_all_cameras(current_pose, current_speeds, current_rotation)
+            print(self.timer.get())
+            self.timer.reset()
+            self.timer.stop()
 
         #self._total_detected_targets = float(len(self.get_all_detected_targets()))
 
