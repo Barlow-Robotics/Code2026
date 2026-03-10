@@ -120,11 +120,11 @@ class Vision(Subsystem):
         self.timer = Timer()
 
         self.auto_align_command = cmd.runOnce(self.auto_align)
-        
+
         self.tag_pose_cache = {}
         for i in range(1, 33):
             self.tag_pose_cache[i] = self.april_tag_field_layout.getTagPose(i)
-            
+
         # Log camera config on init
         for i, cam_cfg in enumerate(self._cameras):
             PyKitLogger.recordOutput(f"Vision/Config/camera_{i}_name", cam_cfg.name)
@@ -221,11 +221,18 @@ class Vision(Subsystem):
                 f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
             )
 
-    def _update_all_cameras(self, drive_pose: Pose2d, current_speeds: ChassisSpeeds, current_rotation: Rotation2d):
+    def _update_all_cameras(
+        self,
+        drive_pose: Pose2d,
+        current_speeds: ChassisSpeeds,
+        current_rotation: Rotation2d,
+    ):
         all_observations: List[VisionObservation] = []
 
         for cam_cfg in self._cameras:
-            obs_list = self._get_observations_from_camera(drive_pose, current_speeds, current_rotation, cam_cfg)
+            obs_list = self._get_observations_from_camera(
+                drive_pose, current_speeds, current_rotation, cam_cfg
+            )
             all_observations.extend(obs_list)
 
         all_observations.sort(key=lambda o: o.timestamp)
@@ -248,7 +255,7 @@ class Vision(Subsystem):
             return []
 
         observations: List[VisionObservation] = []
-        try: 
+        try:
             result = cam_cfg.camera.getLatestResult()
         except IndexError:
             return observations
@@ -270,9 +277,7 @@ class Vision(Subsystem):
             #     f"{prefix}/single_tag_ambiguity", target.getPoseAmbiguity()
             # )
 
-            tag_pose = self.get_cached_tag_pose(
-                target.getFiducialId()
-            )
+            tag_pose = self.get_cached_tag_pose(target.getFiducialId())
             if tag_pose is None:
                 # PyKitLogger.recordOutput(
                 #     f"{prefix}/rejected_no_tag_pose_in_layout", True
@@ -292,9 +297,7 @@ class Vision(Subsystem):
                 target.getAlternateCameraToTarget().inverse()
             ).transformBy(camera_to_robot)
 
-            diff_best = abs(
-                (gyro - robot_pose_best.toPose2d().rotation()).radians()
-            )
+            diff_best = abs((gyro - robot_pose_best.toPose2d().rotation()).radians())
             diff_alt = abs((gyro - robot_pose_alt.toPose2d().rotation()).radians())
 
             # PyKitLogger.recordOutput(f"{prefix}/gyro_diff_best_rad", diff_best)
@@ -321,9 +324,9 @@ class Vision(Subsystem):
                 > MAX_ANGLE_DIFFERENCE_FOR_GYRO_DISAMBIGUATION_DEGREES
                 * SI.degrees_to_radians
             ):
-            #     PyKitLogger.recordOutput(
-            #         f"{prefix}/rejected_gyro_disambiguation_too_large", True
-            #     )
+                #     PyKitLogger.recordOutput(
+                #         f"{prefix}/rejected_gyro_disambiguation_too_large", True
+                #     )
                 return observations
             else:
                 pass
@@ -392,10 +395,7 @@ class Vision(Subsystem):
         else:
             pass
             # PyKitLogger.recordOutput(f"{prefix}/rejected_out_of_bounds", False)
-        if (
-            current_speeds.omega
-            > SI.degrees_to_radians * MAX_ANGULAR_VELOCITY_DEGREES
-        ):
+        if current_speeds.omega > SI.degrees_to_radians * MAX_ANGULAR_VELOCITY_DEGREES:
             # PyKitLogger.recordOutput(
             #     f"{prefix}/rejected_excessive_angular_velocity", True
             # )
@@ -410,9 +410,7 @@ class Vision(Subsystem):
             #     f"{prefix}/rejected_excessive_angular_velocity", False
             # )
 
-        avg_distance = self._average_tag_distance(
-            pose_2d, tags, cam_cfg.estimator
-        )
+        avg_distance = self._average_tag_distance(pose_2d, tags, cam_cfg.estimator)
 
         if self._should_reject_by_z(estimated):
             # PyKitLogger.recordOutput(f"{prefix}/rejected_bad_z", True)
@@ -659,6 +657,7 @@ class Vision(Subsystem):
 
         error_degrees = abs((desired_angle - current_angle).degrees())
         return error_degrees < tolerance_degrees
+
     def get_cached_tag_pose(self, tag_id) -> Pose3d:
         if tag_id not in self.tag_pose_cache:
             self.tag_pose_cache[tag_id] = self.april_tag_field_layout.getTagPose(tag_id)

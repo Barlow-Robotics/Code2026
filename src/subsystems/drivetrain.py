@@ -357,7 +357,7 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             self.current_pose = self.get_state().pose
             self.last_timestamp = cur_timestamp
             return self.current_pose
-    
+
     def get_speeds(self):
         return self.get_state().speeds
 
