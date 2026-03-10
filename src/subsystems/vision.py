@@ -17,6 +17,7 @@ from commands2 import Subsystem, cmd
 from commands import FollowTrajectoryCommand
 
 from pykit.logger import Logger as PyKitLogger
+from utils.profiler import LoopTimer
 from utils.trajectory_generator import CreateTrajectory
 
 if not RobotBase.isReal():
@@ -108,6 +109,7 @@ class Vision(Subsystem):
         ]
         self._cameras = self._cameras[0 : RobotFeatures.vision_camera_count]
 
+        self._loop_timer = LoopTimer("Vision")
         self.disabled_vision = False
         self._last_pose_estimate: Optional[Pose2d] = None
         self._camera_stats: dict[str, CameraStats] = {}
@@ -152,6 +154,8 @@ class Vision(Subsystem):
             self._vision_sim = None
 
     def periodic(self):
+        self._loop_timer.start()
+
         if not RobotBase.isReal() and VisionConstants.VISION_SIM:
             self.simulation_periodic()
 
@@ -221,12 +225,13 @@ class Vision(Subsystem):
                 f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
             )
 
-    def _update_all_cameras(
-        self,
+        self._loop_timer.stop()
+
+    def _update_all_cameras(self,
         drive_pose: Pose2d,
         current_speeds: ChassisSpeeds,
         current_rotation: Rotation2d,
-    ):
+):
         all_observations: List[VisionObservation] = []
 
         for cam_cfg in self._cameras:

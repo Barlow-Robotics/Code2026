@@ -16,6 +16,7 @@ class RobotFeatures:
     HAS_INTAKE = True
     HAS_SPINDEX = True
     HAS_FEEDER = True
+    HAS_CPROFILE = False
 
     @classmethod
     def configure(cls):
@@ -30,6 +31,7 @@ class RobotFeatures:
             cls.HAS_INTAKE = False
             cls.HAS_SPINDEX = False
             cls.HAS_FEEDER = False
+            cls.HAS_CPROFILE = False
         else:
             cls.HAS_DRIVETRAIN = True
             cls.vision_camera_count = 4
@@ -39,6 +41,7 @@ class RobotFeatures:
             cls.HAS_INTAKE = True
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
+            cls.HAS_CPROFILE = True
 
 
 class MotorIDs:

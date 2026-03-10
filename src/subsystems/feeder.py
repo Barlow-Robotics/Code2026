@@ -6,11 +6,13 @@ from constants import MotorIDs
 from pykit.logger import Logger as PyKitLogger
 from commands2.sysid import SysIdRoutine
 from utils import generateSysIdProfile
+from utils.profiler import LoopTimer
 
 
 class Feeder(commands2.Subsystem):
     def __init__(self):
         super().__init__()
+        self._loop_timer = LoopTimer("Feeder")
         FEEDER_CONFIG_CONSTANT = TalonConfig(
             kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True
         )
@@ -86,6 +88,7 @@ class Feeder(commands2.Subsystem):
         )
 
     def periodic(self):
+        self._loop_timer.start()
         self.log_motor(
             self.motor_feeder_constant,
             "Feeder_Constant",
@@ -96,6 +99,7 @@ class Feeder(commands2.Subsystem):
             "Feeder_Alternating",
             self.target_velocity_feeder_alternating,
         )
+        self._loop_timer.stop()
 
     def log_motor(self, motor: TalonFX, prefix: str, target_velocity: float):
         PyKitLogger.recordOutput(f"{prefix}/target_velocity", target_velocity)

@@ -12,11 +12,13 @@ from rev import (
 )
 from pykit.logger import Logger as PyKitLogger
 from commands2 import cmd
+from utils.profiler import LoopTimer
 
 
 class Shooter(Subsystem):
     def __init__(self):
         super().__init__()
+        self._loop_timer = LoopTimer("Shooter")
 
         self.flywheel_motor_left_leader = SparkFlex(
             MotorIDs.motor_id_flywheel_left, type=SparkFlex.MotorType.kBrushless
@@ -92,6 +94,8 @@ class Shooter(Subsystem):
         self.flywheel_target_velocity = 0.0
 
     def periodic(self):
+        self._loop_timer.start()
+
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_RPM", float(self.get_current_rpm())
         )
@@ -121,6 +125,8 @@ class Shooter(Subsystem):
         #     "Shooter/flywheel_motor_current_volts",
         #     float(self.flywheel_motor_left_leader.getAppliedOutput()),
         # )
+
+        self._loop_timer.stop()
 
     # 1. flywheel motor spins up to speed.
     # both at same time

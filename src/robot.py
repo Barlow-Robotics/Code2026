@@ -17,6 +17,8 @@ from utils import (
 from core import RobotContainer
 from phoenix6 import HootAutoReplay
 from wpilib import DriverStation, RobotBase
+from constants import RobotFeatures
+from utils.profiler import LoopTimer, PeriodicProfiler
 
 if typing.TYPE_CHECKING:
     from autos import AutoRoutine
@@ -60,11 +62,23 @@ class Robot(
             HootAutoReplay().with_timestamp_replay().with_joystick_replay()
         )
 
+        # --- cProfile setup (sim-only by default) ---
+        self._cprofile = PeriodicProfiler(enabled=RobotFeatures.HAS_CPROFILE)
+        self._scheduler_timer = LoopTimer("Scheduler")
+
     def robotPeriodic(self) -> None:
         self._time_and_joystick_replay.update()
 
+        if self._cprofile.enabled:
+            self._cprofile.start()
+
+        self._scheduler_timer.start()
         commands2.CommandScheduler.getInstance().run()
         self.container.update_scoring_mechanism()
+        self._scheduler_timer.stop()
+
+        if self._cprofile.enabled:
+            self._cprofile.stop()
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""

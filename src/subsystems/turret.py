@@ -14,11 +14,13 @@ from pykit.logger import Logger as PyKitLogger
 from utils.talon_config import TalonConfig
 from phoenix6.hardware import TalonFX
 from utils import generateSysIdProfile, get_red_pose
+from utils.profiler import LoopTimer
 
 
 class Turret(Subsystem):
     def __init__(self, driveSub: Drivetrain):
         super().__init__()
+        self._loop_timer = LoopTimer("Turret")
         self.driveSub = driveSub
 
         HOOD_MOTOR_CONFIG = TalonConfig(
@@ -113,6 +115,8 @@ class Turret(Subsystem):
         return v_fixed, hood_angle_deg, turret_yaw_deg
 
     def periodic(self):
+        self._loop_timer.start()
+
         if not self.driveSub.allow_center_auto_align:
             self.set_target_hood_and_turret()
 
@@ -164,6 +168,8 @@ class Turret(Subsystem):
             "Turret/turret_motor_current",
             float(self.turret_motor.get_stator_current().value_as_double),
         )
+
+        self._loop_timer.stop()
 
     def _optimal_angle_calc(
         self, v_fixed: float = TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT
