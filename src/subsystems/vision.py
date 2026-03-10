@@ -148,16 +148,17 @@ class Vision(Subsystem):
             self._vision_sim = None
 
     def periodic(self):
-        self._loop_timer.start()
 
         if not RobotBase.isReal() and VisionConstants.VISION_SIM:
             self.simulation_periodic()
+
+        self._loop_timer.start()
 
         if not self.disabled_vision:
             current_pose = self.drive_sub.get_pose()
             self._update_all_cameras(current_pose)
 
-        self._total_detected_targets = float(len(self.get_all_detected_targets()))
+        #self._total_detected_targets = float(len(self.get_all_detected_targets()))
 
         if self._last_pose_estimate is not None:
             PyKitLogger.recordOutput(
@@ -189,9 +190,9 @@ class Vision(Subsystem):
         PyKitLogger.recordOutput(
             "Vision/State/observations_per_cycle", self._observations_per_cycle
         )
-        PyKitLogger.recordOutput(
-            "Vision/State/total_detected_targets", self._total_detected_targets
-        )
+        #PyKitLogger.recordOutput(
+        #    "Vision/State/total_detected_targets", self._total_detected_targets
+        #)
         PyKitLogger.recordOutput(
             "Vision/State/auto_align_triggered", self._auto_align_triggered
         )
