@@ -160,8 +160,6 @@ class Vision(Subsystem):
         if not RobotBase.isReal() and VisionConstants.VISION_SIM:
             self.simulation_periodic()
 
-        self._loop_timer.start()
-
         if not self.disabled_vision:
             self.timer.start()
 
@@ -246,6 +244,7 @@ class Vision(Subsystem):
 
         all_observations.sort(key=lambda o: o.timestamp)
         self._observations_per_cycle = float(len(all_observations))
+        self.timer.start()
 
         for obs in all_observations:
             self.drive_sub.add_vision_measurement(obs.pose, obs.timestamp, obs.std_devs)
