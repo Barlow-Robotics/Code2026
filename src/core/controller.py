@@ -17,7 +17,7 @@ from subsystems.intake import IntakePositions
 if TYPE_CHECKING:
     from core import RobotContainer
 
-class CurrentState(Enum):
+class StartingState(Enum):
     SLOW = 0.5
     NORMAL = 1
     FAST = 2
@@ -29,7 +29,7 @@ class Controller:
     def __init__(self, container: "RobotContainer"):
         self._operator = CommandXboxController(self._OPERATOR_PORT)
         self._driver = CommandXboxController(self._DRIVER_PORT)
-        self._current_state = CurrentState.NORMAL
+        self._current_state = StartingState.NORMAL.value
         # Drivetrain default command (field-centric drive)
         # Note that X is forward and Y is left per WPILib convention.
         container.drivetrain.setDefaultCommand(
@@ -38,31 +38,29 @@ class Controller:
                     container.drivetrain.movement.with_velocity_x(
                         -self._driver.getRawAxis(1)
                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                        * self._current_state.value
+                        * self._current_state 
                     )
                     .with_velocity_y(
                         -self._driver.getRawAxis(0)
                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                        * self._current_state.value
+                        * self._current_state
                     )
                     .with_rotational_rate(
                         -self._driver.getRawAxis(2 if type(self._driver) == CommandJoystick else 4)
                         * DriveConstants.MAX_ANGULAR_VELOCITY
-                        * self._current_state.value
+                        * self._current_state
                     )
                 )
             )
         )
         
         self._driver.leftBumper().onTrue(
-            cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.SLOW if True else CurrentState.NORMAL))).onFalse(
-                cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.NORMAL if True else CurrentState.NORMAL))
-            )
+            cmd.runOnce(lambda: self.update_state(sub=False) if self._current_state < 1.0 else None)
+        )
 
         self._driver.rightBumper().onTrue(
-            cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.FAST if True else CurrentState.NORMAL))).onFalse(
-                cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.NORMAL if True else CurrentState.NORMAL))
-            )
+            cmd.runOnce(lambda: self.update_state(sub=True) if self._current_state > 0.5 else None)
+        )
 
         
 
@@ -158,7 +156,11 @@ class Controller:
                 cmd.runOnce(self._log_missing_connections),
             ).repeatedly()
         )
-
+    def update_state(self, sub=False):
+        if sub:
+            self._current_state -= 0.1
+        else:
+            self._current_state += 0.1
     def _log_missing_connections(self):
         if not DriverStation.isJoystickConnected(self._OPERATOR_PORT):
             wpilib.reportWarning(
