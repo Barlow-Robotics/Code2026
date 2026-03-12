@@ -4,6 +4,7 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 from commands2 import cmd
+import commands2
 from commands2.button import CommandXboxController, CommandJoystick, Trigger
 
 import wpilib
@@ -56,11 +57,9 @@ class Controller:
         
         self._driver.rightBumper().onTrue(
             cmd.runOnce(lambda: self.update_state(sub=False) if round(self._current_state, 2) < 1.0 else print("HI2"))
+        )
         
         
-        *
-        /')
-
         self._driver.leftBumper().onTrue(
             cmd.runOnce(lambda: self.update_state(sub=True) if round(self._current_state, 2) > 0.5 else print("hi"))
         )
@@ -120,7 +119,22 @@ class Controller:
             and RobotFeatures.HAS_SPINDEX
         ):
             self._driver.rightTrigger().whileTrue(ShootCommand(container.shooter, container.feeder, container.spindex))
-            
+        if RobotFeatures.HAS_SPINDEX:
+            self._operator.leftTrigger().onTrue(
+                cmd.run(lambda: commands2.Command(
+                    lambda: container.feeder.move(velocity=1, invert=False),
+                ))
+            )
+            self._operator.leftBumper().onTrue(
+                cmd.run(lambda: commands2.Command(
+                    lambda: container.feeder.move(velocity=1, invert=True),
+                ))
+            )
+            self._operator.rightBumper().onTrue(
+                cmd.run(lambda: commands2.Command(
+                    lambda: container.feeder.stop(),
+                ))
+            )
 
         self._driver.button(12).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
 
