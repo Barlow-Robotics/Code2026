@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 import math
 from typing import Optional, List
+from ntcore import BooleanSubscriber, DoubleSubscriber, NetworkTable, NetworkTableInstance
+from numpy import double
 from photonlibpy.photonCamera import PhotonCamera
 from photonlibpy.estimatedRobotPose import EstimatedRobotPose
 from photonlibpy.photonPoseEstimator import PhotonPoseEstimator
@@ -70,6 +72,13 @@ class _CameraConfig:
 
 class Vision(Subsystem):
     def __init__(self, drive_sub: Drivetrain):
+        table: NetworkTable = NetworkTableInstance.getDefault().getTable("BallVision")
+
+        self.xSub: DoubleSubscriber      = table.getDoubleTopic("x").subscribe(0.0)
+        self.ySub: DoubleSubscriber      = table.getDoubleTopic("y").subscribe(0.0)
+        self.angleSub: DoubleSubscriber  = table.getDoubleTopic("angle").subscribe(0.0)
+        self.targetSub: BooleanSubscriber = table.getBooleanTopic("has_target").subscribe(False)
+
         self.drive_sub = drive_sub
 
         field_layout = AprilTagFieldLayout.loadField(VisionConstants.FIELD_LAYOUT)
@@ -168,7 +177,7 @@ class Vision(Subsystem):
             current_rotation = self.drive_sub.get_rotation()  # once for all cameras
 
             self._update_all_cameras(current_pose, current_speeds, current_rotation)
-            print(self.timer.get())
+            # print(self.timer.get())
             self.timer.reset()
             self.timer.stop()
 
@@ -618,10 +627,18 @@ class Vision(Subsystem):
             self._vision_sim.update(self.drive_sub.get_pose())
 
     def auto_align(self):
+        hasTarget: bool = self.targetSub.get()
+        if not hasTarget:
+            print("AUTO ALIGN: No target detected, aborting auto align.")
+            return
+        x: float        = self.xSub.get()
+        y: float        = self.ySub.get()
+        angle: float    = self.angleSub.get()
+
         print("AUTO ALIGN")
         starting_pose = self.drive_sub.get_pose()
         target_pose = Pose2d(
-            starting_pose.X() + 1, starting_pose.Y(), starting_pose.rotation()
+            starting_pose.X() + x, starting_pose.Y() + y, starting_pose.rotation() + Rotation2d(angle * SI.degrees_to_radians)
         )
 
         self._auto_align_triggered = True
