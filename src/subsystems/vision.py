@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import math
 from typing import Optional, List
 from ntcore import BooleanSubscriber, DoubleSubscriber, NetworkTable, NetworkTableInstance
+import ntcore
 from numpy import double
 from photonlibpy.photonCamera import PhotonCamera
 from photonlibpy.estimatedRobotPose import EstimatedRobotPose
@@ -72,7 +73,11 @@ class _CameraConfig:
 
 class Vision(Subsystem):
     def __init__(self, drive_sub: Drivetrain):
-        table: NetworkTable = NetworkTableInstance.getDefault().getTable("BallVision")
+        inst = ntcore.NetworkTableInstance.getDefault()
+        inst.setServerTeam(4572)
+        inst.startClient4("connect-auto-align")
+    
+        table = inst.getTable("BallVision")
 
         self.xSub: DoubleSubscriber      = table.getDoubleTopic("x").subscribe(0.0)
         self.ySub: DoubleSubscriber      = table.getDoubleTopic("y").subscribe(0.0)
