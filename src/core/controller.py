@@ -10,7 +10,7 @@ import wpilib
 from phoenix6 import swerve
 from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
-from commands import IntakePositionCommand
+from commands import IntakePositionCommand, ShootCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
 
@@ -29,7 +29,7 @@ class Controller:
     def __init__(self, container: "RobotContainer"):
         self._operator = CommandXboxController(self._OPERATOR_PORT)
         self._driver = CommandXboxController(self._DRIVER_PORT)
-        currentState = CurrentState.NORMAL
+        self._current_state = CurrentState.NORMAL
         # Drivetrain default command (field-centric drive)
         # Note that X is forward and Y is left per WPILib convention.
         container.drivetrain.setDefaultCommand(
@@ -38,21 +38,34 @@ class Controller:
                     container.drivetrain.movement.with_velocity_x(
                         -self._driver.getRawAxis(1)
                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                        * currentState.value
+                        * self._current_state.value
                     )
                     .with_velocity_y(
                         -self._driver.getRawAxis(0)
                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                        * currentState.value
+                        * self._current_state.value
                     )
                     .with_rotational_rate(
                         -self._driver.getRawAxis(2 if type(self._driver) == CommandJoystick else 4)
                         * DriveConstants.MAX_ANGULAR_VELOCITY
-                        * currentState.value
+                        * self._current_state.value
                     )
                 )
             )
         )
+        
+        self._driver.leftBumper().onTrue(
+            cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.SLOW if True else CurrentState.NORMAL)).onFalse(
+                cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.NORMAL if True else CurrentState.NORMAL))
+            )
+        )
+
+        self._driver.rightBumper().onTrue(
+            cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.FAST if True else CurrentState.NORMAL)).onFalse(
+                cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.NORMAL if True else CurrentState.NORMAL))
+            )
+        )
+        
 
         # Idle while the robot is disabled. This ensures the configured
         # neutral mode is applied to the drive motors while disabled.
@@ -75,33 +88,38 @@ class Controller:
 
         # Subsystem button bindings (driver joystick)
         if RobotFeatures.HAS_INTAKE:
-            current_speeds = container.drivetrain.get_speeds()
-            overall_velocity = (current_speeds.vx**2 + current_speeds.vy**2) ** 0.5
-            self._driver.button(2).onTrue(
-                IntakePositionCommand(drive_sub=driveSub)
-            )
-            self._driver.button(4).onTrue(
+            self._driver.leftStick().onTrue( # NEED TO FIX
                 IntakePositionCommand(
-                    container.drivetrain, container.intake, IntakePositions.DEPLOYED
-                )
-            ).onFalse(
-                IntakePositionCommand(
-                    container.drivetrain, container.intake, IntakePositions.STOWED
+                    drive_sub=container.drivetrain, intake_sub=container.intake, position=IntakePositions.DEPLOYED,
                 )
             )
+            self._driver.b().onTrue(
+                IntakePositionCommand(
+                    drive_sub=container.drivetrain, intake_sub=container.intake, position=IntakePositions.DEPLOYED, move=False
+                )
+            )
+            self._driver.a().onTrue(
+                IntakePositionCommand(
+                    drive_sub=container.drivetrain, intake_sub=container.intake, position=IntakePositions.HOME, move=False
+                )
+            )
+        
+            
         if RobotFeatures.HAS_VISION:
-            self._driver.button(3).onTrue(container.vision.auto_align_command)
-            self._driver.button(6).onTrue(
-                cmd.run(container.vision.position_to_pose_align)
-                .until(lambda: container.vision.is_aligned(tolerance_degrees=0.7))
-                .withTimeout(1.0)
-            )
+            # NEED TO ADD AUTO-ALIGN
+            self._driver.x().onTrue(container.vision.auto_align_command)
+            # self._driver.button(6).onTrue(
+            #     cmd.run(container.vision.position_to_pose_align)
+            #     .until(lambda: container.vision.is_aligned(tolerance_degrees=0.7))
+            #     .withTimeout(1.0)
+            # )
         if (
             RobotFeatures.HAS_SHOOTER
             and RobotFeatures.HAS_FEEDER
             and RobotFeatures.HAS_SPINDEX
         ):
-            self._driver.button(5).whileTrue(container.shoot_command_factory())
+            self._driver.button(5).whileTrue(ShootCommand(container.shooter, container.feeder, container.spindex))
+            
 
         self._driver.button(12).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
 
