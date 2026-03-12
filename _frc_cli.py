@@ -11,6 +11,7 @@ HOST_ONLY_PACKAGES = {
     "robotpy_cli",
     "robotpy_halsim_gui",
     "robotpy_pykit_watch",
+    "snakeviz",
 }
 
 

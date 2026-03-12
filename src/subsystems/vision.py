@@ -8,14 +8,16 @@ from photonlibpy.targeting.photonPipelineResult import PhotonPipelineResult
 from photonlibpy.targeting.photonTrackedTarget import PhotonTrackedTarget
 from robotpy_apriltag import AprilTagFieldLayout
 from wpilib._wpilib import RobotBase
-from wpimath.geometry import Pose2d, Rotation2d, Transform3d
-from wpilib import DriverStation
+from wpimath.geometry import Pose2d, Pose3d, Rotation2d, Transform3d
+from wpilib import DriverStation, Timer
+from wpimath.kinematics import ChassisSpeeds
 from constants import SI, VisionConstants, RobotFeatures
 from subsystems import Drivetrain
 from commands2 import Subsystem, cmd
 from commands import FollowTrajectoryCommand
 
 from pykit.logger import Logger as PyKitLogger
+from utils.profiler import LoopTimer
 from utils.trajectory_generator import CreateTrajectory
 
 if not RobotBase.isReal():
@@ -27,8 +29,8 @@ if not RobotBase.isReal():
 
 XY_STD_DEV_COEFFICIENT = 0.05  # Base xy std dev coefficient
 THETA_STD_DEV_COEFFICIENT = 0.01  # Base theta std dev coefficient
-DISTANCE_EXPONENT = 1.9  # How aggressively distance degrades trust
-TAG_COUNT_EXPONENT = 2.0  # How aggressively tag count improves trust
+DISTANCE_EXPONENT = 3  # How aggressively distance degrades trust
+TAG_COUNT_EXPONENT = 1.0  # How aggressively tag count improves trust
 FIELD_BORDER_MARGIN = 0.5  # Metres outside field to still accept a pose
 TIMESTAMP_OFFSET = 0.0  # Adjust if clocks drift between coprocessor/RIO
 CAMERA_HEIGHT_TOLERANCE = 0.3  # Metres of tolerance on the camera Z value
@@ -62,6 +64,8 @@ class _CameraConfig:
     robot_to_camera: Transform3d
     std_dev_factor: float = 1.0
     camera_sim: Optional[PhotonCameraSim] = None
+    _last_result_timestamp: float = -1.0
+    is_stale: bool = False
 
 
 class Vision(Subsystem):
@@ -107,6 +111,7 @@ class Vision(Subsystem):
         ]
         self._cameras = self._cameras[0 : RobotFeatures.vision_camera_count]
 
+        self._loop_timer = LoopTimer("Vision")
         self.disabled_vision = False
         self._last_pose_estimate: Optional[Pose2d] = None
         self._camera_stats: dict[str, CameraStats] = {}
@@ -116,8 +121,13 @@ class Vision(Subsystem):
         self._auto_align_triggered: bool = False
         self._auto_align_starting_pose: Optional[Pose2d] = None
         self._auto_align_target_pose: Optional[Pose2d] = None
+        self.timer = Timer()
 
         self.auto_align_command = cmd.runOnce(self.auto_align)
+
+        self.tag_pose_cache = {}
+        for i in range(1, 33):
+            self.tag_pose_cache[i] = self.april_tag_field_layout.getTagPose(i)
 
         # Log camera config on init
         for i, cam_cfg in enumerate(self._cameras):
@@ -146,25 +156,35 @@ class Vision(Subsystem):
             self._vision_sim = None
 
     def periodic(self):
+
         if not RobotBase.isReal() and VisionConstants.VISION_SIM:
             self.simulation_periodic()
 
         if not self.disabled_vision:
-            current_pose = self.drive_sub.get_pose()
-            self._update_all_cameras(current_pose)
+            self.timer.start()
 
-        self._total_detected_targets = float(len(self.get_all_detected_targets()))
+            current_pose = self.drive_sub.get_pose()
+            current_speeds = self.drive_sub.get_speeds()  # once for all cameras
+            current_rotation = self.drive_sub.get_rotation()  # once for all cameras
+
+            self._update_all_cameras(current_pose, current_speeds, current_rotation)
+            print(self.timer.get())
+            self.timer.reset()
+            self.timer.stop()
+
+        #self._total_detected_targets = float(len(self.get_all_detected_targets()))
 
         if self._last_pose_estimate is not None:
-            PyKitLogger.recordOutput(
-                "Vision/elevator_camera_pose", self._last_pose_estimate
-            )
+            pass
+            # PyKitLogger.recordOutput(
+            #     "Vision/elevator_camera_pose", self._last_pose_estimate
+            # )
 
-        closest_tag = self.find_trench_pose_of_tag_closest_to_robot(
-            self.drive_sub.get_pose()
-        )
-        if closest_tag is not None:
-            PyKitLogger.recordOutput("Vision/closest_april_tag", closest_tag)
+        # closest_tag = self.find_trench_pose_of_tag_closest_to_robot(
+        #     self.drive_sub.get_pose()
+        # )
+        # if closest_tag is not None:
+        #     PyKitLogger.recordOutput("Vision/closest_april_tag", closest_tag)
 
         for stat_name, stat_key in [
             ("front_left_swerve", "front_left"),
@@ -185,9 +205,9 @@ class Vision(Subsystem):
         PyKitLogger.recordOutput(
             "Vision/State/observations_per_cycle", self._observations_per_cycle
         )
-        PyKitLogger.recordOutput(
-            "Vision/State/total_detected_targets", self._total_detected_targets
-        )
+        # PyKitLogger.recordOutput(
+        #     "Vision/State/total_detected_targets", self._total_detected_targets
+        # )
         PyKitLogger.recordOutput(
             "Vision/State/auto_align_triggered", self._auto_align_triggered
         )
@@ -207,15 +227,24 @@ class Vision(Subsystem):
                 f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
             )
 
-    def _update_all_cameras(self, drive_pose: Pose2d):
+        self._loop_timer.stop()
+
+    def _update_all_cameras(self,
+        drive_pose: Pose2d,
+        current_speeds: ChassisSpeeds,
+        current_rotation: Rotation2d,
+):
         all_observations: List[VisionObservation] = []
 
         for cam_cfg in self._cameras:
-            obs_list = self._get_observations_from_camera(drive_pose, cam_cfg)
+            obs_list = self._get_observations_from_camera(
+                drive_pose, current_speeds, current_rotation, cam_cfg
+            )
             all_observations.extend(obs_list)
 
         all_observations.sort(key=lambda o: o.timestamp)
         self._observations_per_cycle = float(len(all_observations))
+        self.timer.start()
 
         for obs in all_observations:
             self.drive_sub.add_vision_measurement(obs.pose, obs.timestamp, obs.std_devs)
@@ -224,6 +253,8 @@ class Vision(Subsystem):
     def _get_observations_from_camera(
         self,
         drive_pose: Pose2d,
+        current_speeds: ChassisSpeeds,
+        gyro: Rotation2d,
         cam_cfg: _CameraConfig,
     ) -> List[VisionObservation]:
         prefix = f"Vision/{cam_cfg.name}"
@@ -232,232 +263,236 @@ class Vision(Subsystem):
             return []
 
         observations: List[VisionObservation] = []
+        try:
+            result = cam_cfg.camera.getLatestResult()
+        except IndexError:
+            return observations
+        result_timestamp = result.getTimestampSeconds()
+        if result_timestamp == cam_cfg._last_result_timestamp:
+            cam_cfg.is_stale = True
+            return observations
+        cam_cfg._last_result_timestamp = result_timestamp
+        cam_cfg.is_stale = False
 
-        for result in cam_cfg.camera.getAllUnreadResults():
-            targets = result.getTargets()
-            PyKitLogger.recordOutput(f"{prefix}/targets_seen", float(len(targets)))
+        # for result in cam_cfg.camera.getAllUnreadResults():
+        targets = result.getTargets()
+        # PyKitLogger.recordOutput(f"{prefix}/targets_seen", float(len(targets)))
 
-            if len(targets) == 1 and targets[0].getPoseAmbiguity() > POSE_AMBIGUITY:
-                # continue
-                target = targets[0]
+        if len(targets) == 1 and targets[0].getPoseAmbiguity() > POSE_AMBIGUITY:
+            # continue
+            target = targets[0]
 
-                PyKitLogger.recordOutput(
-                    f"{prefix}/using_single_tag_gyro_disambiguation", True
-                )
-                PyKitLogger.recordOutput(
-                    f"{prefix}/single_tag_id", float(target.getFiducialId())
-                )
-                PyKitLogger.recordOutput(
-                    f"{prefix}/single_tag_ambiguity", target.getPoseAmbiguity()
-                )
+            # PyKitLogger.recordOutput(
+            #     f"{prefix}/using_single_tag_gyro_disambiguation", True
+            # )
+            # PyKitLogger.recordOutput(
+            #     f"{prefix}/single_tag_id", float(target.getFiducialId())
+            # )
+            # PyKitLogger.recordOutput(
+            #     f"{prefix}/single_tag_ambiguity", target.getPoseAmbiguity()
+            # )
 
-                tag_pose = self.april_tag_field_layout.getTagPose(
-                    target.getFiducialId()
-                )
-                if tag_pose is None:
-                    PyKitLogger.recordOutput(
-                        f"{prefix}/rejected_no_tag_pose_in_layout", True
-                    )
-                    continue
-                else:
-                    PyKitLogger.recordOutput(
-                        f"{prefix}/rejected_no_tag_pose_in_layout", False
-                    )
-
-                camera_to_robot = cam_cfg.estimator.robotToCamera.inverse()
-                robot_pose_best = tag_pose.transformBy(
-                    target.getBestCameraToTarget().inverse()
-                ).transformBy(camera_to_robot)
-                robot_pose_alt = tag_pose.transformBy(
-                    target.getAlternateCameraToTarget().inverse()
-                ).transformBy(camera_to_robot)
-
-                gyro = self.drive_sub.get_rotation()
-                diff_best = abs(
-                    (gyro - robot_pose_best.toPose2d().rotation()).radians()
-                )
-                diff_alt = abs((gyro - robot_pose_alt.toPose2d().rotation()).radians())
-
-                PyKitLogger.recordOutput(f"{prefix}/gyro_diff_best_rad", diff_best)
-                PyKitLogger.recordOutput(f"{prefix}/gyro_diff_alt_rad", diff_alt)
-                PyKitLogger.recordOutput(
-                    f"{prefix}/chose_best_pose", diff_best < diff_alt
-                )
-
-                if diff_best < diff_alt:
-                    estimated = EstimatedRobotPose(
-                        estimatedPose=robot_pose_best,
-                        targetsUsed=[target],
-                        timestampSeconds=result.getTimestampSeconds(),
-                    )
-                else:
-                    estimated = EstimatedRobotPose(
-                        estimatedPose=robot_pose_alt,
-                        targetsUsed=[target],
-                        timestampSeconds=result.getTimestampSeconds(),
-                    )
-
-                if (
-                    min(diff_best, diff_alt)
-                    > MAX_ANGLE_DIFFERENCE_FOR_GYRO_DISAMBIGUATION_DEGREES
-                    * SI.degrees_to_radians
-                ):
-                    PyKitLogger.recordOutput(
-                        f"{prefix}/rejected_gyro_disambiguation_too_large", True
-                    )
-                    continue
-                else:
-                    PyKitLogger.recordOutput(
-                        f"{prefix}/rejected_gyro_disambiguation_too_large", False
-                    )
+            tag_pose = self.get_cached_tag_pose(target.getFiducialId())
+            if tag_pose is None:
+                # PyKitLogger.recordOutput(
+                #     f"{prefix}/rejected_no_tag_pose_in_layout", True
+                # )
+                return observations
             else:
-                PyKitLogger.recordOutput(
-                    f"{prefix}/using_single_tag_gyro_disambiguation", False
+                pass
+                # PyKitLogger.recordOutput(
+                #     f"{prefix}/rejected_no_tag_pose_in_layout", False
+                # )
+
+            camera_to_robot = cam_cfg.estimator.robotToCamera.inverse()
+            robot_pose_best = tag_pose.transformBy(
+                target.getBestCameraToTarget().inverse()
+            ).transformBy(camera_to_robot)
+            robot_pose_alt = tag_pose.transformBy(
+                target.getAlternateCameraToTarget().inverse()
+            ).transformBy(camera_to_robot)
+
+            diff_best = abs((gyro - robot_pose_best.toPose2d().rotation()).radians())
+            diff_alt = abs((gyro - robot_pose_alt.toPose2d().rotation()).radians())
+
+            # PyKitLogger.recordOutput(f"{prefix}/gyro_diff_best_rad", diff_best)
+            # PyKitLogger.recordOutput(f"{prefix}/gyro_diff_alt_rad", diff_alt)
+            # PyKitLogger.recordOutput(
+            #     f"{prefix}/chose_best_pose", diff_best < diff_alt
+            # )
+
+            if diff_best < diff_alt:
+                estimated = EstimatedRobotPose(
+                    estimatedPose=robot_pose_best,
+                    targetsUsed=[target],
+                    timestampSeconds=result.getTimestampSeconds(),
                 )
-                broken = False
-                for target in targets:
-                    ambiguity = target.getPoseAmbiguity()
-                    if ambiguity < MINIUM_POSE_AMBIGUITY_FOR_MULTI_POSE:
-                        broken = True
-                        break
-                if not broken:
-                    continue
-
-                estimated = self._get_best_pose_estimate(result, cam_cfg.estimator)
-                if estimated is None:
-                    PyKitLogger.recordOutput(
-                        f"{prefix}/rejected_no_valid_estimate", True
-                    )
-                    continue
-                else:
-                    PyKitLogger.recordOutput(
-                        f"{prefix}/rejected_no_valid_estimate", False
-                    )
-
-            tags = estimated.targetsUsed
-            tag_count = len(tags)
-            PyKitLogger.recordOutput(f"{prefix}/accepted_tag_count", float(tag_count))
-
-            if tag_count == 0:
-                PyKitLogger.recordOutput(f"{prefix}/rejected_zero_tags", True)
-                continue
             else:
-                PyKitLogger.recordOutput(f"{prefix}/rejected_zero_tags", False)
-
-            pose_2d = estimated.estimatedPose.toPose2d()
-
-            PyKitLogger.recordOutput(f"{prefix}/raw_estimated_pose", pose_2d)
-            PyKitLogger.recordOutput(
-                f"{prefix}/raw_estimated_pose_z", estimated.estimatedPose.Z()
-            )
-
-            field_length = self.april_tag_field_layout.getFieldLength()
-            field_width = self.april_tag_field_layout.getFieldWidth()
-            out_of_bounds = (
-                pose_2d.X() < -FIELD_BORDER_MARGIN
-                or pose_2d.X() > field_length + FIELD_BORDER_MARGIN
-                or pose_2d.Y() < -FIELD_BORDER_MARGIN
-                or pose_2d.Y() > field_width + FIELD_BORDER_MARGIN
-            )
-            if out_of_bounds:
-                PyKitLogger.recordOutput(f"{prefix}/rejected_out_of_bounds", True)
-                PyKitLogger.recordOutput(
-                    f"{prefix}/rejected_out_of_bounds_x", pose_2d.X()
+                estimated = EstimatedRobotPose(
+                    estimatedPose=robot_pose_alt,
+                    targetsUsed=[target],
+                    timestampSeconds=result.getTimestampSeconds(),
                 )
-                PyKitLogger.recordOutput(
-                    f"{prefix}/rejected_out_of_bounds_y", pose_2d.Y()
-                )
-                continue
-            else:
-                PyKitLogger.recordOutput(f"{prefix}/rejected_out_of_bounds", False)
-            if (
-                self.drive_sub.get_speeds().omega
-                > SI.degrees_to_radians * MAX_ANGULAR_VELOCITY_DEGREES
-            ):
-                PyKitLogger.recordOutput(
-                    f"{prefix}/rejected_excessive_angular_velocity", True
-                )
-                PyKitLogger.recordOutput(
-                    f"{prefix}/rejected_excessive_angular_velocity_value",
-                    self.drive_sub.get_speeds().omega,
-                )
-                continue
-            else:
-                PyKitLogger.recordOutput(
-                    f"{prefix}/rejected_excessive_angular_velocity", False
-                )
-
-            # if self._should_reject_by_alliance(estimated.targetsUsed):
-            #     PyKitLogger.recordOutput(f"{prefix}/rejected_wrong_alliance_tag", True)
-            #     continue
-            avg_distance = self._average_tag_distance(
-                estimated.estimatedPose.toPose2d(), tags, cam_cfg.estimator
-            )
-
-            if self._should_reject_by_z(estimated):
-                PyKitLogger.recordOutput(f"{prefix}/rejected_bad_z", True)
-                PyKitLogger.recordOutput(
-                    f"{prefix}/rejected_bad_z_value", estimated.estimatedPose.Z()
-                )
-                continue
-            else:
-                PyKitLogger.recordOutput(f"{prefix}/rejected_bad_z", False)
-
-            std_devs = self._calculate_std_devs(
-                avg_distance, tag_count, cam_cfg.std_dev_factor
-            )
-            PyKitLogger.recordOutput(
-                f"{prefix}/currentRadians",
-                abs(estimated.estimatedPose.toPose2d().rotation().radians()),
-            )
-            # if all targets have the same angle and the angle is small, increase the std dev to account for gyro drift causing large errors
-            abs_min_val = float("inf")
-            for tag in tags:
-                diff = (
-                    estimated.estimatedPose.toPose2d().rotation().radians()
-                    - (180 - tag.getYaw()) * SI.degrees_to_radians
-                )
-                abs_min_val = min(abs_min_val, abs(math.remainder(diff, 2 * math.pi)))
-            PyKitLogger.recordOutput(
-                f"{prefix}/abs_min_val", abs_min_val * SI.radians_to_degrees
-            )
 
             if (
-                abs_min_val < MIN_ANGLE_FOR_STD_DEV_INCREASE_DEGREES
-                and avg_distance > MAX_VELOCITY_FOR_STD_DEV_INCREASE_MPS
+                min(diff_best, diff_alt)
+                > MAX_ANGLE_DIFFERENCE_FOR_GYRO_DISAMBIGUATION_DEGREES
+                * SI.degrees_to_radians
             ):
-                std_devs[0] = std_devs[0] + 1
-                std_devs[1] = std_devs[1] + 1
-                std_devs[2] = std_devs[2] + 1
-            if avg_distance > 4.2:
-                PyKitLogger.recordOutput(f"{prefix}/rejected_too_far_from_tags", True)
-                PyKitLogger.recordOutput(
-                    f"{prefix}/rejected_too_far_from_tags_distance", avg_distance
-                )
-                continue
+                #     PyKitLogger.recordOutput(
+                #         f"{prefix}/rejected_gyro_disambiguation_too_large", True
+                #     )
+                return observations
             else:
-                PyKitLogger.recordOutput(f"{prefix}/rejected_too_far_from_tags", False)
+                pass
+                # PyKitLogger.recordOutput(
+                #     f"{prefix}/rejected_gyro_disambiguation_too_large", False
+                # )
+        else:
+            # PyKitLogger.recordOutput(
+            #     f"{prefix}/using_single_tag_gyro_disambiguation", False
+            # )
+            broken = False
+            for target in targets:
+                ambiguity = target.getPoseAmbiguity()
+                if ambiguity < MINIUM_POSE_AMBIGUITY_FOR_MULTI_POSE:
+                    broken = True
+                    break
+            if not broken:
+                return observations
 
-            timestamp = estimated.timestampSeconds + TIMESTAMP_OFFSET
+            estimated = self._get_best_pose_estimate(result, cam_cfg.estimator)
+            if estimated is None:
+                # PyKitLogger.recordOutput(
+                #     f"{prefix}/rejected_no_valid_estimate", True
+                # )
+                return observations
+            else:
+                pass
+                # PyKitLogger.recordOutput(
+                #     f"{prefix}/rejected_no_valid_estimate", False
+                # )
 
-            PyKitLogger.recordOutput(f"{prefix}/accepted_avg_distance_m", avg_distance)
-            PyKitLogger.recordOutput(f"{prefix}/accepted_xy_std_dev", std_devs[0])
-            PyKitLogger.recordOutput(
-                f"{prefix}/accepted_theta_std_dev",
-                std_devs[2] if std_devs[2] != float("inf") else -1.0,
+        tags = estimated.targetsUsed
+        tag_count = len(tags)
+        # PyKitLogger.recordOutput(f"{prefix}/accepted_tag_count", float(tag_count))
+
+        if tag_count == 0:
+            # PyKitLogger.recordOutput(f"{prefix}/rejected_zero_tags", True)
+            return observations
+        else:
+            pass
+            # PyKitLogger.recordOutput(f"{prefix}/rejected_zero_tags", False)
+
+        estimated_pose = estimated.estimatedPose
+        pose_2d = estimated_pose.toPose2d()
+        # PyKitLogger.recordOutput(
+        #     f"{prefix}/raw_estimated_pose_z", pose_2d
+        # )
+
+        field_length = self.april_tag_field_layout.getFieldLength()
+        field_width = self.april_tag_field_layout.getFieldWidth()
+        out_of_bounds = (
+            pose_2d.X() < -FIELD_BORDER_MARGIN
+            or pose_2d.X() > field_length + FIELD_BORDER_MARGIN
+            or pose_2d.Y() < -FIELD_BORDER_MARGIN
+            or pose_2d.Y() > field_width + FIELD_BORDER_MARGIN
+        )
+        if out_of_bounds:
+            # PyKitLogger.recordOutput(f"{prefix}/rejected_out_of_bounds", True)
+            # PyKitLogger.recordOutput(
+            #     f"{prefix}/rejected_out_of_bounds_x", pose_2d.X()
+            # )
+            # PyKitLogger.recordOutput(
+            #     f"{prefix}/rejected_out_of_bounds_y", pose_2d.Y()
+            # )
+            return observations
+        else:
+            pass
+            # PyKitLogger.recordOutput(f"{prefix}/rejected_out_of_bounds", False)
+        if current_speeds.omega > SI.degrees_to_radians * MAX_ANGULAR_VELOCITY_DEGREES:
+            # PyKitLogger.recordOutput(
+            #     f"{prefix}/rejected_excessive_angular_velocity", True
+            # )
+            # PyKitLogger.recordOutput(
+            #     f"{prefix}/rejected_excessive_angular_velocity_value",
+            #     self.drive_sub.get_speeds().omega,
+            # )
+            return observations
+        else:
+            pass
+            # PyKitLogger.recordOutput(
+            #     f"{prefix}/rejected_excessive_angular_velocity", False
+            # )
+
+        avg_distance = self._average_tag_distance(pose_2d, tags, cam_cfg.estimator)
+
+        if self._should_reject_by_z(estimated):
+            # PyKitLogger.recordOutput(f"{prefix}/rejected_bad_z", True)
+            # PyKitLogger.recordOutput(
+            #     f"{prefix}/rejected_bad_z_value", estimated_pose.Z()
+            # )
+            return observations
+        else:
+            pass
+            # PyKitLogger.recordOutput(f"{prefix}/rejected_bad_z", False)
+
+        std_devs = self._calculate_std_devs(
+            avg_distance, tag_count, cam_cfg.std_dev_factor
+        )
+        # PyKitLogger.recordOutput(
+        #     f"{prefix}/currentRadians",
+        #     abs(pose_2d.rotation().radians()),
+        # )
+        # if all targets have the same angle and the angle is small, increase the std dev to account for gyro drift causing large errors
+        abs_min_val = float("inf")
+        for tag in tags:
+            diff = (
+                pose_2d.rotation().radians()
+                - (180 - tag.getYaw()) * SI.degrees_to_radians
             )
-            PyKitLogger.recordOutput(f"{prefix}/accepted_timestamp", timestamp)
-            PyKitLogger.recordOutput(f"{prefix}/accepted_pose", pose_2d)
+            abs_min_val = min(abs_min_val, abs(math.remainder(diff, 2 * math.pi)))
+        # PyKitLogger.recordOutput(
+        #     f"{prefix}/abs_min_val", abs_min_val * SI.radians_to_degrees
+        # )
 
-            self._camera_stats[cam_cfg.name] = CameraStats(
-                std_dev=std_devs[0],
-                tag_count=float(tag_count),
-                distance=avg_distance,
-            )
+        if (
+            abs_min_val < MIN_ANGLE_FOR_STD_DEV_INCREASE_DEGREES
+            and avg_distance > MAX_VELOCITY_FOR_STD_DEV_INCREASE_MPS
+        ):
+            std_devs[0] = std_devs[0] + 1
+            std_devs[1] = std_devs[1] + 1
+            std_devs[2] = std_devs[2] + 1
+        if avg_distance > 4.2:
+            # PyKitLogger.recordOutput(f"{prefix}/rejected_too_far_from_tags", True)
+            # PyKitLogger.recordOutput(
+            #     f"{prefix}/rejected_too_far_from_tags_distance", avg_distance
+            # )
+            return observations
+        else:
+            pass
+            # PyKitLogger.recordOutput(f"{prefix}/rejected_too_far_from_tags", False)
 
-            observations.append(
-                VisionObservation(pose=pose_2d, timestamp=timestamp, std_devs=std_devs)
-            )
+        timestamp = estimated.timestampSeconds + TIMESTAMP_OFFSET
+
+        # PyKitLogger.recordOutput(f"{prefix}/accepted_avg_distance_m", avg_distance)
+        # PyKitLogger.recordOutput(f"{prefix}/accepted_xy_std_dev", std_devs[0])
+        # PyKitLogger.recordOutput(
+        #     f"{prefix}/accepted_theta_std_dev",
+        #     std_devs[2] if std_devs[2] != float("inf") else -1.0,
+        # )
+        # PyKitLogger.recordOutput(f"{prefix}/accepted_timestamp", timestamp)
+        PyKitLogger.recordOutput(f"{prefix}/accepted_pose", pose_2d)
+
+        self._camera_stats[cam_cfg.name] = CameraStats(
+            std_dev=std_devs[0],
+            tag_count=float(tag_count),
+            distance=avg_distance,
+        )
+
+        observations.append(
+            VisionObservation(pose=pose_2d, timestamp=timestamp, std_devs=std_devs)
+        )
 
         return observations
 
@@ -637,3 +672,8 @@ class Vision(Subsystem):
 
         error_degrees = abs((desired_angle - current_angle).degrees())
         return error_degrees < tolerance_degrees
+
+    def get_cached_tag_pose(self, tag_id) -> Pose3d:
+        if tag_id not in self.tag_pose_cache:
+            self.tag_pose_cache[tag_id] = self.april_tag_field_layout.getTagPose(tag_id)
+        return self.tag_pose_cache[tag_id]

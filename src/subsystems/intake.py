@@ -10,6 +10,7 @@ import wpilib
 from wpilib import RobotBase, Mechanism2d, Color8Bit
 from pykit.logger import Logger as PyKitLogger
 
+from utils.profiler import LoopTimer
 from constants import IntakeConstants, MotorIDs
 from utils import TalonConfig, generateSysIdProfile, IntakePositions
 
@@ -39,6 +40,7 @@ class IntakeTelemetry:
 class Intake(commands2.Subsystem):
     def __init__(self):
         super().__init__()
+        self._loop_timer = LoopTimer("Intake")
         self.target_velocity = 0.0
         self._commanded_velocity_ft_per_sec = 0.0
         self._converted_velocity_rps = 0.0
@@ -160,6 +162,8 @@ class Intake(commands2.Subsystem):
                 PyKitLogger.recordOutput(key, value)
 
     def periodic(self):
+        self._loop_timer.start()
+
         if not RobotBase.isReal():
             arm_degrees = self.motor_arm.get_position().value * 360
             self.arm_ligament.setAngle(75 + arm_degrees)
@@ -189,6 +193,8 @@ class Intake(commands2.Subsystem):
                 stop_requested=self._stop_requested,
             ),
         )
+
+        self._loop_timer.stop()
 
     def sysIdQuasistaticRollerTop(self, direction: SysIdRoutine.Direction):
         return self.sys_id_routine_roller.quasistatic(direction)

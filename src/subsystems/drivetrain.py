@@ -10,6 +10,7 @@ from wpimath.geometry import Pose2d, Rotation2d
 from constants import SI, TunerSwerveDrivetrain, DriveConstants
 import ntcore
 from wpimath.kinematics import ChassisSpeeds
+from utils.profiler import LoopTimer
 
 
 class Drivetrain(Subsystem, TunerSwerveDrivetrain):
@@ -136,7 +137,8 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             # Disable CAN warnings in sim
             for module in self.modules:
                 module.drive_motor.sim_state  # just accessing it quiets stale warnings
-
+        self.last_timestamp = -1
+        self.current_pose = None
         self.movement = (
             swerve.requests.FieldCentric()
             .with_deadband(DriveConstants.MAX_TRANSLATIONAL_VELOCITY * 0.1)
@@ -250,6 +252,8 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         self._sys_id_routine_to_apply = self._sys_id_routine_translation
         """The SysId routine to test"""
 
+        self._loop_timer = LoopTimer("Drivetrain")
+
     def apply_request(
         self, request: Callable[[], swerve.requests.SwerveRequest]
     ) -> Command:
@@ -288,6 +292,8 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         return self._sys_id_routine_to_apply.dynamic(direction)
 
     def periodic(self):
+        self._loop_timer.start()
+
         self.determine_turret_state()
         # Periodically try to apply the operator perspective.
         # If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
@@ -303,6 +309,8 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
                     else self._BLUE_ALLIANCE_PERSPECTIVE_ROTATION
                 )
                 self._has_applied_operator_perspective = True
+
+        self._loop_timer.stop()
 
     def add_vision_measurement(
         self,
@@ -349,7 +357,13 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         )
 
     def get_pose(self) -> Pose2d | None:
-        return self.get_state().pose
+        cur_timestamp = self.get_timestamp()
+        if self.last_timestamp == cur_timestamp:
+            return self.current_pose
+        else:
+            self.current_pose = self.get_state().pose
+            self.last_timestamp = cur_timestamp
+            return self.current_pose
 
     def get_speeds(self):
         return self.get_state().speeds

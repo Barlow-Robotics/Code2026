@@ -81,7 +81,7 @@ class TunerConstants:
     # This needs to be tuned to your individual robot
     speed_at_12_volts: units.meters_per_second = 4.33
     accl_at_12_volts = 8.0  # 9–11 m/s² max
-    max_angular_velocity_at_12_volts = 10  # rad/s² max
+    max_angular_velocity_at_12_volts = 4  # can be 10 fine rad/s² max
     max_angular_accl_at_12_volts = 30  # rad/s² max
 
     # Every 1 rotation of the azimuth results in _couple_ratio drive motor turns;

@@ -16,6 +16,7 @@ class RobotFeatures:
     HAS_INTAKE = True
     HAS_SPINDEX = True
     HAS_FEEDER = True
+    HAS_CPROFILE = False
 
     @classmethod
     def configure(cls):
@@ -24,12 +25,13 @@ class RobotFeatures:
         if RobotBase.isReal():
             cls.HAS_DRIVETRAIN = True
             cls.HAS_VISION = True
-            cls.vision_camera_count = 1
+            cls.vision_camera_count = 2
             cls.HAS_SHOOTER = False
             cls.HAS_TURRET = False
             cls.HAS_INTAKE = False
             cls.HAS_SPINDEX = False
             cls.HAS_FEEDER = False
+            cls.HAS_CPROFILE = False
         else:
             cls.HAS_DRIVETRAIN = True
             cls.vision_camera_count = 4
@@ -39,6 +41,7 @@ class RobotFeatures:
             cls.HAS_INTAKE = True
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
+            cls.HAS_CPROFILE = True
 
 
 class MotorIDs:
@@ -137,7 +140,7 @@ class DriveConstants:
     CENTER_WHEEL_TO_CENTER_WHEEL_METERS = (
         SI.inches_to_meters * CENTER_WHEEL_TO_CENTER_WHEEL
     )  # M
-    ROBOT_MASS_KG = 50  # KG
+    ROBOT_MASS_KG = 25  # KG
     ROBOT_MOI = (
         ROBOT_MASS_KG
         * (
@@ -161,7 +164,7 @@ class VisionConstants:
     CAMERA_3_NAME = "Back_Left_Swerve"
     CAMERA_4_NAME = "Back_Right_Swerve"
 
-    VISION_SIM = True
+    VISION_SIM = False
 
     HALF_WIDTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)
     HALF_LENGTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)
