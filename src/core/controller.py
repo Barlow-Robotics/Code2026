@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import TYPE_CHECKING
 
 from commands2 import cmd
@@ -16,6 +17,10 @@ from subsystems.intake import IntakePositions
 if TYPE_CHECKING:
     from core import RobotContainer
 
+class CurrentState(Enum):
+    SLOW = 0.5
+    NORMAL = 1
+    FAST = 2
 
 class Controller:
     _OPERATOR_PORT = 1
@@ -23,8 +28,8 @@ class Controller:
 
     def __init__(self, container: "RobotContainer"):
         self._operator = CommandXboxController(self._OPERATOR_PORT)
-        self._driver = CommandJoystick(self._DRIVER_PORT)
-
+        self._driver = CommandXboxController(self._DRIVER_PORT)
+        currentState = CurrentState.NORMAL
         # Drivetrain default command (field-centric drive)
         # Note that X is forward and Y is left per WPILib convention.
         container.drivetrain.setDefaultCommand(
@@ -33,17 +38,17 @@ class Controller:
                     container.drivetrain.movement.with_velocity_x(
                         -self._driver.getRawAxis(1)
                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                        * (((self._driver.getThrottle() + 1) * (1 - 0.4)) / 2 + 0.4)
+                        * currentState.value
                     )
                     .with_velocity_y(
                         -self._driver.getRawAxis(0)
                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                        * (((self._driver.getThrottle() + 1) * (1 - 0.4)) / 2 + 0.4)
+                        * currentState.value
                     )
                     .with_rotational_rate(
-                        -self._driver.getRawAxis(2)
+                        -self._driver.getRawAxis(2 if type(self._driver) == CommandJoystick else 4)
                         * DriveConstants.MAX_ANGULAR_VELOCITY
-                        * (((self._driver.getThrottle() + 1) * (1 - 0.4)) / 2 + 0.4)
+                        * currentState.value
                     )
                 )
             )
@@ -73,7 +78,7 @@ class Controller:
             current_speeds = container.drivetrain.get_speeds()
             overall_velocity = (current_speeds.vx**2 + current_speeds.vy**2) ** 0.5
             self._driver.button(2).onTrue(
-                container.intake.go_to_velocity_command_factory(overall_velocity)
+                IntakePositionCommand(drive_sub=driveSub)
             )
             self._driver.button(4).onTrue(
                 IntakePositionCommand(

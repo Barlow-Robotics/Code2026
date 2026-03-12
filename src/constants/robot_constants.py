@@ -164,7 +164,7 @@ class VisionConstants:
     CAMERA_3_NAME = "Back_Left_Swerve"
     CAMERA_4_NAME = "Back_Right_Swerve"
 
-    VISION_SIM = True
+    VISION_SIM = False
 
     HALF_WIDTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)
     HALF_LENGTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)

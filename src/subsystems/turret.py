@@ -110,6 +110,10 @@ class Turret(Subsystem):
         )
         if v_fixed < 0:
             return -1, -1, -1
+        if hood_angle_deg > 80:
+            hood_angle_deg = 80
+        elif hood_angle_deg < -80:
+            hood_angle_deg = -80
         self.set_angle_hood(hood_angle_deg)
         self.set_angle_turret(turret_yaw_deg)
         return v_fixed, hood_angle_deg, turret_yaw_deg
@@ -118,7 +122,7 @@ class Turret(Subsystem):
         self._loop_timer.start()
 
         if not self.driveSub.allow_center_auto_align:
-            self.set_target_hood_and_turret()
+            print(self.set_target_hood_and_turret())
 
         actual_turret_yaw = (
             float(
@@ -180,7 +184,7 @@ class Turret(Subsystem):
 
         Returns:
             turret_yaw (degree) is robot-relative, so 0 degrees is straight ahead of your robot's front. Where Positive = left, Negative = right
-            hood_angle (degree), 0 = shooting horizontally, 90 = shooting straight up
+            hood_angle (degree), 0 = shooting horizontally, 90 = shooting straight up          -      40 degrees is starting -> 30 degrees
             v_fixed (m/s) is the fixed velocity you input, returned for convenience
         """
 
