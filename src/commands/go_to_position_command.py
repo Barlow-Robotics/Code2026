@@ -8,12 +8,13 @@ if typing.TYPE_CHECKING:
 
 class IntakePositionCommand(Command):
     def __init__(
-        self, drive_sub: "Drivetrain", intake_sub: "Intake", position: IntakePositions
+        self, drive_sub: "Drivetrain", intake_sub: "Intake", position: IntakePositions, move=False
     ):
         super().__init__()
         self.drive_sub = drive_sub
         self.intake_sub = intake_sub
         self.position = position
+        self.move = move
         self.addRequirements(
             intake_sub
         )  # BW: since im only controlling intake and just getting data from drive i only need to do requirements for intake
@@ -30,7 +31,7 @@ class IntakePositionCommand(Command):
             self.intake_sub.set_velocity(overall_velocity)
 
     def isFinished(self):
-        pass
+        return False
 
     def end(self, interrupted):
         pass

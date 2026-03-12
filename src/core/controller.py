@@ -55,16 +55,15 @@ class Controller:
         )
         
         self._driver.leftBumper().onTrue(
-            cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.SLOW if True else CurrentState.NORMAL)).onFalse(
+            cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.SLOW if True else CurrentState.NORMAL))).onFalse(
                 cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.NORMAL if True else CurrentState.NORMAL))
             )
-        )
 
         self._driver.rightBumper().onTrue(
-            cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.FAST if True else CurrentState.NORMAL)).onFalse(
+            cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.FAST if True else CurrentState.NORMAL))).onFalse(
                 cmd.runOnce(lambda: setattr(self, "_current_state", CurrentState.NORMAL if True else CurrentState.NORMAL))
             )
-        )
+
         
 
         # Idle while the robot is disabled. This ensures the configured
@@ -93,6 +92,7 @@ class Controller:
                     drive_sub=container.drivetrain, intake_sub=container.intake, position=IntakePositions.DEPLOYED,
                 )
             )
+            
             self._driver.b().onTrue(
                 IntakePositionCommand(
                     drive_sub=container.drivetrain, intake_sub=container.intake, position=IntakePositions.DEPLOYED, move=False
