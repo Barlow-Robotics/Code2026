@@ -121,19 +121,19 @@ class Controller:
             self._driver.rightTrigger().whileTrue(ShootCommand(container.shooter, container.feeder, container.spindex))
         if RobotFeatures.HAS_SPINDEX:
             self._operator.leftTrigger().onTrue(
-                cmd.run(lambda: commands2.Command(
-                    lambda: container.feeder.move(velocity=1, invert=False),
-                ))
+                cmd.runOnce(
+                    lambda: container.feeder.move(1, False),
+                )
             )
             self._operator.leftBumper().onTrue(
-                cmd.run(lambda: commands2.Command(
-                    lambda: container.feeder.move(velocity=1, invert=True),
-                ))
+                cmd.runOnce(
+                    lambda: container.feeder.move(1, True),
+                )
             )
             self._operator.rightBumper().onTrue(
-                cmd.run(lambda: commands2.Command(
+                cmd.runOnce(
                     lambda: container.feeder.stop(),
-                ))
+                )
             )
 
         self._driver.button(12).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
