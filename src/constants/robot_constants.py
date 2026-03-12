@@ -123,7 +123,7 @@ class SpindexConstants:
 
 class FeederConstants:
     MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
-    GEARING = 4.0  # TODO: measure actual gear ratio
+    GEARING = 1.0  
     MOI = 0.005  # TODO: calculate from mechanism mass/geometry (kg*m^2)
 
     PID = {"kP": 0.11, "kI": 0, "kD": 0, "kF": 0, "kA": 0}  # TODO: tune PID

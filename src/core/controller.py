@@ -54,12 +54,15 @@ class Controller:
             )
         )
         
-        self._driver.leftBumper().onTrue(
-            cmd.runOnce(lambda: self.update_state(sub=False) if self._current_state < 1.0 else None)
-        )
-
         self._driver.rightBumper().onTrue(
-            cmd.runOnce(lambda: self.update_state(sub=True) if self._current_state > 0.5 else None)
+            cmd.runOnce(lambda: self.update_state(sub=False) if round(self._current_state, 2) < 1.0 else print("HI2"))
+        
+        
+        *
+        /')
+
+        self._driver.leftBumper().onTrue(
+            cmd.runOnce(lambda: self.update_state(sub=True) if round(self._current_state, 2) > 0.5 else print("hi"))
         )
 
         
@@ -116,7 +119,7 @@ class Controller:
             and RobotFeatures.HAS_FEEDER
             and RobotFeatures.HAS_SPINDEX
         ):
-            self._driver.button(5).whileTrue(ShootCommand(container.shooter, container.feeder, container.spindex))
+            self._driver.rightTrigger().whileTrue(ShootCommand(container.shooter, container.feeder, container.spindex))
             
 
         self._driver.button(12).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
@@ -157,6 +160,7 @@ class Controller:
             ).repeatedly()
         )
     def update_state(self, sub=False):
+        print(self._current_state)
         if sub:
             self._current_state -= 0.1
         else:
