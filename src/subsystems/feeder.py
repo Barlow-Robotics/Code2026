@@ -37,6 +37,8 @@ class Feeder(commands2.Subsystem):
         FEEDER_CONFIG_ALTERNATING._apply_settings(
             self.motor_feeder_alternating, inverted=False
         )
+        self._duty_cycle_out = controls.DutyCycleOut(0)
+
 
         self.target_velocity_feeder_constant = -1
         self.target_velocity_feeder_alternating = -1
@@ -58,25 +60,29 @@ class Feeder(commands2.Subsystem):
         self.target_velocity_feeder_constant = velocity
         self.target_velocity_feeder_alternating = velocity
         print("MOVINNGHGGGG")
-        self.motor_feeder_constant.set(0.2)
+        self.motor_feeder_constant.set_control(
+            self._duty_cycle_out.with_output(0.2)
+        )
+
+        # self.motor_feeder_constant.set(0.2)
         # self.motor_feeder_constant.set_control(
         #     self._motion_magic_velocity_voltage.with_velocity(
         #         velocity
         #     ).with_acceleration(10)
         # )
-        if invert:
-            self.target_velocity_feeder_alternating = -velocity
-            self.motor_feeder_alternating.set_control(
-                self._motion_magic_velocity_voltage.with_velocity(
-                    -velocity
-                ).with_acceleration(2)
-            )
-        else:
-            self.motor_feeder_alternating.set_control(
-                self._motion_magic_velocity_voltage.with_velocity(
-                    velocity
-                ).with_acceleration(2)
-            )
+        # if invert:
+        #     self.target_velocity_feeder_alternating = -velocity
+        #     self.motor_feeder_alternating.set_control(
+        #         self._motion_magic_velocity_voltage.with_velocity(
+        #             -velocity
+        #         ).with_acceleration(2)
+        #     )
+        # else:
+        #     self.motor_feeder_alternating.set_control(
+        #         self._motion_magic_velocity_voltage.with_velocity(
+        #             velocity
+        #         ).with_acceleration(2)
+        #     )
 
     def stop(self):
         self.target_velocity_feeder_constant = 0
