@@ -38,6 +38,8 @@ class Feeder(commands2.Subsystem):
             self.motor_feeder_alternating, inverted=True
         )
         self._duty_cycle_out = controls.DutyCycleOut(0)
+        self._velocity_voltage = controls.VelocityVoltage(0)
+
 
 
         self.target_velocity_feeder_constant = -1
@@ -85,20 +87,20 @@ class Feeder(commands2.Subsystem):
         # self.motor_feeder_constant.set(0.2)
         velocity = 31.25 # rotations/sec
         self.motor_feeder_constant.set_control(
-            self._motion_magic_velocity_voltage.with_velocity(
+            self._velocity_voltage.with_velocity(
                 velocity
             )
         )
         if invert:
             self.target_velocity_feeder_alternating = -velocity
             self.motor_feeder_alternating.set_control(
-                self._motion_magic_velocity_voltage.with_velocity(
+                self._velocity_voltage.with_velocity(
                     -velocity
                 )
             )
         else:
             self.motor_feeder_alternating.set_control(
-                self._motion_magic_velocity_voltage.with_velocity(
+                self._velocity_voltage.with_velocity(
                     velocity
                 )
             )
@@ -107,10 +109,10 @@ class Feeder(commands2.Subsystem):
         self.target_velocity_feeder_constant = 0
         self.target_velocity_feeder_alternating = 0
         self.motor_feeder_constant.set_control(
-            self._motion_magic_velocity_voltage.with_velocity(0)
+            self._velocity_voltage.with_velocity(0)
         )
         self.motor_feeder_alternating.set_control(
-            self._motion_magic_velocity_voltage.with_velocity(0)
+            self._velocity_voltage.with_velocity(0)
         )
 
     def periodic(self):
