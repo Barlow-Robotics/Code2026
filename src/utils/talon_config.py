@@ -1,4 +1,5 @@
 from phoenix6 import StatusCode, configs, signals
+from phoenix6.hardware import TalonFXS
 
 
 class TalonConfig:
@@ -43,9 +44,10 @@ class TalonConfig:
         self.motion_magic_jerk = motion_magic_jerk
         self.gear_ratio = gear_ratio
 
-    def _apply_settings(self, motor, inverted: bool = False):
+    def _apply_settings(self, motor: TalonFXS, inverted: bool = False):
         print("applying settings to Talon")
         talon_config = configs.TalonFXSConfiguration()
+        talon_config.commutation.motor_arrangement = signals.MotorArrangementValue.MINION_JST
         # PID
         # talon_config.feedback.sensor_to_mechanism_ratio = self.gear_ratio
         pid = talon_config.slot0
