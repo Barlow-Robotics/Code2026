@@ -14,10 +14,10 @@ class Feeder(commands2.Subsystem):
         super().__init__()
         self._loop_timer = LoopTimer("Feeder")
         FEEDER_CONFIG_CONSTANT = TalonConfig(
-            kP=1, kI=0, kD=0, kF=0.15, kA=0, brake_mode=True
+            kP=0.0, kI=0, kD=0, kF=0.094, kA=0, brake_mode=True
         )
         FEEDER_CONFIG_ALTERNATING = TalonConfig(
-            kP=1, kI=0, kD=0, kF=0.15, kA=0, brake_mode=True
+            kP=0.0, kI=0, kD=0, kF=0.094, kA=0, brake_mode=True
         )
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
@@ -32,10 +32,10 @@ class Feeder(commands2.Subsystem):
         )
 
         FEEDER_CONFIG_CONSTANT._apply_settings(
-            self.motor_feeder_constant, inverted=False
+            self.motor_feeder_constant, inverted=True
         )
         FEEDER_CONFIG_ALTERNATING._apply_settings(
-            self.motor_feeder_alternating, inverted=False
+            self.motor_feeder_alternating, inverted=True
         )
         self._duty_cycle_out = controls.DutyCycleOut(0)
 
@@ -51,7 +51,7 @@ class Feeder(commands2.Subsystem):
         )
         
 
-    def move(self, velocity: float = 1, invert=False):
+    def move(self, velocity: float = 0.17, invert=False):
         """
         Args:
             velocity (float): rotations per second. Defaults to 1.
@@ -60,39 +60,57 @@ class Feeder(commands2.Subsystem):
         self.target_velocity_feeder_constant = velocity
         self.target_velocity_feeder_alternating = velocity
         print("MOVINNGHGGGG")
-        self.motor_feeder_constant.set_control(
-            self._duty_cycle_out.with_output(0.2)
-        )
-
-        # self.motor_feeder_constant.set(0.2)
         # self.motor_feeder_constant.set_control(
-        #     self._motion_magic_velocity_voltage.with_velocity(
-        #         velocity
-        #     ).with_acceleration(10)
+        #     self._duty_cycle_out.with_output(velocity)
         # )
         # if invert:
         #     self.target_velocity_feeder_alternating = -velocity
         #     self.motor_feeder_alternating.set_control(
-        #         self._motion_magic_velocity_voltage.with_velocity(
-        #             -velocity
-        #         ).with_acceleration(2)
+        #         self._duty_cycle_out.with_output(-velocity)
         #     )
         # else:
+        #     self.target_velocity_feeder_alternating = velocity
         #     self.motor_feeder_alternating.set_control(
-        #         self._motion_magic_velocity_voltage.with_velocity(
-        #             velocity
-        #         ).with_acceleration(2)
+        #         self._duty_cycle_out.with_output(velocity)
         #     )
+
+            # self.motor_feeder_alternating.set_control(
+            #     self._motion_magic_velocity_voltage.with_velocity(
+            #         velocity
+            #     ).with_acceleration(2)
+            # )
+    
+        # 0.094 * speed
+
+        # self.motor_feeder_constant.set(0.2)
+        velocity = 31.25 # rotations/sec
+        self.motor_feeder_constant.set_control(
+            self._motion_magic_velocity_voltage.with_velocity(
+                velocity
+            )
+        )
+        if invert:
+            self.target_velocity_feeder_alternating = -velocity
+            self.motor_feeder_alternating.set_control(
+                self._motion_magic_velocity_voltage.with_velocity(
+                    -velocity
+                )
+            )
+        else:
+            self.motor_feeder_alternating.set_control(
+                self._motion_magic_velocity_voltage.with_velocity(
+                    velocity
+                )
+            )
 
     def stop(self):
         self.target_velocity_feeder_constant = 0
         self.target_velocity_feeder_alternating = 0
-
         self.motor_feeder_constant.set_control(
-            self._motion_magic_velocity_voltage.with_velocity(0).with_acceleration(0.1)
+            self._motion_magic_velocity_voltage.with_velocity(0)
         )
         self.motor_feeder_alternating.set_control(
-            self._motion_magic_velocity_voltage.with_velocity(0).with_acceleration(0.1)
+            self._motion_magic_velocity_voltage.with_velocity(0)
         )
 
     def periodic(self):
@@ -112,8 +130,12 @@ class Feeder(commands2.Subsystem):
     def log_motor(self, motor: TalonFXS, prefix: str, target_velocity: float):
         PyKitLogger.recordOutput(f"{prefix}/target_velocity", target_velocity)
         PyKitLogger.recordOutput(
-            f"{prefix}/current_velocity", float(motor.get_velocity().value)
+            f"{prefix}/current_RPS", float(motor.get_velocity().value)
         )
+        PyKitLogger.recordOutput(
+            f"{prefix}/current_RPM", float(motor.get_velocity().value * 60)
+        )
+
         PyKitLogger.recordOutput(
             f"{prefix}/current_supply_current",
             float(motor.get_supply_current().value),

@@ -122,13 +122,14 @@ class Controller:
         if RobotFeatures.HAS_FEEDER:
             self._operator.leftTrigger().onTrue(
                 cmd.runOnce(
-                    lambda: container.feeder.move(10, False),
+                    lambda: container.feeder.move(0.3, False),
                 )
             )
             self._operator.leftBumper().onTrue(
                 cmd.runOnce(
-                    lambda: container.feeder.move(1, True),
+                    lambda: container.feeder.move(0.3, True),
                 )
+
             )
             self._operator.rightBumper().onTrue(
                 cmd.runOnce(
