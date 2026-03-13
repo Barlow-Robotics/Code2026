@@ -1,4 +1,4 @@
-from phoenix6.hardware import TalonFX
+from phoenix6.hardware import TalonFXS
 from phoenix6 import controls
 import commands2
 from utils import TalonConfig
@@ -24,10 +24,10 @@ class Feeder(commands2.Subsystem):
             0, enable_foc=MotorIDs.foc_active
         )
 
-        self.motor_feeder_constant: TalonFX = TalonFX(
+        self.motor_feeder_constant: TalonFXS = TalonFXS(
             MotorIDs.motor_id_motor_feeder_constant,
         )
-        self.motor_feeder_alternating: TalonFX = TalonFX(
+        self.motor_feeder_alternating: TalonFXS = TalonFXS(
             MotorIDs.motor_id_motor_feeder_alternating,
         )
 
@@ -102,7 +102,7 @@ class Feeder(commands2.Subsystem):
         )
         self._loop_timer.stop()
 
-    def log_motor(self, motor: TalonFX, prefix: str, target_velocity: float):
+    def log_motor(self, motor: TalonFXS, prefix: str, target_velocity: float):
         PyKitLogger.recordOutput(f"{prefix}/target_velocity", target_velocity)
         PyKitLogger.recordOutput(
             f"{prefix}/current_velocity", float(motor.get_velocity().value)
