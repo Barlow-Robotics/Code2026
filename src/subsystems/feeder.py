@@ -14,10 +14,10 @@ class Feeder(commands2.Subsystem):
         super().__init__()
         self._loop_timer = LoopTimer("Feeder")
         FEEDER_CONFIG_CONSTANT = TalonConfig(
-            kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True
+            kP=1, kI=0, kD=0, kF=0.15, kA=0, brake_mode=True
         )
         FEEDER_CONFIG_ALTERNATING = TalonConfig(
-            kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True
+            kP=1, kI=0, kD=0, kF=0.15, kA=0, brake_mode=True
         )
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
@@ -57,24 +57,25 @@ class Feeder(commands2.Subsystem):
         """
         self.target_velocity_feeder_constant = velocity
         self.target_velocity_feeder_alternating = velocity
-
-        self.motor_feeder_constant.set_control(
-            self._motion_magic_velocity_voltage.with_velocity(
-                velocity
-            ).with_acceleration(0.1)
-        )
+        print("MOVINNGHGGGG")
+        self.motor_feeder_constant.set(0.2)
+        # self.motor_feeder_constant.set_control(
+        #     self._motion_magic_velocity_voltage.with_velocity(
+        #         velocity
+        #     ).with_acceleration(10)
+        # )
         if invert:
             self.target_velocity_feeder_alternating = -velocity
             self.motor_feeder_alternating.set_control(
                 self._motion_magic_velocity_voltage.with_velocity(
                     -velocity
-                ).with_acceleration(0.1)
+                ).with_acceleration(2)
             )
         else:
             self.motor_feeder_alternating.set_control(
                 self._motion_magic_velocity_voltage.with_velocity(
                     velocity
-                ).with_acceleration(0.1)
+                ).with_acceleration(2)
             )
 
     def stop(self):

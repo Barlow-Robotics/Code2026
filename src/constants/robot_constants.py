@@ -30,7 +30,7 @@ class RobotFeatures:
             cls.HAS_TURRET = False
             cls.HAS_INTAKE = False
             cls.HAS_SPINDEX = False
-            cls.HAS_FEEDER = False
+            cls.HAS_FEEDER = True
             cls.HAS_CPROFILE = False
         else:
             cls.HAS_DRIVETRAIN = True

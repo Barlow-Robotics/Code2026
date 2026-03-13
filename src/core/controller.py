@@ -119,10 +119,10 @@ class Controller:
             and RobotFeatures.HAS_SPINDEX
         ):
             self._driver.rightTrigger().whileTrue(ShootCommand(container.shooter, container.feeder, container.spindex))
-        if RobotFeatures.HAS_SPINDEX:
+        if RobotFeatures.HAS_FEEDER:
             self._operator.leftTrigger().onTrue(
                 cmd.runOnce(
-                    lambda: container.feeder.move(1, False),
+                    lambda: container.feeder.move(10, False),
                 )
             )
             self._operator.leftBumper().onTrue(
