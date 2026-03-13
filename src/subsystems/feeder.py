@@ -24,11 +24,11 @@ class Feeder(commands2.Subsystem):
             0, enable_foc=MotorIDs.foc_active
         )
 
-        self.motor_feeder_constant: TalonFXS = TalonFXS(
-            MotorIDs.motor_id_motor_feeder_constant,
+        self.motor_feeder_constant: TalonFXS = TalonFXS( 
+            MotorIDs.motor_id_motor_feeder_constant, "*"
         )
         self.motor_feeder_alternating: TalonFXS = TalonFXS(
-            MotorIDs.motor_id_motor_feeder_alternating,
+            MotorIDs.motor_id_motor_feeder_alternating, "*"
         )
 
         FEEDER_CONFIG_CONSTANT._apply_settings(
