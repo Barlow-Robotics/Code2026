@@ -89,6 +89,7 @@ class TalonConfig:
         magic.motion_magic_cruise_velocity = self.motion_magic_cruise_velocity
 
         # Implementing 6328 logic on configuring talons
+        motor.configurator.apply(configs.TalonFXSConfiguration(), 0.5)
 
         for i in range(10):
             res = motor.configurator.apply(
