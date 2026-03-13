@@ -78,6 +78,9 @@ class TalonConfig:
             if inverted
             else signals.InvertedValue.CLOCKWISE_POSITIVE
         )
+        talon_config.external_feedback.external_feedback_sensor_source = (
+            signals.ExternalFeedbackSensorSourceValue.COMMUTATION
+        )
 
         # motion magic
         magic = talon_config.motion_magic
