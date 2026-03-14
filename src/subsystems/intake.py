@@ -66,8 +66,7 @@ class Intake(commands2.Subsystem):
             kP=0.11,
             kI=0,
             kD=0,
-            kF=0,
-            kA=0,
+            kV=0,
             brake_mode=False,
             gear_ratio=IntakeConstants.ROLLER_GEARING,
         )
@@ -75,8 +74,7 @@ class Intake(commands2.Subsystem):
             kP=0.11,
             kI=0,
             kD=0,
-            kF=0,
-            kA=0,
+            kV=0,
             brake_mode=True,
             gear_ratio=IntakeConstants.ARM_GEARING,
         )

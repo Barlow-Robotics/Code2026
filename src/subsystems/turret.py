@@ -23,29 +23,23 @@ class Turret(Subsystem):
         self._loop_timer = LoopTimer("Turret")
         self.driveSub = driveSub
 
-        HOOD_MOTOR_CONFIG = TalonConfigFX(
-            kP=0.2, kI=0.0, kD=0, kF=0, kA=0.5, brake_mode=True
-        )
+        HOOD_MOTOR_CONFIG = TalonConfigFX(kP=0.2, kI=0.0, kD=0, kV=0, brake_mode=True)
         if not RobotBase.isReal():
-            HOOD_MOTOR_CONFIG = TalonConfigFX(
-                kP=10, kI=0, kD=6, kF=0, kA=0, brake_mode=True
-            )
+            HOOD_MOTOR_CONFIG = TalonConfigFX(kP=10, kI=0, kD=6, kV=0, brake_mode=True)
 
         if not RobotBase.isReal():
             TURRET_MOTOR_CONFIG = TalonConfigFX(
                 kP=0.85,
                 kI=0,
                 kD=0.6,
-                kF=0.0,
-                kA=0.03,
-                kV=0.11,
+                kV=0,
                 brake_mode=True,
                 motion_magic_cruise_velocity=8,
                 motion_magic_acceleration=30,
             )
         else:
             TURRET_MOTOR_CONFIG = TalonConfigFX(
-                kP=0.2, kI=0, kD=0, kF=0, kA=0, brake_mode=True
+                kP=0.2, kI=0, kD=0, kA=0, brake_mode=True
             )
 
         self.hood_motor = TalonFX(MotorIDs.motor_id_hood, "*")

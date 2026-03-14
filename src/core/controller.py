@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
+import math
 from typing import TYPE_CHECKING
 
 from commands2 import cmd
@@ -92,7 +93,7 @@ class Controller:
         self._operator.b().whileTrue(
             container.drivetrain.apply_request(
                 lambda: container.point.with_module_direction(
-                    Rotation2d(-self._operator.getLeftY(), -self._operator.getLeftX())
+                    self._joystick_to_rotation()
                 )
             )
         )
@@ -211,3 +212,10 @@ class Controller:
             wpilib.reportWarning(
                 f"Driver joystick not connected on port {self._DRIVER_PORT}"
             )
+
+    def _joystick_to_rotation(self) -> Rotation2d | None:
+        x = -self._operator.getLeftX()
+        y = -self._operator.getLeftY()
+        if math.hypot(x, y) < 0.1:
+            return Rotation2d(0)
+        return Rotation2d(y, x)

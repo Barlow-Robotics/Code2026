@@ -3,23 +3,14 @@ from phoenix6.hardware import TalonFXS
 
 
 class TalonConfigFXS:
-    kP: float
-    kI: float
-    kD: float
-    kF: float
-    kA: float
-    current_limit: float
-    break_mode: bool
-    output_range: tuple[float, float]
-
     def __init__(
         self,
         kP: float,
         kI: float,
         kD: float,
-        kF: float,
-        kA: float,
-        kV: float = 0,
+        kV: float,
+        kA: float = 0,
+        kS: float = 0,
         kG: float = 0,
         current_limit: int = 80,
         brake_mode: bool = True,
@@ -32,9 +23,9 @@ class TalonConfigFXS:
         self.kP = kP
         self.kI = kI
         self.kD = kD
-        self.kF = kF
-        self.kA = kA
         self.kV = kV
+        self.kA = kA
+        self.kS = kS
         self.kG = kG
         self.current_limit = current_limit
         self.brake_mode = brake_mode
@@ -56,9 +47,9 @@ class TalonConfigFXS:
         pid.k_p = self.kP
         pid.k_i = self.kI
         pid.k_d = self.kD
-        pid.k_s = self.kF
-        pid.k_a = self.kA
         pid.k_v = self.kV
+        pid.k_a = self.kA
+        pid.k_s = self.kS
         pid.k_g = self.kG
 
         # current limits
