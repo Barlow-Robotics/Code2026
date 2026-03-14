@@ -1,7 +1,7 @@
 from phoenix6.hardware import TalonFX
 from phoenix6 import controls
 import commands2
-from utils import TalonConfig
+from utils import TalonConfigFX
 from constants import MotorIDs
 from pykit.logger import Logger as PyKitLogger
 from commands2.sysid import SysIdRoutine
@@ -13,14 +13,14 @@ class Spindex(commands2.Subsystem):
     def __init__(self):
         super().__init__()
         self._loop_timer = LoopTimer("Spindex")
-        SPINDEX_CONFIG = TalonConfig(kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True)
+        SPINDEX_CONFIG = TalonConfigFX(kP=0.11, kI=0, kD=0, kF=0, kA=0, brake_mode=True)
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
             0, enable_foc=MotorIDs.foc_active
         )
 
         self.motor_spindex: TalonFX = TalonFX(
-            MotorIDs.motor_id_motor_spindex,
+            MotorIDs.motor_id_motor_spindex, "*"
         )
 
         SPINDEX_CONFIG._apply_settings(self.motor_spindex, inverted=False)
