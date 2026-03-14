@@ -14,10 +14,10 @@ class Feeder(commands2.Subsystem):
         super().__init__()
         self._loop_timer = LoopTimer("Feeder")
         FEEDER_CONFIG_CONSTANT = TalonConfig(
-            kP=0.0, kI=0, kD=0, kF=0.094, kA=0, brake_mode=True
+            kP=0.1, kI=0, kD=0, kF=4.0, kA=0, brake_mode=True
         )
         FEEDER_CONFIG_ALTERNATING = TalonConfig(
-            kP=0.0, kI=0, kD=0, kF=0.094, kA=0, brake_mode=True
+            kP=0.1, kI=0, kD=0, kF=4.0, kA=0, brake_mode=True
         )
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
@@ -37,13 +37,15 @@ class Feeder(commands2.Subsystem):
         FEEDER_CONFIG_ALTERNATING._apply_settings(
             self.motor_feeder_alternating, inverted=True
         )
-        self._duty_cycle_out = controls.DutyCycleOut(0)
-        self._velocity_voltage = controls.VelocityVoltage(0)
+        self._duty_cycle_out = controls.DutyCycleOut(0, 
+                                                     enable_foc=MotorIDs.foc_active)
+        self._velocity_voltage = controls.VelocityVoltage(0,
+                                                          enable_foc=MotorIDs.foc_active)
 
 
 
-        self.target_velocity_feeder_constant = -1
-        self.target_velocity_feeder_alternating = -1
+        self.target_velocity_feeder_constant = -1.0
+        self.target_velocity_feeder_alternating = -1.0
 
         self.sys_id_routine_feeder_constant = generateSysIdProfile(
             self, self.motor_feeder_constant, name="Feeder_Constant"
