@@ -1,8 +1,8 @@
 from phoenix6 import StatusCode, configs, signals
-from phoenix6.hardware import TalonFXS
+from phoenix6.hardware import TalonFX
 
 
-class TalonConfig:
+class TalonConfigFX:
     kP: float
     kI: float
     kD: float
@@ -44,12 +44,11 @@ class TalonConfig:
         self.motion_magic_jerk = motion_magic_jerk
         self.gear_ratio = gear_ratio
 
-    def _apply_settings(self, motor: TalonFXS, inverted: bool = False):
+    def _apply_settings(self, motor: TalonFX, inverted: bool = False):
         print("applying settings to Talon")
-        talon_config = configs.TalonFXSConfiguration()
-        talon_config.commutation.motor_arrangement = signals.MotorArrangementValue.MINION_JST
+        talon_config = configs.TalonFXConfiguration()
         # PID
-        # talon_config.feedback.sensor_to_mechanism_ratio = self.gear_ratio
+        talon_config.feedback.sensor_to_mechanism_ratio = self.gear_ratio
         pid = talon_config.slot0
         pid.k_p = self.kP
         pid.k_i = self.kI
@@ -78,9 +77,8 @@ class TalonConfig:
             if inverted
             else signals.InvertedValue.CLOCKWISE_POSITIVE
         )
-        talon_config.external_feedback.external_feedback_sensor_source = (
-            signals.ExternalFeedbackSensorSourceValue.COMMUTATION
-        )
+
+
 
         # motion magic
         magic = talon_config.motion_magic
@@ -89,7 +87,7 @@ class TalonConfig:
         magic.motion_magic_cruise_velocity = self.motion_magic_cruise_velocity
 
         # Implementing 6328 logic on configuring talons
-        motor.configurator.apply(configs.TalonFXSConfiguration(), 0.5)
+        motor.configurator.apply(configs.TalonFXConfiguration(), 0.5)
 
         for i in range(10):
             res = motor.configurator.apply(
