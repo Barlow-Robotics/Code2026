@@ -12,7 +12,7 @@ class IntakeSim:
             IntakeConstants.ROLLER_MOI,
         )
         self._arm = FlywheelMotorSim(
-            intake.motor_arm,
+            intake.motor_arm_leader,
             IntakeConstants.ARM_MOTOR,
             IntakeConstants.ARM_GEARING,
             IntakeConstants.ARM_MOI,

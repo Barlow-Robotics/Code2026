@@ -1,7 +1,7 @@
 from phoenix6.hardware import TalonFXS
 from phoenix6 import controls
 import commands2
-from utils import TalonConfig
+from utils import TalonConfigFXS
 from constants import MotorIDs
 from pykit.logger import Logger as PyKitLogger
 from commands2.sysid import SysIdRoutine
@@ -13,11 +13,11 @@ class Feeder(commands2.Subsystem):
     def __init__(self):
         super().__init__()
         self._loop_timer = LoopTimer("Feeder")
-        FEEDER_CONFIG_CONSTANT = TalonConfig(
-            kP=0.1, kI=0, kD=0, kF=4.0, kA=0, brake_mode=True
+        FEEDER_CONFIG_CONSTANT = TalonConfigFXS(
+            kP=0.1, kI=0, kD=0, kF=4.0, kA=0, brake_mode=False
         )
-        FEEDER_CONFIG_ALTERNATING = TalonConfig(
-            kP=0.1, kI=0, kD=0, kF=4.0, kA=0, brake_mode=True
+        FEEDER_CONFIG_ALTERNATING = TalonConfigFXS(
+            kP=0.1, kI=0, kD=0, kF=4.0, kA=0, brake_mode=False
         )
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
@@ -63,30 +63,6 @@ class Feeder(commands2.Subsystem):
         """
         self.target_velocity_feeder_constant = velocity
         self.target_velocity_feeder_alternating = velocity
-        print("MOVINNGHGGGG")
-        # self.motor_feeder_constant.set_control(
-        #     self._duty_cycle_out.with_output(velocity)
-        # )
-        # if invert:
-        #     self.target_velocity_feeder_alternating = -velocity
-        #     self.motor_feeder_alternating.set_control(
-        #         self._duty_cycle_out.with_output(-velocity)
-        #     )
-        # else:
-        #     self.target_velocity_feeder_alternating = velocity
-        #     self.motor_feeder_alternating.set_control(
-        #         self._duty_cycle_out.with_output(velocity)
-        #     )
-
-            # self.motor_feeder_alternating.set_control(
-            #     self._motion_magic_velocity_voltage.with_velocity(
-            #         velocity
-            #     ).with_acceleration(2)
-            # )
-    
-        # 0.094 * speed
-
-        # self.motor_feeder_constant.set(0.2)
         velocity = 31.25 # rotations/sec
         self.motor_feeder_constant.set_control(
             self._velocity_voltage.with_velocity(

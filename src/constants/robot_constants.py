@@ -48,10 +48,10 @@ class MotorIDs:
     foc_active = False
 
     # INTAKE
-    motor_id_arm = 51
-    motor_id_head = 52
-    motor_id_roller_top = 53
-    motor_id_roller_bottom = 54
+    motor_id_arm_leader = 51
+    motor_id_arm_follower = 52
+    motor_id_roller = 53
+    # 54 IS NOT used. 
 
     # SPINDEX
     motor_id_motor_spindex = 55
@@ -78,7 +78,7 @@ class IntakeConstants:
     )  # BW: REAL CIRCUMFRENCE IS 2IN * PI
 
     ARM_MOTOR = DCMotor.krakenX60(1)
-    ARM_GEARING = 1
+    ARM_GEARING = 14 / 58  # BW: REAL GEAR RATIO IS 14:58, NOT 1:1
     ARM_MOI = 0.01
     ARM_HOME_ROTATIONS = 0
     ARM_STOWED_ROTATIONS = 0.5  # TODO: measure actual rotations

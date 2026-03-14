@@ -12,7 +12,7 @@ from pykit.logger import Logger as PyKitLogger
 
 from utils.profiler import LoopTimer
 from constants import IntakeConstants, MotorIDs
-from utils import TalonConfig, generateSysIdProfile, IntakePositions
+from utils import TalonConfigFX, generateSysIdProfile, IntakePositions
 
 
 @dataclass
@@ -58,19 +58,21 @@ class Intake(commands2.Subsystem):
         )
         wpilib.SmartDashboard.putData("Intake/Mechanism2d", self.mechanism)
 
-        self.motor_roller: TalonFX = TalonFX(MotorIDs.motor_id_roller_top)
-        self.motor_arm: TalonFX = TalonFX(MotorIDs.motor_id_arm)
+        self.motor_roller: TalonFX = TalonFX(MotorIDs.motor_id_roller, "*")
+        self.motor_arm_leader: TalonFX = TalonFX(MotorIDs.motor_id_arm_leader, "*")
+        self.motor_arm_follower: TalonFX = TalonFX(MotorIDs.motor_id_arm_follower, "*")
 
-        INTAKE_ROLLER = TalonConfig(
+
+        INTAKE_ROLLER = TalonConfigFX(
             kP=0.11,
             kI=0,
             kD=0,
             kF=0,
             kA=0,
-            brake_mode=True,
+            brake_mode=False,
             gear_ratio=IntakeConstants.ROLLER_GEARING,
         )
-        INTAKE_CONFIG_ARM = TalonConfig(
+        INTAKE_CONFIG_ARM = TalonConfigFX(
             kP=0.11,
             kI=0,
             kD=0,
@@ -81,14 +83,19 @@ class Intake(commands2.Subsystem):
         )
 
         INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=True)
-        INTAKE_CONFIG_ARM._apply_settings(self.motor_arm, inverted=False)
+        INTAKE_CONFIG_ARM._apply_settings(self.motor_arm_leader, inverted=False)
+        INTAKE_CONFIG_ARM._apply_settings(self.motor_arm_follower, inverted=True)
 
         self._motion_magic_velocity_voltage_roller = (
             controls.MotionMagicVelocityVoltage(0, enable_foc=MotorIDs.foc_active)
         )
-        self._motion_magic_position_voltage_arm = controls.MotionMagicVoltage(
+        self._motion_magic_position_voltage_arm_leader = controls.MotionMagicVoltage(
             0, enable_foc=MotorIDs.foc_active
         )
+        self._motion_magic_position_voltage_arm_follower = controls.MotionMagicVoltage(
+            0, enable_foc=MotorIDs.foc_active
+        )
+
 
         self.sys_id_routine_roller = generateSysIdProfile(
             self, self.motor_roller, name="Roller"
@@ -141,9 +148,13 @@ class Intake(commands2.Subsystem):
         self._target_position = position
         arm_rot = self._POSITION_MAP[position]
 
-        self.motor_arm.set_control(
-            self._motion_magic_position_voltage_arm.with_position(arm_rot)
+        self.motor_arm_leader.set_control(
+            self._motion_magic_position_voltage_arm_leader.with_position(arm_rot)
         )
+        self.motor_arm_follower.set_control(
+            self._motion_magic_position_voltage_arm_follower.with_position(arm_rot)
+        )
+
         if position == IntakePositions.DEPLOYED:
             self.set_velocity(current_velocity)
         else:
@@ -165,13 +176,13 @@ class Intake(commands2.Subsystem):
         self._loop_timer.start()
 
         if not RobotBase.isReal():
-            arm_degrees = self.motor_arm.get_position().value * 360
+            arm_degrees = self.motor_arm_leader.get_position().value * 360
             self.arm_ligament.setAngle(75 + arm_degrees)
 
         self._log_dataclass(
             "Intake/Telemetry",
             IntakeTelemetry(
-                arm_position=float(self.motor_arm.get_position().value),
+                arm_position=float(self.motor_arm_leader.get_position().value),
                 arm_target_position=(self.target_rot),
                 # arm_supply_current=float(self.motor_arm.get_supply_current().value),
                 # arm_stator_current=float(self.motor_arm.get_stator_current().value),

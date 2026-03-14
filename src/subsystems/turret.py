@@ -11,7 +11,7 @@ from constants import TurretConstants
 from constants import SI
 from pykit.logger import Logger as PyKitLogger
 
-from utils.talon_config import TalonConfig
+from utils import TalonConfigFX
 from phoenix6.hardware import TalonFX
 from utils import generateSysIdProfile, get_red_pose
 from utils.profiler import LoopTimer
@@ -23,16 +23,16 @@ class Turret(Subsystem):
         self._loop_timer = LoopTimer("Turret")
         self.driveSub = driveSub
 
-        HOOD_MOTOR_CONFIG = TalonConfig(
+        HOOD_MOTOR_CONFIG = TalonConfigFX(
             kP=0.2, kI=0.0, kD=0, kF=0, kA=0.5, brake_mode=True
         )
         if not RobotBase.isReal():
-            HOOD_MOTOR_CONFIG = TalonConfig(
+            HOOD_MOTOR_CONFIG = TalonConfigFX(
                 kP=10, kI=0, kD=6, kF=0, kA=0, brake_mode=True
             )
 
         if not RobotBase.isReal():
-            TURRET_MOTOR_CONFIG = TalonConfig(
+            TURRET_MOTOR_CONFIG = TalonConfigFX(
                 kP=0.85,
                 kI=0,
                 kD=0.6,
@@ -44,12 +44,12 @@ class Turret(Subsystem):
                 motion_magic_acceleration=30,
             )
         else:
-            TURRET_MOTOR_CONFIG = TalonConfig(
+            TURRET_MOTOR_CONFIG = TalonConfigFX(
                 kP=0.2, kI=0, kD=0, kF=0, kA=0, brake_mode=True
             )
 
-        self.hood_motor = TalonFX(MotorIDs.motor_id_hood)
-        self.turret_motor = TalonFX(MotorIDs.motor_id_turret)
+        self.hood_motor = TalonFX(MotorIDs.motor_id_hood, "*")
+        self.turret_motor = TalonFX(MotorIDs.motor_id_turret, "*")
 
         HOOD_MOTOR_CONFIG._apply_settings(self.hood_motor, inverted=False)
         TURRET_MOTOR_CONFIG._apply_settings(self.turret_motor, inverted=False)
