@@ -19,9 +19,7 @@ class Spindex(commands2.Subsystem):
             0, enable_foc=MotorIDs.foc_active
         )
 
-        self.motor_spindex: TalonFX = TalonFX(
-            MotorIDs.motor_id_motor_spindex, "*"
-        )
+        self.motor_spindex: TalonFX = TalonFX(MotorIDs.motor_id_motor_spindex, "*")
 
         SPINDEX_CONFIG._apply_settings(self.motor_spindex, inverted=False)
 

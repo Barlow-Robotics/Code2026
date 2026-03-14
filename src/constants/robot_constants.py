@@ -51,7 +51,7 @@ class MotorIDs:
     motor_id_arm_leader = 51
     motor_id_arm_follower = 52
     motor_id_roller = 53
-    # 54 IS NOT used. 
+    # 54 IS NOT used.
 
     # SPINDEX
     motor_id_motor_spindex = 55
@@ -123,7 +123,7 @@ class SpindexConstants:
 
 class FeederConstants:
     MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
-    GEARING = 1.0  
+    GEARING = 1.0
     MOI = 0.005  # TODO: calculate from mechanism mass/geometry (kg*m^2)
 
     PID = {"kP": 0.11, "kI": 0, "kD": 0, "kF": 0, "kA": 0}  # TODO: tune PID

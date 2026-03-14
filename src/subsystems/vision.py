@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 import math
 from typing import Optional, List
-from ntcore import BooleanSubscriber, DoubleSubscriber, NetworkTable, NetworkTableInstance
+from ntcore import (
+    BooleanSubscriber,
+    DoubleSubscriber,
+)
 import ntcore
-from numpy import double
 from photonlibpy.photonCamera import PhotonCamera
 from photonlibpy.estimatedRobotPose import EstimatedRobotPose
 from photonlibpy.photonPoseEstimator import PhotonPoseEstimator
@@ -74,15 +76,17 @@ class _CameraConfig:
 class Vision(Subsystem):
     def __init__(self, drive_sub: Drivetrain):
         inst = ntcore.NetworkTableInstance.getDefault()
-        inst.setServerTeam(4572)
         inst.startClient3("connect-auto-align")
-    
+        inst.setServerTeam(4572)
+
         table = inst.getTable("BallVision")
 
-        self.xSub: DoubleSubscriber      = table.getDoubleTopic("x").subscribe(0.0)
-        self.ySub: DoubleSubscriber      = table.getDoubleTopic("y").subscribe(0.0)
-        self.angleSub: DoubleSubscriber  = table.getDoubleTopic("angle").subscribe(0.0)
-        self.targetSub: BooleanSubscriber = table.getBooleanTopic("has_target").subscribe(False)
+        self.xSub: DoubleSubscriber = table.getDoubleTopic("x").subscribe(0.0)
+        self.ySub: DoubleSubscriber = table.getDoubleTopic("y").subscribe(0.0)
+        self.angleSub: DoubleSubscriber = table.getDoubleTopic("angle").subscribe(0.0)
+        self.targetSub: BooleanSubscriber = table.getBooleanTopic(
+            "has_target"
+        ).subscribe(False)
 
         self.drive_sub = drive_sub
 
@@ -186,7 +190,7 @@ class Vision(Subsystem):
             self.timer.reset()
             self.timer.stop()
 
-        #self._total_detected_targets = float(len(self.get_all_detected_targets()))
+        # self._total_detected_targets = float(len(self.get_all_detected_targets()))
 
         if self._last_pose_estimate is not None:
             pass
@@ -243,11 +247,12 @@ class Vision(Subsystem):
 
         self._loop_timer.stop()
 
-    def _update_all_cameras(self,
+    def _update_all_cameras(
+        self,
         drive_pose: Pose2d,
         current_speeds: ChassisSpeeds,
         current_rotation: Rotation2d,
-):
+    ):
         all_observations: List[VisionObservation] = []
 
         for cam_cfg in self._cameras:
@@ -636,14 +641,16 @@ class Vision(Subsystem):
         if not hasTarget:
             print("AUTO ALIGN: No target detected, aborting auto align.")
             return
-        x: float        = self.xSub.get()
-        y: float        = self.ySub.get()
-        angle: float    = self.angleSub.get()
+        x: float = self.xSub.get()
+        y: float = self.ySub.get()
+        angle: float = self.angleSub.get()
 
         print("AUTO ALIGN")
         starting_pose = self.drive_sub.get_pose()
         target_pose = Pose2d(
-            starting_pose.X() + x, starting_pose.Y() + y, starting_pose.rotation() + Rotation2d(angle * SI.degrees_to_radians)
+            starting_pose.X() + x,
+            starting_pose.Y() + y,
+            starting_pose.rotation() + Rotation2d(angle * SI.degrees_to_radians),
         )
 
         self._auto_align_triggered = True

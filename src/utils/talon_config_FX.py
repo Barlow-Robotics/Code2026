@@ -78,8 +78,6 @@ class TalonConfigFX:
             else signals.InvertedValue.CLOCKWISE_POSITIVE
         )
 
-
-
         # motion magic
         magic = talon_config.motion_magic
         magic.motion_magic_acceleration = self.motion_magic_acceleration

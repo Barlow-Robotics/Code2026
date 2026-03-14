@@ -28,20 +28,18 @@ class Kenny_auto2:
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[1]),
-                
                 IntakePositionCommand(
                     self.container.drivetrain,
                     self.container.intake,
-                    IntakePositions.DEPLOYED
+                    IntakePositions.DEPLOYED,
                 ).withTimeout(3),
-
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[2]),
                 IntakePositionCommand(
                     self.container.drivetrain,
                     self.container.intake,
-                    IntakePositions.STOWED
+                    IntakePositions.STOWED,
                 ).withTimeout(3),
             ),
             ParallelCommandGroup(
@@ -52,7 +50,7 @@ class Kenny_auto2:
                 IntakePositionCommand(
                     self.container.drivetrain,
                     self.container.intake,
-                    IntakePositions.DEPLOYED
+                    IntakePositions.DEPLOYED,
                 ).withTimeout(3),
             ),
             ParallelCommandGroup(

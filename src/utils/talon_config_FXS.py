@@ -47,7 +47,9 @@ class TalonConfigFXS:
     def _apply_settings(self, motor: TalonFXS, inverted: bool = False):
         print("applying settings to Talon")
         talon_config = configs.TalonFXSConfiguration()
-        talon_config.commutation.motor_arrangement = signals.MotorArrangementValue.MINION_JST
+        talon_config.commutation.motor_arrangement = (
+            signals.MotorArrangementValue.MINION_JST
+        )
         # PID
         # talon_config.feedback.sensor_to_mechanism_ratio = self.gear_ratio
         pid = talon_config.slot0

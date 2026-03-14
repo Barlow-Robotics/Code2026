@@ -4,7 +4,6 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 from commands2 import cmd
-import commands2
 from commands2.button import CommandXboxController, CommandJoystick, Trigger
 
 import wpilib
@@ -18,10 +17,12 @@ from subsystems.intake import IntakePositions
 if TYPE_CHECKING:
     from core import RobotContainer
 
+
 class StartingState(Enum):
     SLOW = 0.5
     NORMAL = 1
     FAST = 2
+
 
 class Controller:
     _OPERATOR_PORT = 1
@@ -39,7 +40,7 @@ class Controller:
                     container.drivetrain.movement.with_velocity_x(
                         -self._driver.getRawAxis(1)
                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                        * self._current_state 
+                        * self._current_state
                     )
                     .with_velocity_y(
                         -self._driver.getRawAxis(0)
@@ -47,24 +48,35 @@ class Controller:
                         * self._current_state
                     )
                     .with_rotational_rate(
-                        -self._driver.getRawAxis(2 if type(self._driver) == CommandJoystick else 4)
+                        -self._driver.getRawAxis(
+                            2 if type(self._driver) is CommandJoystick else 4
+                        )
                         * DriveConstants.MAX_ANGULAR_VELOCITY
                         * self._current_state
                     )
                 )
             )
         )
-        
+
         self._driver.rightBumper().onTrue(
-            cmd.runOnce(lambda: self.update_state(sub=False) if round(self._current_state, 2) < 1.0 else print("HI2"))
-        )
-        
-        
-        self._driver.leftBumper().onTrue(
-            cmd.runOnce(lambda: self.update_state(sub=True) if round(self._current_state, 2) > 0.5 else print("hi"))
+            cmd.runOnce(
+                lambda: (
+                    self.update_state(sub=False)
+                    if round(self._current_state, 2) < 1.0
+                    else print("HI2")
+                )
+            )
         )
 
-        
+        self._driver.leftBumper().onTrue(
+            cmd.runOnce(
+                lambda: (
+                    self.update_state(sub=True)
+                    if round(self._current_state, 2) > 0.5
+                    else print("hi")
+                )
+            )
+        )
 
         # Idle while the robot is disabled. This ensures the configured
         # neutral mode is applied to the drive motors while disabled.
@@ -87,24 +99,31 @@ class Controller:
 
         # Subsystem button bindings (driver joystick)
         if RobotFeatures.HAS_INTAKE:
-            self._driver.leftStick().onTrue( # NEED TO FIX
+            self._driver.leftStick().onTrue(  # NEED TO FIX
                 IntakePositionCommand(
-                    drive_sub=container.drivetrain, intake_sub=container.intake, position=IntakePositions.DEPLOYED,
+                    drive_sub=container.drivetrain,
+                    intake_sub=container.intake,
+                    position=IntakePositions.DEPLOYED,
                 )
             )
-            
+
             self._driver.b().onTrue(
                 IntakePositionCommand(
-                    drive_sub=container.drivetrain, intake_sub=container.intake, position=IntakePositions.DEPLOYED, move=False
+                    drive_sub=container.drivetrain,
+                    intake_sub=container.intake,
+                    position=IntakePositions.DEPLOYED,
+                    move=False,
                 )
             )
             self._driver.a().onTrue(
                 IntakePositionCommand(
-                    drive_sub=container.drivetrain, intake_sub=container.intake, position=IntakePositions.HOME, move=False
+                    drive_sub=container.drivetrain,
+                    intake_sub=container.intake,
+                    position=IntakePositions.HOME,
+                    move=False,
                 )
             )
-        
-            
+
         if RobotFeatures.HAS_VISION:
             # NEED TO ADD AUTO-ALIGN
             self._driver.x().onTrue(container.vision.auto_align_command)
@@ -118,7 +137,9 @@ class Controller:
             and RobotFeatures.HAS_FEEDER
             and RobotFeatures.HAS_SPINDEX
         ):
-            self._driver.rightTrigger().whileTrue(ShootCommand(container.shooter, container.feeder, container.spindex))
+            self._driver.rightTrigger().whileTrue(
+                ShootCommand(container.shooter, container.feeder, container.spindex)
+            )
         if RobotFeatures.HAS_FEEDER:
             self._operator.leftTrigger().onTrue(
                 cmd.runOnce(
@@ -129,7 +150,6 @@ class Controller:
                 cmd.runOnce(
                     lambda: container.feeder.move(0.3, True),
                 )
-
             )
             self._operator.rightBumper().onTrue(
                 cmd.runOnce(
@@ -174,12 +194,14 @@ class Controller:
                 cmd.runOnce(self._log_missing_connections),
             ).repeatedly()
         )
+
     def update_state(self, sub=False):
         print(self._current_state)
         if sub:
             self._current_state -= 0.1
         else:
             self._current_state += 0.1
+
     def _log_missing_connections(self):
         if not DriverStation.isJoystickConnected(self._OPERATOR_PORT):
             wpilib.reportWarning(

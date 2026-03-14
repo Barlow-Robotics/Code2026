@@ -8,7 +8,11 @@ if typing.TYPE_CHECKING:
 
 class IntakePositionCommand(Command):
     def __init__(
-        self, drive_sub: "Drivetrain", intake_sub: "Intake", position: IntakePositions, move=False
+        self,
+        drive_sub: "Drivetrain",
+        intake_sub: "Intake",
+        position: IntakePositions,
+        move=False,
     ):
         super().__init__()
         self.drive_sub = drive_sub

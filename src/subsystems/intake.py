@@ -62,7 +62,6 @@ class Intake(commands2.Subsystem):
         self.motor_arm_leader: TalonFX = TalonFX(MotorIDs.motor_id_arm_leader, "*")
         self.motor_arm_follower: TalonFX = TalonFX(MotorIDs.motor_id_arm_follower, "*")
 
-
         INTAKE_ROLLER = TalonConfigFX(
             kP=0.11,
             kI=0,
@@ -95,7 +94,6 @@ class Intake(commands2.Subsystem):
         self._motion_magic_position_voltage_arm_follower = controls.MotionMagicVoltage(
             0, enable_foc=MotorIDs.foc_active
         )
-
 
         self.sys_id_routine_roller = generateSysIdProfile(
             self, self.motor_roller, name="Roller"

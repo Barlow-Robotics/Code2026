@@ -7,8 +7,9 @@ from autos import AutoRoutine
 from commands2 import SequentialCommandGroup, ParallelCommandGroup
 
 if typing.TYPE_CHECKING:
-    from core import RobotContainer
-from subsystems import IntakePositions
+    # from core import RobotContainer
+    pass
+# from subsystems import IntakePositions
 
 path_name = "N_BETTER_Samyy_Path"
 paths = [PathPlannerPath.fromChoreoTrajectory(path_name, i) for i in range(6)]
@@ -25,7 +26,7 @@ command = SequentialCommandGroup(
         AutoBuilder.followPath(paths[2]),
         # Stop intake
     ),
-     ParallelCommandGroup(
+    ParallelCommandGroup(
         AutoBuilder.followPath(paths[3]),
         # Shoot 'yer balls
     ),

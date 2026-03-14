@@ -24,7 +24,7 @@ class Feeder(commands2.Subsystem):
             0, enable_foc=MotorIDs.foc_active
         )
 
-        self.motor_feeder_constant: TalonFXS = TalonFXS( 
+        self.motor_feeder_constant: TalonFXS = TalonFXS(
             MotorIDs.motor_id_motor_feeder_constant, "*"
         )
         self.motor_feeder_alternating: TalonFXS = TalonFXS(
@@ -37,12 +37,10 @@ class Feeder(commands2.Subsystem):
         FEEDER_CONFIG_ALTERNATING._apply_settings(
             self.motor_feeder_alternating, inverted=True
         )
-        self._duty_cycle_out = controls.DutyCycleOut(0, 
-                                                     enable_foc=MotorIDs.foc_active)
-        self._velocity_voltage = controls.VelocityVoltage(0,
-                                                          enable_foc=MotorIDs.foc_active)
-
-
+        self._duty_cycle_out = controls.DutyCycleOut(0, enable_foc=MotorIDs.foc_active)
+        self._velocity_voltage = controls.VelocityVoltage(
+            0, enable_foc=MotorIDs.foc_active
+        )
 
         self.target_velocity_feeder_constant = -1.0
         self.target_velocity_feeder_alternating = -1.0
@@ -53,7 +51,6 @@ class Feeder(commands2.Subsystem):
         self.sys_id_routine_feeder_alternating = generateSysIdProfile(
             self, self.motor_feeder_alternating, name="Feeder_Alternating"
         )
-        
 
     def move(self, velocity: float = 0.17, invert=False):
         """
@@ -63,32 +60,24 @@ class Feeder(commands2.Subsystem):
         """
         self.target_velocity_feeder_constant = velocity
         self.target_velocity_feeder_alternating = velocity
-        velocity = 31.25 # rotations/sec
+        velocity = 31.25  # rotations/sec
         self.motor_feeder_constant.set_control(
-            self._velocity_voltage.with_velocity(
-                velocity
-            )
+            self._velocity_voltage.with_velocity(velocity)
         )
         if invert:
             self.target_velocity_feeder_alternating = -velocity
             self.motor_feeder_alternating.set_control(
-                self._velocity_voltage.with_velocity(
-                    -velocity
-                )
+                self._velocity_voltage.with_velocity(-velocity)
             )
         else:
             self.motor_feeder_alternating.set_control(
-                self._velocity_voltage.with_velocity(
-                    velocity
-                )
+                self._velocity_voltage.with_velocity(velocity)
             )
 
     def stop(self):
         self.target_velocity_feeder_constant = 0
         self.target_velocity_feeder_alternating = 0
-        self.motor_feeder_constant.set_control(
-            self._velocity_voltage.with_velocity(0)
-        )
+        self.motor_feeder_constant.set_control(self._velocity_voltage.with_velocity(0))
         self.motor_feeder_alternating.set_control(
             self._velocity_voltage.with_velocity(0)
         )
