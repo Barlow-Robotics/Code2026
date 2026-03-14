@@ -75,7 +75,7 @@ class Vision(Subsystem):
     def __init__(self, drive_sub: Drivetrain):
         inst = ntcore.NetworkTableInstance.getDefault()
         inst.setServerTeam(4572)
-        inst.startClient4("connect-auto-align")
+        inst.startClient3("connect-auto-align")
     
         table = inst.getTable("BallVision")
 
