@@ -126,6 +126,15 @@ class Controller:
             )
 
         if RobotFeatures.HAS_VISION:
+            self._driver.button(6).onTrue(
+                cmd.runOnce(
+                    lambda: container.vision.disable_the_vision(
+                        not container.vision.disabled_vision
+                    )
+                )
+            )
+            self._driver.button(7).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
+
             # NEED TO ADD AUTO-ALIGN
             # self._driver.x().onTrue(container.vision.auto_align_command)
             # self._driver.x().onTrue(cmd.runOnce(lambda: container.vision.auto_align()))
@@ -169,8 +178,7 @@ class Controller:
                 ThrowFeederCommand(container.feeder, container.spindex)
             )
 
-        if RobotFeatures.TESTING:
-            self._driver.button(12).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
+        # if RobotFeatures.TESTING:
 
         # SysId bindings (uncomment as needed)
         # self._driver.button(1).onTrue(
