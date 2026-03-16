@@ -1,7 +1,7 @@
 from commands2 import Subsystem
 from commands2.sysid import SysIdRoutine
 from phoenix6 import controls
-from wpilib import DriverStation, Mechanism2d, Color8Bit, RobotBase, SmartDashboard
+from wpilib import DriverStation, Mechanism2d, Color8Bit, RobotBase, SmartDashboard, DigitalInput
 from wpimath.geometry import Translation3d
 from constants.robot_constants import MotorIDs
 from subsystems import Drivetrain
@@ -81,6 +81,9 @@ class Turret(Subsystem):
         self.sys_id_routine_turret = generateSysIdProfile(
             self, self.turret_motor, name="Turret_Motor"
         )
+        self.left_turret_limit_switch  = DigitalInput(0)
+        self.right_turret_limit_switch = DigitalInput(1)
+
 
     def set_angle_hood(self, angle_deg: float):
         self.target_hood_angle = angle_deg
@@ -92,11 +95,16 @@ class Turret(Subsystem):
 
     def set_angle_turret(self, angle_deg: float):
         self.target_turret_yaw = angle_deg
-        self.turret_motor.set_control(
-            self._motion_magic_position_voltage_turret.with_position(
-                SI.degrees_to_rotations * angle_deg * TurretConstants.TURRET_GEARING
+        if self.left_turret_limit_switch.get() and angle_deg < self.get_actual_turret_yaw():
+            print("Left limit switch triggered, preventing further left movement")
+        elif self.right_turret_limit_switch.get() and angle_deg > self.get_actual_turret_yaw():
+            print("Right limit switch triggered, preventing further right movement")
+        else:
+            self.turret_motor.set_control(
+                self._motion_magic_position_voltage_turret.with_position(
+                    SI.degrees_to_rotations * angle_deg * TurretConstants.TURRET_GEARING
+                )
             )
-        )
 
     def set_target_hood_and_turret(self):
         v_fixed, hood_angle_deg, turret_yaw_deg = self._optimal_angle_calc(
@@ -111,6 +119,15 @@ class Turret(Subsystem):
         self.set_angle_hood(hood_angle_deg)
         self.set_angle_turret(turret_yaw_deg)
         return v_fixed, hood_angle_deg, turret_yaw_deg
+
+
+    def get_actual_turret_yaw(self):
+        return (
+            float(
+                self.turret_motor.get_position().value / TurretConstants.TURRET_GEARING
+            )
+            * SI.rotations_to_degrees
+        )
 
     def periodic(self):
         self._loop_timer.start()
@@ -136,6 +153,12 @@ class Turret(Subsystem):
         # Hood angle controls turret length — 0° = min length, 90° = max length
         hood_fraction = max(0, min(actual_hood_angle, 90)) / 90.0
         self.turret_ligament.setLength(0.3 + hood_fraction * 0.9)
+        PyKitLogger.recordOutput(
+            "Turret/left_limit_switch", not (self.left_turret_limit_switch.get())
+        )
+        PyKitLogger.recordOutput(
+            "Turret/right_limit_switch", not (self.right_turret_limit_switch.get())
+        )
 
         PyKitLogger.recordOutput(
             "Turret/target_hood_angle", float(self.target_hood_angle)
@@ -188,7 +211,7 @@ class Turret(Subsystem):
         # Unit circle 110° -> 90° offset -> 20° elevation (max travel)
         # HOOD_UNIT_CIRCLE_REST = 140.0  # degrees, rest position
         # HOOD_UNIT_CIRCLE_FULL = 110.0  # degrees, full travel
-        HOOD_ELEV_MAX_DEG = 50.0  # elevation at rest   (140 - 90)
+        HOOD_ELEV_MAX_DEG = 45.0  # elevation at rest   (140 - 90)
         HOOD_ELEV_MIN_DEG = 20.0  # elevation at full   (110 - 90)
 
         YAW_MIN_DEG = -90.0
@@ -332,7 +355,7 @@ class Turret(Subsystem):
         # print("shooter height:", TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M)
         # print("dz:", hub_pose.Z() - TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M)
 
-        return v_fixed, hood_motor_deg, turret_yaw_deg
+        return v_fixed, -hood_motor_deg, -turret_yaw_deg
 
     @staticmethod
     def find_v_fixed():
