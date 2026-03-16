@@ -634,20 +634,31 @@ class Vision(Subsystem):
         if self._vision_sim is not None:
             self._vision_sim.update(self.drive_sub.get_pose())
 
-    def auto_align_rotation(self):
+    def auto_align_rotation(self, x_speed: float, y_speed: float):
+        """
+        Rotates the robot to a target while still allowing 
+        translation (x/y) from the provided inputs.
+        """
         hasTarget: bool = self.targetSub.get()
         if not hasTarget:
-            print("AUTO ALIGN ROTATION: No target detected, aborting auto align.")
+            self.drive_sub.set_control(
+                self.drive_sub.movement
+                .with_velocity_x(x_speed)
+                .with_velocity_y(y_speed)
+            )
             return
-        angle: float = self.angleSub.get()
-        current_pose = self.drive_sub.get_pose()
-        target_rotation = current_pose.rotation() + Rotation2d(
-            angle * SI.degrees_to_radians
-        )
+
+        angle_deg: float = self.angleSub.get()
+        
+        target_rotation = self.drive_sub.get_pose().rotation() + Rotation2d.fromDegrees(angle_deg)
 
         self.drive_sub.set_control(
-            self.drive_sub.facing_angle.with_target_direction(target_rotation)
+            self.drive_sub.facing_angle
+            .with_velocity_x(x_speed)
+            .with_velocity_y(y_speed)
+            .with_target_direction(target_rotation)
         )
+
 
     def auto_align(self):
         hasTarget: bool = self.targetSub.get()
