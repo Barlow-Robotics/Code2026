@@ -179,7 +179,7 @@ class Intake(commands2.Subsystem):
             "Intake/Telemetry",
             IntakeTelemetry(
                 arm_position=float(self.motor_arm_leader.get_position().value),
-                arm_target_position=(self.target_rot),
+                arm_target_position=float(self.target_rot),
                 # arm_supply_current=float(self.motor_arm.get_supply_current().value),
                 # arm_stator_current=float(self.motor_arm.get_stator_current().value),
                 roller_velocity=float(self.motor_roller.get_velocity().value),
