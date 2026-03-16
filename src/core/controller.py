@@ -12,6 +12,7 @@ from phoenix6 import swerve
 from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
 from commands import IntakePositionCommand, ShootCommand
+from commands.throw_feeder_command import ThrowFeederCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
 
@@ -130,12 +131,12 @@ class Controller:
 
         if RobotFeatures.HAS_VISION:
             # NEED TO ADD AUTO-ALIGN
-            self._driver.x().onTrue(container.vision.auto_align_command)
-            # self._driver.button(6).onTrue(
-            #     cmd.run(container.vision.position_to_pose_align)
-            #     .until(lambda: container.vision.is_aligned(tolerance_degrees=0.7))
-            #     .withTimeout(1.0)
-            # )
+            # self._driver.x().onTrue(container.vision.auto_align_command)
+            # self._driver.x().onTrue(cmd.runOnce(lambda: container.vision.auto_align()))
+            self._driver.x().onTrue(
+                cmd.runOnce(lambda: container.vision.auto_align_rotation())
+            )
+
         if (
             RobotFeatures.HAS_SHOOTER
             and RobotFeatures.HAS_FEEDER
@@ -144,6 +145,7 @@ class Controller:
             self._driver.rightTrigger().whileTrue(
                 ShootCommand(container.shooter, container.feeder, container.spindex)
             )
+
         if RobotFeatures.HAS_FEEDER:
             self._operator.leftTrigger().onTrue(
                 cmd.runOnce(
@@ -160,8 +162,13 @@ class Controller:
                     lambda: container.feeder.stop(),
                 )
             )
+        if RobotFeatures.HAS_FEEDER and RobotFeatures.HAS_SPINDEX:
+            self._driver.b().whileTrue(
+                ThrowFeederCommand(container.feeder, container.spindex)
+            )
 
-        self._driver.button(12).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
+        if RobotFeatures.TESTING:
+            self._driver.button(12).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
 
         # SysId bindings (uncomment as needed)
         # self._driver.button(1).onTrue(

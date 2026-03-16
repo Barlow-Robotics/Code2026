@@ -66,7 +66,4 @@ TODO at comp:
 should these be tuned?
 auto_translation_pid = PIDConstants(4, 0.0, 0)
 auto_rotation_pid = PIDConstants(5.0, 0.0, 0.0)
-
-
-
-
+Need to add shooter to a speicifc position on the field 

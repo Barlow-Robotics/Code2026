@@ -32,6 +32,7 @@ class RobotFeatures:
             cls.HAS_SPINDEX = False
             cls.HAS_FEEDER = True
             cls.HAS_CPROFILE = False
+            cls.TESTING = False
         else:
             cls.HAS_DRIVETRAIN = True
             cls.vision_camera_count = 4
@@ -42,6 +43,7 @@ class RobotFeatures:
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
             cls.HAS_CPROFILE = True
+            cls.TESTING = False
 
 
 class MotorIDs:
@@ -93,6 +95,7 @@ class ShooterConstants:
     FLYWHEEL_MOTOR = DCMotor.neoVortex(1)  # TODO: verify motor type
     FLYWHEEL_GEARING = 1.0  # TODO: measure actual gear ratio
     FLYWHEEL_MOI = 0.002651  # TODO: calculate from roller mass/geometry (kg*m^2)
+    FLYWHEEL_VELOCITY_TOLERANCE = 0.1
 
     FLYWHEEL_RPM_CONSTANT = 5700
     FLYWHEEL_VELOCITY_CONSTANT = 9.5

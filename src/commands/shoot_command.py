@@ -7,8 +7,6 @@ if TYPE_CHECKING:
     from subsystems.feeder import Feeder
     from subsystems import Spindex
 
-VELOCITY_TOLERANCE = 0.1
-
 
 class ShootCommand(Command):
     def __init__(self, shooter: "Shooter", feeder: "Feeder", spindex: "Spindex"):
@@ -29,7 +27,7 @@ class ShootCommand(Command):
         current_velocity = self.shooter.get_current_velocity()
         if (
             abs(current_velocity - ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT)
-            <= VELOCITY_TOLERANCE
+            <= ShooterConstants.FLYWHEEL_VELOCITY_TOLERANCE
         ):
             self.feeder.move()
             self.spindex.move()
