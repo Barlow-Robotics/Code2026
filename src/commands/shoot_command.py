@@ -6,11 +6,17 @@ from subsystems.drivetrain import Drivetrain
 
 if TYPE_CHECKING:
     from subsystems import Spindex, Turret, Feeder, Shooter
-    from subsystems.turret import Turret
 
 
 class ShootCommand(Command):
-    def __init__(self, driveSub: "Drivetrain", shooter: "Shooter", feeder: "Feeder", spindex: "Spindex", turret: "Turret"):
+    def __init__(
+        self,
+        driveSub: "Drivetrain",
+        shooter: "Shooter",
+        feeder: "Feeder",
+        spindex: "Spindex",
+        turret: "Turret",
+    ):
         super().__init__()
         self.driveSub = driveSub
         self.shooter = shooter
@@ -31,7 +37,10 @@ class ShootCommand(Command):
             self.turret.set_target_hood_and_turret()
         else:
             pose = self.driveSub.get_pose()
-            target_pose = pose.nearest(CustomPoints.TARGET_POSE_SHOOT, CustomPoints.TARGET_POSE_SHOOT_OTHER_SIDE)
+            target_pose = pose.nearest(
+                CustomPoints.TARGET_POSE_SHOOT,
+                CustomPoints.TARGET_POSE_SHOOT_OTHER_SIDE,
+            )
             self.turret.set_target_hood_and_turret(shooting_location=target_pose)
 
         if self._feeding:

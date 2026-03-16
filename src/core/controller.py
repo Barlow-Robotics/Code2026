@@ -107,7 +107,9 @@ class Controller:
                     intake_sub=container.intake,
                     position=IntakePositions.DEPLOYED,
                 )
-            ).onFalse(
+            )
+
+            self._driver.a().onTrue(
                 IntakePositionCommand(
                     drive_sub=container.drivetrain,
                     intake_sub=container.intake,
@@ -115,13 +117,7 @@ class Controller:
                 )
             )
 
-            self._driver.b().onTrue(
-                IntakePositionCommand(
-                    drive_sub=container.drivetrain,
-                    intake_sub=container.intake,
-                    position=IntakePositions.REVERSE,
-                )
-            ).onFalse(
+            self._driver.y().onTrue(
                 IntakePositionCommand(
                     drive_sub=container.drivetrain,
                     intake_sub=container.intake,
@@ -143,7 +139,13 @@ class Controller:
             and RobotFeatures.HAS_SPINDEX
         ):
             self._driver.rightTrigger().whileTrue(
-                ShootCommand(container.drivetrain, container.shooter, container.feeder, container.spindex, container.turret)
+                ShootCommand(
+                    container.drivetrain,
+                    container.shooter,
+                    container.feeder,
+                    container.spindex,
+                    container.turret,
+                )
             )
 
         if RobotFeatures.HAS_FEEDER:

@@ -118,7 +118,7 @@ class Turret(Subsystem):
                 )
             )
 
-    def set_target_hood_and_turret(self, shooting_location = Hub.TOP_CENTER_POINT):
+    def set_target_hood_and_turret(self, shooting_location=Hub.TOP_CENTER_POINT):
         v_fixed, hood_angle_deg, turret_yaw_deg = self._optimal_angle_calc(
             TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location
         )
@@ -161,9 +161,11 @@ class Turret(Subsystem):
         # Hood angle controls turret length — 0° = min length, 90° = max length
         hood_fraction = max(0, min(actual_hood_angle, 90)) / 90.0
         self.turret_ligament.setLength(0.3 + hood_fraction * 0.9)
+
         PyKitLogger.recordOutput(
             "Turret/left_limit_switch", not (self.left_turret_limit_switch.get())
         )
+
         PyKitLogger.recordOutput(
             "Turret/right_limit_switch", not (self.right_turret_limit_switch.get())
         )
@@ -201,7 +203,9 @@ class Turret(Subsystem):
         self._loop_timer.stop()
 
     def _optimal_angle_calc(
-        self, v_fixed: float = TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location = Hub.TOP_CENTER_POINT
+        self,
+        v_fixed: float = TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT,
+        shooting_location=Hub.TOP_CENTER_POINT,
     ):
         """
         Args:
@@ -236,9 +240,7 @@ class Turret(Subsystem):
         G = 9.81
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
             hub_pose = get_red_pose(shooting_location.toTranslation2d())
-            hub_pose = Translation3d(
-                hub_pose.X(), hub_pose.Y(), shooting_location.Z()
-            )
+            hub_pose = Translation3d(hub_pose.X(), hub_pose.Y(), shooting_location.Z())
         else:
             hub_pose = shooting_location
 
