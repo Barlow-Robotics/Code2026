@@ -25,7 +25,7 @@ class RobotFeatures:
         if RobotBase.isReal():
             cls.HAS_DRIVETRAIN = True
             cls.HAS_VISION = True
-            cls.vision_camera_count = 2
+            cls.vision_camera_count = 3
             cls.HAS_SHOOTER = False
             cls.HAS_TURRET = False
             cls.HAS_INTAKE = False
@@ -47,7 +47,7 @@ class RobotFeatures:
 
 
 class MotorIDs:
-    foc_active = False
+    foc_active = True
 
     # INTAKE
     motor_id_arm_leader = 51

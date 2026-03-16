@@ -118,9 +118,9 @@ class Turret(Subsystem):
                 )
             )
 
-    def set_target_hood_and_turret(self):
+    def set_target_hood_and_turret(self, shooting_location = Hub.TOP_CENTER_POINT):
         v_fixed, hood_angle_deg, turret_yaw_deg = self._optimal_angle_calc(
-            TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT
+            TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location
         )
         if v_fixed < 0:
             return -1, -1, -1
@@ -142,9 +142,6 @@ class Turret(Subsystem):
 
     def periodic(self):
         self._loop_timer.start()
-
-        if not self.driveSub.allow_center_auto_align:
-            print(self.set_target_hood_and_turret())
 
         actual_turret_yaw = (
             float(
@@ -204,7 +201,7 @@ class Turret(Subsystem):
         self._loop_timer.stop()
 
     def _optimal_angle_calc(
-        self, v_fixed: float = TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT
+        self, v_fixed: float = TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location = Hub.TOP_CENTER_POINT
     ):
         """
         Args:
@@ -238,12 +235,12 @@ class Turret(Subsystem):
 
         G = 9.81
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-            hub_pose = get_red_pose(Hub.TOP_CENTER_POINT.toTranslation2d())
+            hub_pose = get_red_pose(shooting_location.toTranslation2d())
             hub_pose = Translation3d(
-                hub_pose.X(), hub_pose.Y(), Hub.TOP_CENTER_POINT.Z()
+                hub_pose.X(), hub_pose.Y(), shooting_location.Z()
             )
         else:
-            hub_pose = Hub.TOP_CENTER_POINT
+            hub_pose = shooting_location
 
         if hub_pose is None:
             PyKitLogger.recordOutput("Turret/calc_valid", False)

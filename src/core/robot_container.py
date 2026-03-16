@@ -145,9 +145,10 @@ class RobotContainer:
             RobotFeatures.HAS_SHOOTER
             and RobotFeatures.HAS_FEEDER
             and RobotFeatures.HAS_SPINDEX
+            and RobotFeatures.HAS_TURRET
         ):
             self.shoot_command_factory = lambda: ShootCommand(
-                self.shooter, self.feeder, self.spindex
+                self.drivetrain, self.shooter, self.feeder, self.spindex, self.turret
             )
         else:
             self.shoot_command_factory = lambda: cmd.none()

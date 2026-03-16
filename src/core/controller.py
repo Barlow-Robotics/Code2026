@@ -143,7 +143,7 @@ class Controller:
             and RobotFeatures.HAS_SPINDEX
         ):
             self._driver.rightTrigger().whileTrue(
-                ShootCommand(container.shooter, container.feeder, container.spindex)
+                ShootCommand(container.drivetrain, container.shooter, container.feeder, container.spindex, container.turret)
             )
 
         if RobotFeatures.HAS_FEEDER:

@@ -1,27 +1,39 @@
 from typing import TYPE_CHECKING
 from commands2 import Command
 from constants import ShooterConstants
+from constants.field_constants import CustomPoints
+from subsystems.drivetrain import Drivetrain
 
 if TYPE_CHECKING:
-    from subsystems.shooter import Shooter
-    from subsystems.feeder import Feeder
-    from subsystems import Spindex
+    from subsystems import Spindex, Turret, Feeder, Shooter
+    from subsystems.turret import Turret
 
 
 class ShootCommand(Command):
-    def __init__(self, shooter: "Shooter", feeder: "Feeder", spindex: "Spindex"):
+    def __init__(self, driveSub: "Drivetrain", shooter: "Shooter", feeder: "Feeder", spindex: "Spindex", turret: "Turret"):
         super().__init__()
+        self.driveSub = driveSub
         self.shooter = shooter
         self.feeder = feeder
         self.spindex = spindex
+        self.turret = turret
         self._feeding = False
-        self.addRequirements(shooter, feeder, spindex)
+        self.addRequirements(self.shooter, self.feeder, self.spindex, self.turret)
 
     def initialize(self):
         self._feeding = False
         self.shooter.set_velocity(ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT)
+        if not self.driveSub.allow_center_auto_align:
+            self.turret.set_target_hood_and_turret()
 
     def execute(self):
+        if not self.driveSub.allow_center_auto_align:
+            self.turret.set_target_hood_and_turret()
+        else:
+            pose = self.driveSub.get_pose()
+            target_pose = pose.nearest(CustomPoints.TARGET_POSE_SHOOT, CustomPoints.TARGET_POSE_SHOOT_OTHER_SIDE)
+            self.turret.set_target_hood_and_turret(shooting_location=target_pose)
+
         if self._feeding:
             return
         current_velocity = self.shooter.get_current_velocity()

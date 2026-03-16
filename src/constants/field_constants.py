@@ -311,3 +311,13 @@ class Outpost:
 
     # Relevant reference points on alliance side
     CENTER_POINT = Translation2d(0, _layout.getTagPose(29).Y())
+
+
+
+class CustomPoints:
+    TARGET_POSE_SHOOT = Translation3d(
+        15.6, 7.477, 0.0
+    )
+    TARGET_POSE_SHOOT_OTHER_SIDE = Translation3d(
+        15.6, FIELD_WIDTH - 7.477, 0.0
+    )
