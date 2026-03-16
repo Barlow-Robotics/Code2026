@@ -29,12 +29,12 @@ class HP_Intake_Center_Pieces:
                 self.container.intake,
                 IntakePositions.DEPLOYED,
             ).withTimeout(3)
-            stow_cmd = IntakePositionCommand(
-                self.container.drivetrain, self.container.intake, IntakePositions.STOWED
+            home_cmd = IntakePositionCommand(
+                self.container.drivetrain, self.container.intake, IntakePositions.HOME
             ).withTimeout(3)
         else:
             deploy_cmd = cmd.none()
-            stow_cmd = cmd.none()
+            home_cmd = cmd.none()
 
         self.command = SequentialCommandGroup(
             self.container.shoot_command_factory().withTimeout(5),
@@ -47,7 +47,7 @@ class HP_Intake_Center_Pieces:
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[2]),
-                stow_cmd,
+                home_cmd,
             ),
             self.container.shoot_command_factory().withTimeout(5),
         )

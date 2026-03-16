@@ -7,3 +7,6 @@ from .shoot_command import (
 from .go_to_position_command import (
     IntakePositionCommand as IntakePositionCommand,
 )
+from .throw_feeder_command import (
+    ThrowFeederCommand as ThrowFeederCommand,
+)

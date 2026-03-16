@@ -62,7 +62,8 @@ TODO at comp:
 2. Need to update deploy/pathplanner/settings.json
 3. Update Constants 
 4. Update mech 2d of Intake
-5. Restrict turret to be 180 degrees 
+5. Test reverse intake (reverse button for intake)
 should these be tuned?
 auto_translation_pid = PIDConstants(4, 0.0, 0)
 auto_rotation_pid = PIDConstants(5.0, 0.0, 0.0)
+Need to add shooter to a speicifc position on the field 

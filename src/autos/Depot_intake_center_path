@@ -38,7 +38,7 @@ class Depot_intake_center_path:
                 IntakePositionCommand(
                     self.container.drivetrain,
                     self.container.intake,
-                    IntakePositions.STOWED
+                    IntakePositions.HOME
                 ).withTimeout(3),
             ),
             self.container.shoot_command_factory().withTimeout(5),

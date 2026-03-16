@@ -413,9 +413,9 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     def determine_turret_state(self):
         drivePose = self.get_pose()
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-            threshold_to_turret = drivePose.X() >= 10.682
+            threshold_to_turret = drivePose.X() >= 11.15
         else:
-            threshold_to_turret = drivePose.X() <= 5.834
+            threshold_to_turret = drivePose.X() <= 5.3
 
         if threshold_to_turret:
             self.allow_center_auto_align = False

@@ -18,7 +18,7 @@ from wpilib import DriverStation, Timer
 from wpimath.kinematics import ChassisSpeeds
 from constants import SI, VisionConstants, RobotFeatures
 from subsystems import Drivetrain
-from commands2 import Subsystem, cmd
+from commands2 import Subsystem
 from commands import FollowTrajectoryCommand
 
 from pykit.logger import Logger as PyKitLogger
@@ -140,8 +140,6 @@ class Vision(Subsystem):
         self._auto_align_starting_pose: Optional[Pose2d] = None
         self._auto_align_target_pose: Optional[Pose2d] = None
         self.timer = Timer()
-
-        self.auto_align_command = cmd.runOnce(self.auto_align)
 
         self.tag_pose_cache = {}
         for i in range(1, 33):
@@ -635,6 +633,21 @@ class Vision(Subsystem):
     def simulation_periodic(self):
         if self._vision_sim is not None:
             self._vision_sim.update(self.drive_sub.get_pose())
+
+    def auto_align_rotation(self):
+        hasTarget: bool = self.targetSub.get()
+        if not hasTarget:
+            print("AUTO ALIGN ROTATION: No target detected, aborting auto align.")
+            return
+        angle: float = self.angleSub.get()
+        current_pose = self.drive_sub.get_pose()
+        target_rotation = current_pose.rotation() + Rotation2d(
+            angle * SI.degrees_to_radians
+        )
+
+        self.drive_sub.set_control(
+            self.drive_sub.facing_angle.with_target_direction(target_rotation)
+        )
 
     def auto_align(self):
         hasTarget: bool = self.targetSub.get()
