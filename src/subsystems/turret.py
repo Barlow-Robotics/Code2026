@@ -116,7 +116,7 @@ class Turret(Subsystem):
         self._loop_timer.start()
 
         if not self.driveSub.allow_center_auto_align:
-            print(self.set_target_hood_and_turret())
+            self.set_target_hood_and_turret()
 
         actual_turret_yaw = (
             float(
