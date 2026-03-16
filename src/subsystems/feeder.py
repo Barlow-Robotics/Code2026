@@ -14,10 +14,10 @@ class Feeder(commands2.Subsystem):
         super().__init__()
         self._loop_timer = LoopTimer("Feeder")
         FEEDER_CONFIG_CONSTANT = TalonConfigFXS(
-            kP=0.1, kI=0, kD=0, kV=0, kS=4.0, brake_mode=False
+            kP=0.02, kI=0, kD=0.01, kV=0.118, kS=0, brake_mode=False
         )
         FEEDER_CONFIG_ALTERNATING = TalonConfigFXS(
-            kP=0.1, kI=0, kD=0, kV=0, kS=4.0, brake_mode=False
+            kP=0.02, kI=0, kD=0.01, kV=0.118, kS=0, brake_mode=False
         )
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
