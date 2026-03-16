@@ -1,7 +1,14 @@
 from commands2 import Subsystem
 from commands2.sysid import SysIdRoutine
 from phoenix6 import controls
-from wpilib import DriverStation, Mechanism2d, Color8Bit, RobotBase, SmartDashboard, DigitalInput
+from wpilib import (
+    DriverStation,
+    Mechanism2d,
+    Color8Bit,
+    RobotBase,
+    SmartDashboard,
+    DigitalInput,
+)
 from wpimath.geometry import Translation3d
 from constants.robot_constants import MotorIDs
 from subsystems import Drivetrain
@@ -81,9 +88,8 @@ class Turret(Subsystem):
         self.sys_id_routine_turret = generateSysIdProfile(
             self, self.turret_motor, name="Turret_Motor"
         )
-        self.left_turret_limit_switch  = DigitalInput(0)
+        self.left_turret_limit_switch = DigitalInput(0)
         self.right_turret_limit_switch = DigitalInput(1)
-
 
     def set_angle_hood(self, angle_deg: float):
         self.target_hood_angle = angle_deg
@@ -95,9 +101,15 @@ class Turret(Subsystem):
 
     def set_angle_turret(self, angle_deg: float):
         self.target_turret_yaw = angle_deg
-        if self.left_turret_limit_switch.get() and angle_deg < self.get_actual_turret_yaw():
+        if (
+            self.left_turret_limit_switch.get()
+            and angle_deg < self.get_actual_turret_yaw()
+        ):
             print("Left limit switch triggered, preventing further left movement")
-        elif self.right_turret_limit_switch.get() and angle_deg > self.get_actual_turret_yaw():
+        elif (
+            self.right_turret_limit_switch.get()
+            and angle_deg > self.get_actual_turret_yaw()
+        ):
             print("Right limit switch triggered, preventing further right movement")
         else:
             self.turret_motor.set_control(
@@ -119,7 +131,6 @@ class Turret(Subsystem):
         self.set_angle_hood(hood_angle_deg)
         self.set_angle_turret(turret_yaw_deg)
         return v_fixed, hood_angle_deg, turret_yaw_deg
-
 
     def get_actual_turret_yaw(self):
         return (
