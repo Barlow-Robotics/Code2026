@@ -99,7 +99,7 @@ class Intake(commands2.Subsystem):
 
         self._POSITION_MAP = {
             IntakePositions.HOME: IntakeConstants.ARM_HOME_ROTATIONS,
-            IntakePositions.STOWED: IntakeConstants.ARM_STOWED_ROTATIONS,
+            IntakePositions.REVERSE: IntakeConstants.ARM_DEPLOYED_ROTATIONS,
             IntakePositions.DEPLOYED: IntakeConstants.ARM_DEPLOYED_ROTATIONS,
         }
 

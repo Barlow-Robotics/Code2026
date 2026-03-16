@@ -39,7 +39,7 @@ class Kenny_auto2:
                 IntakePositionCommand(
                     self.container.drivetrain,
                     self.container.intake,
-                    IntakePositions.STOWED,
+                    IntakePositions.HOME,
                 ).withTimeout(3),
             ),
             ParallelCommandGroup(
@@ -58,7 +58,7 @@ class Kenny_auto2:
                 IntakePositionCommand(
                     self.container.drivetrain,
                     self.container.intake,
-                    IntakePositions.STOWED,
+                    IntakePositions.HOME,
                 ).withTimeout(3),
             ),
             self.container.shoot_command_factory().withTimeout(5),

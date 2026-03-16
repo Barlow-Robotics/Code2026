@@ -106,22 +106,25 @@ class Controller:
                     intake_sub=container.intake,
                     position=IntakePositions.DEPLOYED,
                 )
+            ).onFalse(
+                IntakePositionCommand(
+                    drive_sub=container.drivetrain,
+                    intake_sub=container.intake,
+                    position=IntakePositions.HOME,
+                )
             )
 
             self._driver.b().onTrue(
                 IntakePositionCommand(
                     drive_sub=container.drivetrain,
                     intake_sub=container.intake,
-                    position=IntakePositions.DEPLOYED,
-                    move=False,
+                    position=IntakePositions.REVERSE,
                 )
-            )
-            self._driver.a().onTrue(
+            ).onFalse(
                 IntakePositionCommand(
                     drive_sub=container.drivetrain,
                     intake_sub=container.intake,
-                    position=IntakePositions.HOME,
-                    move=False,
+                    position=IntakePositions.DEPLOYED,
                 )
             )
 

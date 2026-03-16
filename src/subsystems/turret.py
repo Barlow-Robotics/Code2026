@@ -99,17 +99,17 @@ class Turret(Subsystem):
             )
         )
 
+    def left_limit_switch_on(self):
+        return not self.left_turret_limit_switch.get()
+
+    def right_limit_switch_on(self):
+        return not self.right_turret_limit_switch.get()
+
     def set_angle_turret(self, angle_deg: float):
         self.target_turret_yaw = angle_deg
-        if (
-            self.left_turret_limit_switch.get()
-            and angle_deg < self.get_actual_turret_yaw()
-        ):
+        if self.left_limit_switch_on() and angle_deg < self.get_actual_turret_yaw():
             print("Left limit switch triggered, preventing further left movement")
-        elif (
-            self.right_turret_limit_switch.get()
-            and angle_deg > self.get_actual_turret_yaw()
-        ):
+        elif self.right_limit_switch_on() and angle_deg > self.get_actual_turret_yaw():
             print("Right limit switch triggered, preventing further right movement")
         else:
             self.turret_motor.set_control(
