@@ -39,27 +39,7 @@ class Controller:
         container.drivetrain.setDefaultCommand(
             container.drivetrain.apply_request(
                 lambda: (
-                    # --- AUTO ALIGN MODE (Holding Button 1) ---
-                    container.drivetrain.facing_angle
-                    .with_velocity_x(
-                        -self._driver.getRawAxis(1)
-                        * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                        * self._current_state
-                    )
-                    .with_velocity_y(
-                        -self._driver.getRawAxis(0)
-                        * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                        * self._current_state
-                    )
-                    .with_target_direction(
-                        container.drivetrain.get_pose().rotation() + 
-                        Rotation2d.fromDegrees(container.vision.angleSub.get())
-                    )
-                    if self._driver.x() and container.vision.targetSub.get()
-                    
-                    # --- NORMAL DRIVE MODE (Default) ---
-                    else container.drivetrain.movement
-                    .with_velocity_x(
+                    container.drivetrain.movement.with_velocity_x(
                         -self._driver.getRawAxis(1)
                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
                         * self._current_state
@@ -79,7 +59,6 @@ class Controller:
                 )
             )
         )
-
 
         self._driver.rightBumper().onTrue(
             cmd.runOnce(
@@ -147,13 +126,12 @@ class Controller:
             )
 
         if RobotFeatures.HAS_VISION:
-            pass
             # NEED TO ADD AUTO-ALIGN
             # self._driver.x().onTrue(container.vision.auto_align_command)
             # self._driver.x().onTrue(cmd.runOnce(lambda: container.vision.auto_align()))
-            # self._driver.x().onTrue(
-            #     cmd.runOnce(lambda: container.vision.auto_align_rotation())
-            # )
+            self._driver.x().onTrue(
+                cmd.runOnce(lambda: container.vision.auto_align_rotation())
+            )
 
         if (
             RobotFeatures.HAS_SHOOTER
