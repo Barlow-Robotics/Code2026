@@ -142,11 +142,11 @@ class Controller:
                 )
 
         for controller in [self._driver, self._operator]:
-            controller.button(7).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
+            controller.button(8).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
 
         if RobotFeatures.HAS_VISION:
             for controller in [self._driver, self._operator]:
-                controller.button(6).onTrue(
+                controller.button(7).onTrue(
                     cmd.runOnce(
                         lambda: container.vision.disable_the_vision(
                             not container.vision.disabled_vision
