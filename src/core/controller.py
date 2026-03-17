@@ -61,52 +61,51 @@ class Controller:
         )
 
         if RobotFeatures.HAS_VISION:
-            # NEED TO ADD AUTO-ALIGN
-            # self._driver.x().onTrue(container.vision.auto_align_command)
-            # self._driver.x().onTrue(cmd.runOnce(lambda: container.vision.auto_align()))
-            self._driver.x().whileTrue(
-                container.drivetrain.apply_request(
-                    lambda: container.vision.auto_align_modify_request(
-                        container.drivetrain.movement.with_velocity_x(
-                            -self._driver.getRawAxis(1)
-                            * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                            * self._current_state
-                        )
-                        .with_velocity_y(
-                            -self._driver.getRawAxis(0)
-                            * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                            * self._current_state
-                        )
-                        .with_rotational_rate(
-                            -self._driver.getRawAxis(
-                                2 if type(self._driver) is CommandJoystick else 4
+            for controller in [self._driver, self._operator]:
+                controller.x().whileTrue(
+                    container.drivetrain.apply_request(
+                        lambda: container.vision.auto_align_modify_request(
+                            container.drivetrain.movement.with_velocity_x(
+                                -self._driver.getRawAxis(1)
+                                * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                                * self._current_state
                             )
-                            * DriveConstants.MAX_ANGULAR_VELOCITY
-                            * self._current_state
+                            .with_velocity_y(
+                                -self._driver.getRawAxis(0)
+                                * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                                * self._current_state
+                            )
+                            .with_rotational_rate(
+                                -self._driver.getRawAxis(
+                                    2 if type(self._driver) is CommandJoystick else 4
+                                )
+                                * DriveConstants.MAX_ANGULAR_VELOCITY
+                                * self._current_state
+                            )
                         )
+                    )
+                )
+
+        for controller in [self._driver, self._operator]:
+            controller.rightBumper().onTrue(
+                cmd.runOnce(
+                    lambda: (
+                        self.update_state(sub=False)
+                        if round(self._current_state, 2) < 1.0
+                        else print("HI2")
                     )
                 )
             )
 
-        self._driver.rightBumper().onTrue(
-            cmd.runOnce(
-                lambda: (
-                    self.update_state(sub=False)
-                    if round(self._current_state, 2) < 1.0
-                    else print("HI2")
+            controller.leftBumper().onTrue(
+                cmd.runOnce(
+                    lambda: (
+                        self.update_state(sub=True)
+                        if round(self._current_state, 2) > 0.5
+                        else print("hi")
+                    )
                 )
             )
-        )
-
-        self._driver.leftBumper().onTrue(
-            cmd.runOnce(
-                lambda: (
-                    self.update_state(sub=True)
-                    if round(self._current_state, 2) > 0.5
-                    else print("hi")
-                )
-            )
-        )
 
         # Idle while the robot is disabled. This ensures the configured
         # neutral mode is applied to the drive motors while disabled.
@@ -115,91 +114,75 @@ class Controller:
             container.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
         )
 
-        # # Drivetrain button bindings (xbox controller)
-        # self._operator.a().whileTrue(
-        #     container.drivetrain.apply_request(lambda: container.brake)
-        # )
-        # self._operator.b().whileTrue(
-        #     container.drivetrain.apply_request(
-        #         lambda: container.point.with_module_direction(
-        #             self._joystick_to_rotation()
-        #         )
-        #     )
-        # )
-
-        # Subsystem button bindings (driver joystick)
+        # Subsystem button bindings
         if RobotFeatures.HAS_INTAKE:
-            self._driver.leftStick().onTrue(  # NEED TO FIX
-                IntakePositionCommand(
-                    drive_sub=container.drivetrain,
-                    intake_sub=container.intake,
-                    position=IntakePositions.DEPLOYED,
-                )
-            )
-
-            self._driver.a().onTrue(
-                IntakePositionCommand(
-                    drive_sub=container.drivetrain,
-                    intake_sub=container.intake,
-                    position=IntakePositions.HOME,
-                )
-            )
-
-            self._driver.y().onTrue(
-                IntakePositionCommand(
-                    drive_sub=container.drivetrain,
-                    intake_sub=container.intake,
-                    position=IntakePositions.DEPLOYED,
-                )
-            )
-
-        self._driver.button(7).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
-
-        if RobotFeatures.HAS_VISION:
-            self._driver.button(6).onTrue(
-                cmd.runOnce(
-                    lambda: container.vision.disable_the_vision(
-                        not container.vision.disabled_vision
+            for controller in [self._driver, self._operator]:
+                controller.leftStick().onTrue(
+                    IntakePositionCommand(
+                        drive_sub=container.drivetrain,
+                        intake_sub=container.intake,
+                        position=IntakePositions.DEPLOYED,
                     )
                 )
-            )
+
+                controller.a().onTrue(
+                    IntakePositionCommand(
+                        drive_sub=container.drivetrain,
+                        intake_sub=container.intake,
+                        position=IntakePositions.HOME,
+                    )
+                )
+
+                controller.y().onTrue(
+                    IntakePositionCommand(
+                        drive_sub=container.drivetrain,
+                        intake_sub=container.intake,
+                        position=IntakePositions.DEPLOYED,
+                    )
+                )
+
+        for controller in [self._driver, self._operator]:
+            controller.button(7).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
+
+        if RobotFeatures.HAS_VISION:
+            for controller in [self._driver, self._operator]:
+                controller.button(6).onTrue(
+                    cmd.runOnce(
+                        lambda: container.vision.disable_the_vision(
+                            not container.vision.disabled_vision
+                        )
+                    )
+                )
 
         if (
             RobotFeatures.HAS_SHOOTER
             and RobotFeatures.HAS_FEEDER
             and RobotFeatures.HAS_SPINDEX
         ):
-            self._driver.rightTrigger().whileTrue(
-                ShootCommand(
-                    container.drivetrain,
-                    container.shooter,
-                    container.feeder,
-                    container.spindex,
-                    container.turret,
+            for controller in [self._driver, self._operator]:
+                controller.rightTrigger().whileTrue(
+                    ShootCommand(
+                        container.drivetrain,
+                        container.shooter,
+                        container.feeder,
+                        container.spindex,
+                        container.turret,
+                    )
                 )
-            )
 
-        # if RobotFeatures.HAS_FEEDER:
-        #     self._operator.leftTrigger().onTrue(
-        #         cmd.runOnce(
-        #             lambda: container.feeder.move(0.3, False),
-        #         )
-        #     )
-        #     self._operator.leftBumper().onTrue(
-        #         cmd.runOnce(
-        #             lambda: container.feeder.move(0.3, True),
-        #         )
-        #     )
-        #     self._operator.rightBumper().onTrue(
-        #         cmd.runOnce(
-        #             lambda: container.feeder.stop(),
-        #         )
-            # )
-            pass
         if RobotFeatures.HAS_FEEDER and RobotFeatures.HAS_SPINDEX:
-            self._driver.b().whileTrue(
-                ThrowFeederCommand(container.feeder, container.spindex)
-            )
+            for controller in [self._driver, self._operator]:
+                controller.b().whileTrue(
+                    ThrowFeederCommand(container.feeder, container.spindex)
+                )
+
+        # Periodically warn about missing controllers during teleop
+        Trigger(DriverStation.isTeleopEnabled).whileTrue(
+            cmd.sequence(
+                cmd.waitSeconds(5),
+                cmd.runOnce(self._log_missing_connections),
+            ).repeatedly()
+        )
 
         # if RobotFeatures.TESTING:
 
