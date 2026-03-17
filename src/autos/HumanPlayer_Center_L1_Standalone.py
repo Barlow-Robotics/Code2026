@@ -4,7 +4,10 @@ from pathplannerlib.auto import AutoBuilder
 
 from autos import AutoRoutine
 
-from commands2 import ParallelDeadlineGroup, SequentialCommandGroup, ParallelCommandGroup
+from commands2 import (
+    ParallelDeadlineGroup,
+    SequentialCommandGroup,
+)
 
 if typing.TYPE_CHECKING:
     from core import RobotContainer

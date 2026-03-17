@@ -7,7 +7,6 @@ from autos import AutoRoutine
 from commands2 import (
     ParallelDeadlineGroup,
     SequentialCommandGroup,
-    ParallelCommandGroup,
 )
 
 if typing.TYPE_CHECKING:
@@ -15,13 +14,13 @@ if typing.TYPE_CHECKING:
 from commands import IntakePositionCommand
 from subsystems import IntakePositions
 
-path_name = "HP_Center_1L"
+path_name = "HP_Center_2L"
 
 
-class HP_Center_L1:
+class HP_Center_L2_AutoAlign:
     def __init__(self, container: "RobotContainer"):
         self.paths = [
-            PathPlannerPath.fromChoreoTrajectory(path_name, i) for i in range(5)
+            PathPlannerPath.fromChoreoTrajectory(path_name, i) for i in range(6)
         ]
         self.container = container
 
@@ -46,16 +45,35 @@ class HP_Center_L1:
                     IntakePositions.HOME,
                 ).withTimeout(3),
             ),
-            ParallelCommandGroup(
+            ParallelDeadlineGroup(
+                self.container.shoot_command_factory().withTimeout(5),
+                self.container.drivetrain.hold_position_command(),
+            ),
+            ParallelDeadlineGroup(
                 AutoBuilder.followPath(self.paths[3]),
             ),
-            ParallelCommandGroup(
-                SequentialCommandGroup(
-                    AutoBuilder.followPath(self.paths[4]),
-                    # AutoBuilder.followPath(self.paths[5]),
-                    self.container.drivetrain.hold_position_command(),
+            ParallelDeadlineGroup(
+                (
+                    self.container.vision.auto_align()
+                    or AutoBuilder.followPath(self.paths[4])
                 ),
-                self.container.shoot_command_factory().withTimeout(15),
+                IntakePositionCommand(
+                    self.container.drivetrain,
+                    self.container.intake,
+                    IntakePositions.DEPLOYED,
+                ).withTimeout(3),
+            ),
+            ParallelDeadlineGroup(
+                AutoBuilder.followPath(self.paths[5]),
+                IntakePositionCommand(
+                    self.container.drivetrain,
+                    self.container.intake,
+                    IntakePositions.HOME,
+                ).withTimeout(3),
+            ),
+            ParallelDeadlineGroup(
+                self.container.shoot_command_factory().withTimeout(5),
+                self.container.drivetrain.hold_position_command(),
             ),
         )
 

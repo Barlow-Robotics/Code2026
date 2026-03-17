@@ -137,7 +137,7 @@ class DriveConstants:
     TOTAL_HEIGHT_METERS_FROM_FLOOR = (
         SI.inches_to_meters * TOTAL_HEIGHT_INCHES_FROM_FLOOR
     )
-    TOTAL_WIDTH_INCHES = 27.0 + 0.5 # IN
+    TOTAL_WIDTH_INCHES = 27.0 + 0.5  # IN
     TOTAL_WIDTH_INCHES_BUMPERS = 34.5 + 0.5  # IN
     CENTER_WHEEL_TO_CENTER_WHEEL = 21.75  # IN
     CENTER_WHEEL_TO_CENTER_WHEEL_METERS = (
@@ -192,14 +192,16 @@ class VisionConstants:
         ),
         Rotation3d(0, 0, units.degreesToRadians(0)),
     )
+    # 12 5/8 tall
 
-    BACK_LEFT_SWERVE_TO_ROBOT = Transform3d(
+    BACK_RIGHT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
-            -HALF_LENGTH,
-            HALF_WIDTH,
-            HEIGHT,
+            -HALF_LENGTH + (0.5 * SI.inches_to_meters),
+            -HALF_WIDTH + (2.625 * SI.inches_to_meters),  # RIGHT
+            (12.625 * SI.inches_to_meters)
+            + DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR,
         ),
-        Rotation3d(0, 0, units.degreesToRadians(-(180 - 45))),
+        Rotation3d(0, 0, units.degreesToRadians(180)),
     )
 
     BACK_RIGHT_SWERVE_TO_ROBOT = Transform3d(

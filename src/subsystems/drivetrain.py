@@ -141,9 +141,8 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         self.current_pose = Pose2d()
         self._brake_request = swerve.requests.SwerveDriveBrake()
 
-        self._zero_request = (
-            swerve.requests.ApplyRobotSpeeds()
-            .with_speeds(ChassisSpeeds(0, 0, 0))
+        self._zero_request = swerve.requests.ApplyRobotSpeeds().with_speeds(
+            ChassisSpeeds(0, 0, 0)
         )
         self.movement = (
             swerve.requests.FieldCentric()
@@ -447,9 +446,11 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
                 else 180 * SI.degrees_to_radians
             )
         )
+
     def hold_position_command(self):
         """Actively commands 0 velocity in X, Y, and yaw."""
         return self.apply_request(lambda: self._zero_request)
+
     def lock_wheels_command(self):
         """X-stance: physically locks wheels against pushing forces."""
         return self.apply_request(lambda: self._brake_request)

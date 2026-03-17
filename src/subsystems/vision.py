@@ -675,7 +675,7 @@ class Vision(Subsystem):
         hasTarget: bool = self.targetSub.get()
         if not hasTarget:
             print("AUTO ALIGN: No target detected, aborting auto align.")
-            return
+            return None
         x: float = self.xSub.get()
         y: float = self.ySub.get()
         angle: float = self.angleSub.get()
@@ -687,7 +687,6 @@ class Vision(Subsystem):
             starting_pose.Y() + y,
             starting_pose.rotation() + Rotation2d(angle * SI.degrees_to_radians),
         )
-
         self._auto_align_triggered = True
         self._auto_align_starting_pose = starting_pose
         self._auto_align_target_pose = target_pose
@@ -699,7 +698,7 @@ class Vision(Subsystem):
             target_pose,
             Rotation2d(target_pose.rotation().radians()),
         )
-        FollowTrajectoryCommand(self, trajectory_obj).schedule()
+        return FollowTrajectoryCommand(self, trajectory_obj)
 
     def position_to_pose_align(self):
         if self.drive_sub.allow_center_auto_align:
