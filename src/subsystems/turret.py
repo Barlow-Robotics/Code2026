@@ -212,11 +212,11 @@ class Turret(Subsystem):
             v_fixed: Should be ~10m/s this season, but can be tuned for optimal performance
 
         Returns:
-            turret_yaw (degree): robot-relative. 0° = straight ahead, +left, -right. Clamped to [-90, 90].
+            v_fixed (m/s): the fixed velocity input, returned for convenience.
             hood_angle (degree): in UNIT CIRCLE convention. Rest = 140°, full travel = 110°.
                 Physically: 140° = 50° above horizontal, 110° = 20° above horizontal.
-            v_fixed (m/s): the fixed velocity input, returned for convenience.
-        """
+            turret_yaw (degree): robot-relative. 0° = straight ahead, -left, +right. Clamped to [-90, 90].
+            """
 
         # --- Physical hood limits (elevation from horizontal) ---
         # Unit circle 140° -> 90° offset -> 50° elevation (rest/start)
