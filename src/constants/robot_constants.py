@@ -25,7 +25,7 @@ class RobotFeatures:
         if RobotBase.isReal():
             cls.HAS_DRIVETRAIN = True
             cls.HAS_VISION = True
-            cls.vision_camera_count = 3
+            cls.vision_camera_count = 2
             cls.HAS_SHOOTER = False
             cls.HAS_TURRET = False
             cls.HAS_INTAKE = False
@@ -137,13 +137,13 @@ class DriveConstants:
     TOTAL_HEIGHT_METERS_FROM_FLOOR = (
         SI.inches_to_meters * TOTAL_HEIGHT_INCHES_FROM_FLOOR
     )
-    TOTAL_WIDTH_INCHES = 27.0  # IN
-    TOTAL_WIDTH_INCHES_BUMPERS = 34.5  # IN
+    TOTAL_WIDTH_INCHES = 27.0 + 0.5 # IN
+    TOTAL_WIDTH_INCHES_BUMPERS = 34.5 + 0.5  # IN
     CENTER_WHEEL_TO_CENTER_WHEEL = 21.75  # IN
     CENTER_WHEEL_TO_CENTER_WHEEL_METERS = (
         SI.inches_to_meters * CENTER_WHEEL_TO_CENTER_WHEEL
     )  # M
-    ROBOT_MASS_KG = 25  # KG
+    ROBOT_MASS_KG = 52.1631  # KG
     ROBOT_MOI = (
         ROBOT_MASS_KG
         * (
@@ -175,20 +175,20 @@ class VisionConstants:
 
     FRONT_LEFT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
-            -2.5 * SI.inches_to_meters,
-            HALF_WIDTH + 0.5 * SI.inches_to_meters,  # LEFT
+            HALF_LENGTH - (2.0 * SI.inches_to_meters),
+            HALF_WIDTH - (4.25 * SI.inches_to_meters),  # LEFT
             DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR
-            + SI.inches_to_meters * 22.0625,
+            + (SI.inches_to_meters * 16.375),
         ),
         Rotation3d(0, 0, units.degreesToRadians(0)),
     )
 
     FRONT_RIGHT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
-            -2.5 * SI.inches_to_meters,
-            -HALF_WIDTH - 0.5 * SI.inches_to_meters,  # RIGHT
+            HALF_LENGTH - (2.0 * SI.inches_to_meters),
+            -HALF_WIDTH + (3.75 * SI.inches_to_meters),  # RIGHT
             DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR
-            + SI.inches_to_meters * 22.0625,
+            + (SI.inches_to_meters * 16.375),
         ),
         Rotation3d(0, 0, units.degreesToRadians(0)),
     )
