@@ -13,6 +13,7 @@ from subsystems import IntakePositions
 
 path_name = "Depot_intake_path"
 
+
 class Depot_intake_center_path:
     def __init__(self, container: "RobotContainer"):
         self.paths = [
@@ -30,7 +31,7 @@ class Depot_intake_center_path:
                 IntakePositionCommand(
                     self.container.drivetrain,
                     self.container.intake,
-                    IntakePositions.DEPLOYED
+                    IntakePositions.DEPLOYED,
                 ).withTimeout(3),
             ),
             ParallelCommandGroup(
@@ -38,7 +39,7 @@ class Depot_intake_center_path:
                 IntakePositionCommand(
                     self.container.drivetrain,
                     self.container.intake,
-                    IntakePositions.HOME
+                    IntakePositions.HOME,
                 ).withTimeout(3),
             ),
             self.container.shoot_command_factory().withTimeout(5),

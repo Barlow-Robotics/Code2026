@@ -119,6 +119,10 @@ class Turret(Subsystem):
             )
 
     def set_target_hood_and_turret(self, shooting_location=Hub.TOP_CENTER_POINT):
+        if shooting_location == 0:
+            self.set_angle_hood(0)
+            self.set_angle_turret(0)
+
         v_fixed, hood_angle_deg, turret_yaw_deg = self._optimal_angle_calc(
             TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location
         )
@@ -215,8 +219,8 @@ class Turret(Subsystem):
             v_fixed (m/s): the fixed velocity input, returned for convenience.
             hood_angle (degree): in UNIT CIRCLE convention. Rest = 140°, full travel = 110°.
                 Physically: 140° = 50° above horizontal, 110° = 20° above horizontal.
-            turret_yaw (degree): robot-relative. 0° = straight ahead, -left, +right. Clamped to [-90, 90].
-            """
+            turret_yaw (degree): robot-relative. 0° = straight ahead, -left, +right. Clamped to [-90, 90]
+        """
 
         # --- Physical hood limits (elevation from horizontal) ---
         # Unit circle 140° -> 90° offset -> 50° elevation (rest/start)

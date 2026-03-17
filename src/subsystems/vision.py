@@ -651,13 +651,10 @@ class Vision(Subsystem):
         target_angle = target_direction.radians()
 
         return (
-            self.drive_sub.facing_angle
-            .with_velocity_x(speed * math.cos(target_angle))
+            self.drive_sub.facing_angle.with_velocity_x(speed * math.cos(target_angle))
             .with_velocity_y(speed * math.sin(target_angle))
             .with_target_direction(target_direction)
         )
-
-
 
     def auto_align_rotation(self):
         hasTarget: bool = self.targetSub.get()
