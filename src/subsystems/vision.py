@@ -114,14 +114,6 @@ class Vision(Subsystem):
             _CameraConfig(
                 camera=PhotonCamera(VisionConstants.CAMERA_3_NAME),
                 estimator=PhotonPoseEstimator(
-                    field_layout, VisionConstants.BACK_LEFT_SWERVE_TO_ROBOT
-                ),
-                name="back_left_swerve",
-                robot_to_camera=VisionConstants.BACK_LEFT_SWERVE_TO_ROBOT,
-            ),
-            _CameraConfig(
-                camera=PhotonCamera(VisionConstants.CAMERA_4_NAME),
-                estimator=PhotonPoseEstimator(
                     field_layout, VisionConstants.BACK_RIGHT_SWERVE_TO_ROBOT
                 ),
                 name="back_right_swerve",

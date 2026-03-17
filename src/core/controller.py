@@ -115,17 +115,17 @@ class Controller:
             container.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
         )
 
-        # Drivetrain button bindings (xbox controller)
-        self._operator.a().whileTrue(
-            container.drivetrain.apply_request(lambda: container.brake)
-        )
-        self._operator.b().whileTrue(
-            container.drivetrain.apply_request(
-                lambda: container.point.with_module_direction(
-                    self._joystick_to_rotation()
-                )
-            )
-        )
+        # # Drivetrain button bindings (xbox controller)
+        # self._operator.a().whileTrue(
+        #     container.drivetrain.apply_request(lambda: container.brake)
+        # )
+        # self._operator.b().whileTrue(
+        #     container.drivetrain.apply_request(
+        #         lambda: container.point.with_module_direction(
+        #             self._joystick_to_rotation()
+        #         )
+        #     )
+        # )
 
         # Subsystem button bindings (driver joystick)
         if RobotFeatures.HAS_INTAKE:
@@ -179,22 +179,23 @@ class Controller:
                 )
             )
 
-        if RobotFeatures.HAS_FEEDER:
-            self._operator.leftTrigger().onTrue(
-                cmd.runOnce(
-                    lambda: container.feeder.move(0.3, False),
-                )
-            )
-            self._operator.leftBumper().onTrue(
-                cmd.runOnce(
-                    lambda: container.feeder.move(0.3, True),
-                )
-            )
-            self._operator.rightBumper().onTrue(
-                cmd.runOnce(
-                    lambda: container.feeder.stop(),
-                )
-            )
+        # if RobotFeatures.HAS_FEEDER:
+        #     self._operator.leftTrigger().onTrue(
+        #         cmd.runOnce(
+        #             lambda: container.feeder.move(0.3, False),
+        #         )
+        #     )
+        #     self._operator.leftBumper().onTrue(
+        #         cmd.runOnce(
+        #             lambda: container.feeder.move(0.3, True),
+        #         )
+        #     )
+        #     self._operator.rightBumper().onTrue(
+        #         cmd.runOnce(
+        #             lambda: container.feeder.stop(),
+        #         )
+            # )
+            pass
         if RobotFeatures.HAS_FEEDER and RobotFeatures.HAS_SPINDEX:
             self._driver.b().whileTrue(
                 ThrowFeederCommand(container.feeder, container.spindex)

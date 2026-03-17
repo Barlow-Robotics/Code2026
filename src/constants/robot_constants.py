@@ -164,8 +164,8 @@ class VisionConstants:
     # Camera configuration
     CAMERA_1_NAME = "Left_Cam_Swerve"
     CAMERA_2_NAME = "Right_Cam_Swerve"
-    CAMERA_3_NAME = "Back_Left_Swerve"
-    CAMERA_4_NAME = "Back_Right_Swerve"
+    CAMERA_3_NAME = "Back_Right_Swerve"
+    CAMERA_4_NAME = "Back_Left_Swerve"
 
     VISION_SIM = False
 
