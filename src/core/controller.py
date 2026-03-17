@@ -86,7 +86,7 @@ class Controller:
                     )
                 )
 
-        for controller in [self._driver, self._operator]:
+        for controller in [self._driver]:
             controller.rightBumper().onTrue(
                 cmd.runOnce(
                     lambda: (
