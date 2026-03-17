@@ -118,11 +118,11 @@ class Turret(Subsystem):
                 )
             )
 
+    def reset_target_hood_and_turret(self):
+        self.set_angle_hood(0)
+        self.set_angle_turret(0)
+        return 0, 0, 0
     def set_target_hood_and_turret(self, shooting_location=Hub.TOP_CENTER_POINT):
-        if shooting_location == 0:
-            self.set_angle_hood(0)
-            self.set_angle_turret(0)
-
         v_fixed, hood_angle_deg, turret_yaw_deg = self._optimal_angle_calc(
             TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location
         )

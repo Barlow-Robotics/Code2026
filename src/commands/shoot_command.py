@@ -31,7 +31,7 @@ class ShootCommand(Command):
         self._feeding = False
         self.shooter.set_velocity(ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT)
         if not self.driveSub.allow_center_auto_align:
-            self.turret.set_target_hood_and_turret()
+            self.turret.reset_target_hood_and_turret()
         else:
             pose = self.driveSub.get_pose()
             target_pose = pose.nearest(
