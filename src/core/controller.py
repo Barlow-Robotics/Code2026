@@ -157,6 +157,17 @@ class Controller:
                 )
             )
 
+        self._driver.button(7).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
+
+        if RobotFeatures.HAS_VISION:
+            self._driver.button(6).onTrue(
+                cmd.runOnce(
+                    lambda: container.vision.disable_the_vision(
+                        not container.vision.disabled_vision
+                    )
+                )
+            )
+
         if (
             RobotFeatures.HAS_SHOOTER
             and RobotFeatures.HAS_FEEDER
@@ -193,8 +204,7 @@ class Controller:
                 ThrowFeederCommand(container.feeder, container.spindex)
             )
 
-        if RobotFeatures.TESTING:
-            self._driver.button(12).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
+        # if RobotFeatures.TESTING:
 
         # SysId bindings (uncomment as needed)
         # self._driver.button(1).onTrue(

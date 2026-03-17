@@ -6,6 +6,7 @@ from subsystems.drivetrain import Drivetrain
 
 if TYPE_CHECKING:
     from subsystems import Spindex, Turret, Feeder, Shooter
+from wpimath.geometry import Pose2d, Rotation2d, Translation3d
 
 
 class ShootCommand(Command):
@@ -38,9 +39,17 @@ class ShootCommand(Command):
         else:
             pose = self.driveSub.get_pose()
             target_pose = pose.nearest(
-                CustomPoints.TARGET_POSE_SHOOT,
-                CustomPoints.TARGET_POSE_SHOOT_OTHER_SIDE,
+                [
+                    Pose2d(
+                        CustomPoints.TARGET_POSE_SHOOT.toTranslation2d(), Rotation2d(0)
+                    ),
+                    Pose2d(
+                        CustomPoints.TARGET_POSE_SHOOT_OTHER_SIDE.toTranslation2d(),
+                        Rotation2d(0),
+                    ),
+                ]
             )
+            target_pose = Translation3d(target_pose.X(), target_pose.Y(), 0)
             self.turret.set_target_hood_and_turret(shooting_location=target_pose)
 
         if self._feeding:
