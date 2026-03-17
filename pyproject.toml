@@ -18,7 +18,7 @@ dependencies = [
     #"robotpy-pykit-watch>=1.0.0",
 
     # This list should match the robotpy components in src/pyproject.toml
-    "robotpy[apriltag,commands2,sim]",
+    "robotpy[apriltag,commands2,sim]==2026.2.2",
 
     # This list should match the requires in src/pyproject.toml
     "numpy",
@@ -26,8 +26,8 @@ dependencies = [
     "photonlibpy",
     "robotpy-pykit==1.0.3",
     "robotpy-pykit-watch==1.0.0",
-    "robotpy-halsim-gui>=2026.1.1",
-    "robotpy-cli>=2026.0.1",
+    "robotpy-halsim-gui>=2026.2.2",
+    "robotpy-cli",
     "robotpy-rev",
     "black>=25.9.8",
     "pylint>=4.0.2",
