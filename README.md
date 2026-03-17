@@ -60,10 +60,7 @@ We use L1 motors.
 TODO at comp:
 1. AprilTagField.k2026RebuiltAndyMark or AprilTagField.k2026RebuiltWelded depending on comp. 
 2. Need to update deploy/pathplanner/settings.json
-3. Update Constants 
-4. Update mech 2d of Intake
-5. Test reverse intake (reverse button for intake)
 should these be tuned?
 auto_translation_pid = PIDConstants(4, 0.0, 0)
 auto_rotation_pid = PIDConstants(5.0, 0.0, 0.0)
-Need to add shooter to a speicifc position on the field 
+6. UPDATE camera positions

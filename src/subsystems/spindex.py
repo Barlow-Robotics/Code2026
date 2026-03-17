@@ -7,13 +7,21 @@ from pykit.logger import Logger as PyKitLogger
 from commands2.sysid import SysIdRoutine
 from utils import generateSysIdProfile
 from utils.profiler import LoopTimer
+from constants import SpindexConstants
 
 
 class Spindex(commands2.Subsystem):
     def __init__(self):
         super().__init__()
         self._loop_timer = LoopTimer("Spindex")
-        SPINDEX_CONFIG = TalonConfigFX(kP=0.11, kI=0, kD=0, kV=0, brake_mode=True)
+        SPINDEX_CONFIG = TalonConfigFX(
+            kP=0.11,
+            kI=0,
+            kD=0,
+            kV=0,
+            brake_mode=True,
+            gear_ratio=SpindexConstants.GEARING,
+        )
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
             0, enable_foc=MotorIDs.foc_active

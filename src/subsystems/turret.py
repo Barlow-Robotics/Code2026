@@ -30,9 +30,23 @@ class Turret(Subsystem):
         self._loop_timer = LoopTimer("Turret")
         self.driveSub = driveSub
 
-        HOOD_MOTOR_CONFIG = TalonConfigFX(kP=0.2, kI=0.0, kD=0, kV=0, brake_mode=True)
+        HOOD_MOTOR_CONFIG = TalonConfigFX(
+            kP=0.2,
+            kI=0.0,
+            kD=0,
+            kV=0,
+            brake_mode=True,
+            gear_ratio=TurretConstants.HOOD_GEARING,
+        )
         if not RobotBase.isReal():
-            HOOD_MOTOR_CONFIG = TalonConfigFX(kP=10, kI=0, kD=6, kV=0, brake_mode=True)
+            HOOD_MOTOR_CONFIG = TalonConfigFX(
+                kP=10,
+                kI=0,
+                kD=6,
+                kV=0,
+                brake_mode=True,
+                gear_ratio=TurretConstants.HOOD_GEARING,
+            )
 
         if not RobotBase.isReal():
             TURRET_MOTOR_CONFIG = TalonConfigFX(
@@ -43,10 +57,16 @@ class Turret(Subsystem):
                 brake_mode=True,
                 motion_magic_cruise_velocity=8,
                 motion_magic_acceleration=30,
+                gear_ratio=TurretConstants.TURRET_GEARING,
             )
         else:
             TURRET_MOTOR_CONFIG = TalonConfigFX(
-                kP=0.2, kI=0, kD=0, kA=0, brake_mode=True
+                kP=0.2,
+                kI=0,
+                kD=0,
+                kA=0,
+                brake_mode=True,
+                gear_ratio=TurretConstants.TURRET_GEARING,
             )
 
         self.hood_motor = TalonFX(MotorIDs.motor_id_hood, "*")
@@ -114,7 +134,7 @@ class Turret(Subsystem):
         else:
             self.turret_motor.set_control(
                 self._motion_magic_position_voltage_turret.with_position(
-                    SI.degrees_to_rotations * angle_deg * TurretConstants.TURRET_GEARING
+                    SI.degrees_to_rotations * angle_deg
                 )
             )
 
@@ -122,6 +142,7 @@ class Turret(Subsystem):
         self.set_angle_hood(0)
         self.set_angle_turret(0)
         return 0, 0, 0
+
     def set_target_hood_and_turret(self, shooting_location=Hub.TOP_CENTER_POINT):
         v_fixed, hood_angle_deg, turret_yaw_deg = self._optimal_angle_calc(
             TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location
@@ -137,21 +158,13 @@ class Turret(Subsystem):
         return v_fixed, hood_angle_deg, turret_yaw_deg
 
     def get_actual_turret_yaw(self):
-        return (
-            float(
-                self.turret_motor.get_position().value / TurretConstants.TURRET_GEARING
-            )
-            * SI.rotations_to_degrees
-        )
+        return float(self.turret_motor.get_position().value) * SI.rotations_to_degrees
 
     def periodic(self):
         self._loop_timer.start()
 
         actual_turret_yaw = (
-            float(
-                self.turret_motor.get_position().value / TurretConstants.TURRET_GEARING
-            )
-            * SI.rotations_to_degrees
+            float(self.turret_motor.get_position().value) * SI.rotations_to_degrees
         )
         actual_hood_angle = (
             float(self.hood_motor.get_position().value) * SI.rotations_to_degrees
@@ -186,10 +199,7 @@ class Turret(Subsystem):
         )
         PyKitLogger.recordOutput(
             "Turret/actual_turret_yaw",
-            float(
-                self.turret_motor.get_position().value / TurretConstants.TURRET_GEARING
-            )
-            * SI.rotations_to_degrees,
+            float(self.turret_motor.get_position().value) * SI.rotations_to_degrees,
         )
         PyKitLogger.recordOutput(
             "Turret/hood_motor_voltage",

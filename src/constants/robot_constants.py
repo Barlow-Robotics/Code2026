@@ -65,13 +65,13 @@ class MotorIDs:
     # SHOOTER
     motor_id_hood = 58
     motor_id_turret = 59
-    motor_id_flywheel_left = 60  # from hood position to left flywheel
+    motor_id_flywheel_left = 60
     motor_id_flywheel_right = 61
 
 
 class IntakeConstants:
-    ROLLER_MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
-    ROLLER_GEARING = 30 / 58  # BW: REAL GEAR RATIO IS 30:58, NOT 1:1
+    ROLLER_MOTOR = DCMotor.krakenX44(1)
+    ROLLER_GEARING = 30 / 58
     ROLLER_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
     # Diamater is 2in
     ROLLER_CIRCUMFERENCE_IN = 2 * math.pi  # BW: REAL CIRCUMFRENCE IS 2IN * PI
@@ -79,12 +79,12 @@ class IntakeConstants:
         2 * math.pi * SI.inches_to_meters
     )  # BW: REAL CIRCUMFRENCE IS 2IN * PI
 
-    ARM_MOTOR = DCMotor.krakenX60(1)
-    ARM_GEARING = 14 / 58  # BW: REAL GEAR RATIO IS 14:58, NOT 1:1
+    ARM_MOTOR = DCMotor.krakenX44(1)
+    ARM_GEARING = 14 / 58
     ARM_MOI = 0.01
     ARM_HOME_ROTATIONS = 0
-    ARM_STOWED_ROTATIONS = 0.5  # TODO: measure actual rotations
-    ARM_DEPLOYED_ROTATIONS = 1.0  # TODO: measure actual rotations
+    ARM_DEPLOYED_LENGTH_IN = 12.191
+    ARM_DEPLOYED_ROTATIONS = ARM_DEPLOYED_LENGTH_IN / (58 / 20 * math.pi)
 
     INTAKE_VELOCITY_CONSTANT = 2.6  # Amplified from robot speed
 
@@ -92,9 +92,9 @@ class IntakeConstants:
 
 
 class ShooterConstants:
-    FLYWHEEL_MOTOR = DCMotor.neoVortex(1)  # TODO: verify motor type
-    FLYWHEEL_GEARING = 1.0  # TODO: measure actual gear ratio
-    FLYWHEEL_MOI = 0.002651  # TODO: calculate from roller mass/geometry (kg*m^2)
+    FLYWHEEL_MOTOR = DCMotor.neoVortex(1)
+    FLYWHEEL_GEARING = 1.0
+    FLYWHEEL_MOI = 0.002651
     FLYWHEEL_VELOCITY_TOLERANCE = 0.1
 
     FLYWHEEL_RPM_CONSTANT = 5700
@@ -103,12 +103,12 @@ class ShooterConstants:
 
 
 class TurretConstants:
-    TURRET_MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
-    TURRET_GEARING = 10.0  # TODO: measure actual gear ratio
+    TURRET_MOTOR = DCMotor.minion(1)
+    TURRET_GEARING = 139 / 12.0
     TURRET_MOI = 0.4  # TODO: calculate from roller mass/geometry (kg*m^2)
 
-    HOOD_MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
-    HOOD_GEARING = 1.0  # TODO: measure actual gear ratio
+    HOOD_MOTOR = DCMotor.minion(1)
+    HOOD_GEARING = 29 / 1.0
     HOOD_MOI = 0.1  # TODO: calculate from roller mass/geometry (kg*m^2)
 
     SHOOTER_HEIGHT_FOR_FUEL_IN = 20.57
@@ -117,15 +117,15 @@ class TurretConstants:
 
 
 class SpindexConstants:
-    MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
-    GEARING = 4.0  # TODO: measure actual gear ratio
+    MOTOR = DCMotor.krakenX44(1)
+    GEARING = 42 / 24
     MOI = 0.005  # TODO: calculate from mechanism mass/geometry (kg*m^2)
 
     PID = {"kP": 0.11, "kI": 0, "kD": 0, "kF": 0, "kA": 0}  # TODO: tune PID
 
 
 class FeederConstants:
-    MOTOR = DCMotor.krakenX60(1)  # TODO: verify motor type
+    MOTOR = DCMotor.minion(1)
     GEARING = 1.0
     MOI = 0.005  # TODO: calculate from mechanism mass/geometry (kg*m^2)
 
