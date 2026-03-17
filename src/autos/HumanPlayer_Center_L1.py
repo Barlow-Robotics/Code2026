@@ -4,29 +4,29 @@ from pathplannerlib.auto import AutoBuilder
 
 from autos import AutoRoutine
 
-from commands2 import SequentialCommandGroup, ParallelCommandGroup
+from commands2 import ParallelDeadlineGroup, ParallelRaceGroup, SequentialCommandGroup, ParallelCommandGroup
 
 if typing.TYPE_CHECKING:
     from core import RobotContainer
 from commands import IntakePositionCommand
 from subsystems import IntakePositions
 
-path_name = "Depot_intake_path"
+path_name = "HP_Center_1L"
 
 
-class Depot_intake_center_path:
+class HP_Center_L1:
     def __init__(self, container: "RobotContainer"):
         self.paths = [
-            PathPlannerPath.fromChoreoTrajectory(path_name, i) for i in range(3)
+            PathPlannerPath.fromChoreoTrajectory(path_name, i) for i in range(5)
         ]
         self.container = container
 
         self.command = SequentialCommandGroup(
-            self.container.shoot_command_factory().withTimeout(5),
-            ParallelCommandGroup(
+            # self.container.shoot_command_factory().withTimeout(5),
+            ParallelDeadlineGroup(
                 AutoBuilder.followPath(self.paths[0]),
             ),
-            ParallelCommandGroup(
+            ParallelDeadlineGroup(
                 AutoBuilder.followPath(self.paths[1]),
                 IntakePositionCommand(
                     self.container.drivetrain,
@@ -34,7 +34,7 @@ class Depot_intake_center_path:
                     IntakePositions.DEPLOYED,
                 ).withTimeout(3),
             ),
-            ParallelCommandGroup(
+            ParallelDeadlineGroup(
                 AutoBuilder.followPath(self.paths[2]),
                 IntakePositionCommand(
                     self.container.drivetrain,
@@ -42,7 +42,18 @@ class Depot_intake_center_path:
                     IntakePositions.HOME,
                 ).withTimeout(3),
             ),
-            self.container.shoot_command_factory().withTimeout(5),
+            ParallelCommandGroup(
+                AutoBuilder.followPath(self.paths[3]),
+            ),
+            ParallelCommandGroup(
+                SequentialCommandGroup(
+                    AutoBuilder.followPath(self.paths[4]),
+                    # AutoBuilder.followPath(self.paths[5]),
+                    self.container.drivetrain.hold_position_command(),
+                ),
+                self.container.shoot_command_factory().withTimeout(15),
+            ),
+
         )
 
     def get_command(self):

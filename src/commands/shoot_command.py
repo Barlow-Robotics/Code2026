@@ -85,4 +85,4 @@ class ShootCommand(Command):
         self.shooter.stop_flywheel()
         self.feeder.stop()
         self.spindex.stop()
-        self.turret.set_target_hood_and_turret(0)
+        self.turret.reset_target_hood_and_turret()

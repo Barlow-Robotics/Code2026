@@ -10,7 +10,7 @@ if typing.TYPE_CHECKING:
     from core import RobotContainer
 
 
-path_name = "Leave_Shoot"
+path_name = "Randy"
 
 
 class Leave_Shoot:

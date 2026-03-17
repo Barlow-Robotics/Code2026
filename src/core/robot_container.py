@@ -26,7 +26,7 @@ from wpilib import (
 from utils import should_flip
 import wpilib
 from pykit.logger import Logger as PyKitLogger
-from autos import HP_Intake_Center_Pieces, Leave_Shoot
+from autos import Leave_Shoot, HP_Center_L2, HP_Center_L1, HP_Center_L1_standalone
 
 
 class RobotContainer:
@@ -109,18 +109,21 @@ class RobotContainer:
             and RobotFeatures.HAS_SHOOTER
             and RobotFeatures.HAS_FEEDER
             and RobotFeatures.HAS_SPINDEX
+            and RobotFeatures.HAS_TURRET
         ):
             self.auto_selection.setDefaultOption(
-                "HP_Intake_Center_Pieces",
-                HP_Intake_Center_Pieces(self).get_command(),
+                "HP_Center_L2",
+                HP_Center_L2(self).get_command(),
             )
+            self.auto_selection.addOption("Leave", Leave_Shoot(self).get_command())
         else:
             self.auto_selection.setDefaultOption(
                 "Leave", Leave_Shoot(self).get_command()
             )
-
-        self.auto_selection.addOption("Leave", Leave_Shoot(self).get_command())
-
+            
+        self.auto_selection.addOption("HP_Center_L1", HP_Center_L1(self).get_command())
+        self.auto_selection.addOption("HP_Center_L1_Standalone", HP_Center_L1_standalone(self).get_command())
+        self.auto_selection.addOption("HP_Center_L2", HP_Center_L2(self).get_command())
         # allow us to choose our auto in Smart Dashboard
         wpilib.SmartDashboard.putData("Auto", self.auto_selection)
         prefix = "Auto"
