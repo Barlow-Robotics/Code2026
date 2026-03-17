@@ -60,6 +60,38 @@ class Controller:
             )
         )
 
+        if RobotFeatures.HAS_VISION:
+            # NEED TO ADD AUTO-ALIGN
+            # self._driver.x().onTrue(container.vision.auto_align_command)
+            # self._driver.x().onTrue(cmd.runOnce(lambda: container.vision.auto_align()))
+            self._driver.x().whileTrue(
+                container.drivetrain.apply_request(
+                    lambda: (
+                        container.vision.auto_align_modify_request(
+                            container.drivetrain.movement.with_velocity_x(
+                                -self._driver.getRawAxis(1)
+                                * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                                * self._current_state
+                            )
+                            .with_velocity_y(
+                                -self._driver.getRawAxis(0)
+                                * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                                * self._current_state
+                            )
+                            .with_rotational_rate(
+                                -self._driver.getRawAxis(
+                                    2 if type(self._driver) is CommandJoystick else 4
+                                )
+                                * DriveConstants.MAX_ANGULAR_VELOCITY
+                                * self._current_state
+                            )
+                        )
+                    )
+                )
+            )
+
+
+
         self._driver.rightBumper().onTrue(
             cmd.runOnce(
                 lambda: (
@@ -123,14 +155,6 @@ class Controller:
                     intake_sub=container.intake,
                     position=IntakePositions.DEPLOYED,
                 )
-            )
-
-        if RobotFeatures.HAS_VISION:
-            # NEED TO ADD AUTO-ALIGN
-            # self._driver.x().onTrue(container.vision.auto_align_command)
-            # self._driver.x().onTrue(cmd.runOnce(lambda: container.vision.auto_align()))
-            self._driver.x().onTrue(
-                cmd.runOnce(lambda: container.vision.auto_align_rotation())
             )
 
         if (

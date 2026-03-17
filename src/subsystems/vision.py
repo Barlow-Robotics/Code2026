@@ -20,6 +20,7 @@ from constants import SI, VisionConstants, RobotFeatures
 from subsystems import Drivetrain
 from commands2 import Subsystem
 from commands import FollowTrajectoryCommand
+from phoenix6 import swerve
 
 from pykit.logger import Logger as PyKitLogger
 from utils.profiler import LoopTimer
@@ -633,6 +634,30 @@ class Vision(Subsystem):
     def simulation_periodic(self):
         if self._vision_sim is not None:
             self._vision_sim.update(self.drive_sub.get_pose())
+
+    def auto_align_modify_request(self, swerve_request: swerve.requests.FieldCentric):
+        hasTarget: bool = self.targetSub.get()
+        if not hasTarget:
+            return swerve_request
+
+        angle: float = self.angleSub.get()
+
+        # Target heading: current heading + vision offset (negated for FRC convention)
+        current_heading = self.drive_sub.get_pose().rotation()
+        target_direction = current_heading + Rotation2d(-angle * SI.degrees_to_radians)
+
+        # Take the driver's commanded speed magnitude and redirect it toward the target
+        speed = math.hypot(swerve_request.velocity_x, swerve_request.velocity_y)
+        target_angle = target_direction.radians()
+
+        return (
+            self.drive_sub.facing_angle
+            .with_velocity_x(speed * math.cos(target_angle))
+            .with_velocity_y(speed * math.sin(target_angle))
+            .with_target_direction(target_direction)
+        )
+
+
 
     def auto_align_rotation(self):
         hasTarget: bool = self.targetSub.get()
