@@ -159,7 +159,19 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )
         )
-        self.facing_angle.heading_controller.setPID(8, 0, 3)
+
+        self.heading_lock_movement = (
+            swerve.requests.FieldCentricFacingAngle()
+            .with_deadband(DriveConstants.MAX_TRANSLATIONAL_VELOCITY * 0.1)
+            .with_rotational_deadband(DriveConstants.MAX_ANGULAR_VELOCITY * 0.1)
+            .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
+        )
+
+        # Tune the heading PID (adjust kP to taste)
+        self.heading_lock_movement.heading_controller.setPID(10.0, 0.0, 0.0)
+        self.heading_lock_movement.heading_controller.enableContinuousInput(-math.pi, math.pi)
+
+        self.facing_angle.heading_controller.setPID(10.0, 0.0, 0.0)
 
         self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""
@@ -169,7 +181,8 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         self._steer_characterization = swerve.requests.SysIdSwerveSteerGains()
         self._rotation_characterization = swerve.requests.SysIdSwerveRotation()
         self.nt = ntcore.NetworkTableInstance.getDefault()
-
+        self.target_field_heading = 0
+        self.changeAng = False
         self._sys_id_routine_translation = SysIdRoutine(
             SysIdRoutine.Config(
                 # Use default ramp rate (1 V/s) and timeout (10 s)
@@ -298,7 +311,11 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
 
     def periodic(self):
         self._loop_timer.start()
-
+        if self.changeAng and DriverStation.isAutonomous():
+            self.set_control(
+                self.facing_angle.with_target_direction(self.target_field_heading)
+            )
+# 
         self.determine_turret_state()
         # Periodically try to apply the operator perspective.
         # If we haven't applied the operator perspective before, then we should apply it regardless of DS state.

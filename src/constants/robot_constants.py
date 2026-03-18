@@ -33,6 +33,7 @@ class RobotFeatures:
             cls.HAS_FEEDER = True
             cls.HAS_CPROFILE = False
             cls.TESTING = False
+            cls.HAS_TURRET_ANGLE = False
         else:
             cls.HAS_DRIVETRAIN = True
             cls.vision_camera_count = 4
@@ -44,6 +45,7 @@ class RobotFeatures:
             cls.HAS_FEEDER = True
             cls.HAS_CPROFILE = True
             cls.TESTING = False
+            cls.HAS_TURRET_ANGLE = False
 
 
 class MotorIDs:
@@ -53,7 +55,6 @@ class MotorIDs:
     motor_id_arm_leader = 51
     motor_id_arm_follower = 52
     motor_id_roller = 53
-    # 54 IS NOT used.
 
     # SPINDEX
     motor_id_motor_spindex = 55
@@ -67,6 +68,8 @@ class MotorIDs:
     motor_id_turret = 59
     motor_id_flywheel_left = 60
     motor_id_flywheel_right = 61
+    cancoder_id_hood = 54
+
 
 
 class IntakeConstants:
@@ -114,7 +117,7 @@ class TurretConstants:
 
     SHOOTER_HEIGHT_FOR_FUEL_IN = 20.57
     SHOOTER_HEIGHT_FOR_FUEL_M = 20.57 * SI.inches_to_meters
-    SHOOTER_SET_VELOCITY_CONSTANT = 9.5
+    SHOOTER_SET_VELOCITY_CONSTANT = 11
 
 
 class SpindexConstants:

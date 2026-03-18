@@ -30,23 +30,6 @@ class ShootCommand(Command):
     def initialize(self):
         self._feeding = False
         self.shooter.set_velocity(ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT)
-        if not self.driveSub.allow_center_auto_align:
-            self.turret.reset_target_hood_and_turret()
-        else:
-            pose = self.driveSub.get_pose()
-            target_pose = pose.nearest(
-                [
-                    Pose2d(
-                        CustomPoints.TARGET_POSE_SHOOT.toTranslation2d(), Rotation2d(0)
-                    ),
-                    Pose2d(
-                        CustomPoints.TARGET_POSE_SHOOT_OTHER_SIDE.toTranslation2d(),
-                        Rotation2d(0),
-                    ),
-                ]
-            )
-            target_pose = Translation3d(target_pose.X(), target_pose.Y(), 0)
-            self.turret.set_target_hood_and_turret(shooting_location=target_pose)
 
     def execute(self):
         if not self.driveSub.allow_center_auto_align:

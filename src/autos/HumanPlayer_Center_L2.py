@@ -47,7 +47,7 @@ class HP_Center_L2:
             ),
             ParallelDeadlineGroup(
                 self.container.shoot_command_factory().withTimeout(5),
-                self.container.drivetrain.hold_position_command(),
+                # self.container.drivetrain.hold_position_command(),
             ),
             ParallelDeadlineGroup(
                 AutoBuilder.followPath(self.paths[3]),
@@ -70,7 +70,7 @@ class HP_Center_L2:
             ),
             ParallelDeadlineGroup(
                 self.container.shoot_command_factory().withTimeout(5),
-                self.container.drivetrain.hold_position_command(),
+                # self.container.drivetrain.hold_position_command(),
             ),
         )
 
