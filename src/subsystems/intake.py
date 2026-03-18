@@ -79,7 +79,7 @@ class Intake(commands2.Subsystem):
             gear_ratio=IntakeConstants.ARM_GEARING,
         )
 
-        INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=True)
+        INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=False)
         INTAKE_CONFIG_ARM._apply_settings(self.motor_arm_leader, inverted=False)
         INTAKE_CONFIG_ARM._apply_settings(self.motor_arm_follower, inverted=True)
 

@@ -29,7 +29,7 @@ class Spindex(commands2.Subsystem):
 
         self.motor_spindex: TalonFX = TalonFX(MotorIDs.motor_id_motor_spindex, "*")
 
-        SPINDEX_CONFIG._apply_settings(self.motor_spindex, inverted=False)
+        SPINDEX_CONFIG._apply_settings(self.motor_spindex, inverted=True)
 
         self.target_velocity_spindex = -1
 

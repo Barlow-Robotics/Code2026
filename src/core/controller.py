@@ -129,8 +129,9 @@ class Controller:
                 # )
 
                 controller.leftTrigger().whileTrue(
-                    lambda: container.spindex.move(0.1)
+                    cmd.runOnce(lambda: container.spindex.move(9))
                 )
+                controller.a().whileTrue(cmd.runOnce(lambda: container.intake.set_velocity(1)))
                 # self.intake_sub.set_velocity(overall_velocity)
 
 
