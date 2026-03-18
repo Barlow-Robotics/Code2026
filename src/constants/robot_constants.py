@@ -28,8 +28,8 @@ class RobotFeatures:
             cls.vision_camera_count = 2
             cls.HAS_SHOOTER = False
             cls.HAS_TURRET = False
-            cls.HAS_INTAKE = False
-            cls.HAS_SPINDEX = False
+            cls.HAS_INTAKE = True
+            cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
             cls.HAS_CPROFILE = False
             cls.TESTING = False

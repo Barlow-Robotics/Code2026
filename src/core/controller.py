@@ -116,30 +116,39 @@ class Controller:
 
         # Subsystem button bindings
         if RobotFeatures.HAS_INTAKE:
-            for controller in [self._driver, self._operator]:
-                controller.leftStick().onTrue(
-                    IntakePositionCommand(
-                        drive_sub=container.drivetrain,
-                        intake_sub=container.intake,
-                        position=IntakePositions.DEPLOYED,
-                    )
-                )
+            for controller in [self._driver]:
+                # controller.leftStick().onTrue(
+                #     IntakePositionCommand(
+                #         drive_sub=container.drivetrain,
+                #         intake_sub=container.intake,
+                #         position=IntakePositions.DEPLOYED,
+                #     )
+                # )
+                # controller.leftTrigger().whileTrue(
+                #     lambda: container.intake.set_velocity(0.1)
+                # )
 
-                controller.a().onTrue(
-                    IntakePositionCommand(
-                        drive_sub=container.drivetrain,
-                        intake_sub=container.intake,
-                        position=IntakePositions.HOME,
-                    )
+                controller.leftTrigger().whileTrue(
+                    lambda: container.spindex.move(0.1)
                 )
+                # self.intake_sub.set_velocity(overall_velocity)
 
-                controller.y().onTrue(
-                    IntakePositionCommand(
-                        drive_sub=container.drivetrain,
-                        intake_sub=container.intake,
-                        position=IntakePositions.DEPLOYED,
-                    )
-                )
+
+                # controller.a().onTrue(
+                #     IntakePositionCommand(
+                #         drive_sub=container.drivetrain,
+                #         intake_sub=container.intake,
+                #         position=IntakePositions.HOME,
+                #     )
+                # )
+
+                # controller.y().onTrue(
+                #     IntakePositionCommand(
+                #         drive_sub=container.drivetrain,
+                #         intake_sub=container.intake,
+                #         position=IntakePositions.DEPLOYED,
+                #     )
+                # )
 
         for controller in [self._driver, self._operator]:
             controller.button(8).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
