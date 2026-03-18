@@ -23,6 +23,9 @@ from phoenix6.hardware import TalonFX
 from utils import generateSysIdProfile, get_red_pose
 from utils.profiler import LoopTimer
 from wpimath.geometry import Rotation2d
+from phoenix6.hardware import TalonFX, CANcoder
+from phoenix6.configs import CANcoderConfiguration
+from phoenix6.signals import SensorDirectionValue
 
 
 class Turret(Subsystem):
@@ -72,6 +75,16 @@ class Turret(Subsystem):
 
         self.hood_motor = TalonFX(MotorIDs.motor_id_hood, "*")
         self.turret_motor = TalonFX(MotorIDs.motor_id_turret, "*")
+        self.hood_cancoder = CANcoder(MotorIDs.cancoder_id_hood, "*")
+
+        hood_cancoder_config = CANcoderConfiguration()
+        hood_cancoder_config.magnet_sensor.sensor_direction = (
+            SensorDirectionValue.COUNTER_CLOCKWISE_POSITIVE
+        )
+
+        hood_cancoder_config.magnet_sensor.magnet_offset = 0.0
+        self.hood_cancoder.configurator.apply(hood_cancoder_config)
+
 
         HOOD_MOTOR_CONFIG._apply_settings(self.hood_motor, inverted=False)
         TURRET_MOTOR_CONFIG._apply_settings(self.turret_motor, inverted=False)
@@ -131,7 +144,7 @@ class Turret(Subsystem):
         if not RobotFeatures.HAS_TURRET_ANGLE:
             current_robot_yaw_deg = self.driveSub.get_rotation().degrees()
             self.driveSub.target_field_heading = Rotation2d.fromDegrees(current_robot_yaw_deg - angle_deg)
-            self.driveSub.changeAng =True
+            self.driveSub.changeAng = True
 
             print("SET_ANGLE_TURRET")
         else:
@@ -156,7 +169,11 @@ class Turret(Subsystem):
         self.set_angle_hood(0)
         self.clear_robot_heading_lock()
         return 0, 0, 0
-
+    
+    def get_actual_hood_angle_cancoder(self) -> float:
+        """Returns the absolute hood angle in degrees from the CANcoder."""
+        return float(self.hood_cancoder.get_absolute_position().value) * SI.rotations_to_degrees
+    
     def set_target_hood_and_turret(self, shooting_location=Hub.TOP_CENTER_POINT):
         v_fixed, hood_angle_deg, turret_yaw_deg = self._optimal_angle_calc(
             TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location
@@ -226,6 +243,10 @@ class Turret(Subsystem):
         PyKitLogger.recordOutput(
             "Turret/turret_motor_current",
             float(self.turret_motor.get_stator_current().value_as_double),
+        )
+        PyKitLogger.recordOutput(
+            "Turret/actual_hood_angle_cancoder",
+            self.get_actual_hood_angle_cancoder(),
         )
 
         self._loop_timer.stop()
