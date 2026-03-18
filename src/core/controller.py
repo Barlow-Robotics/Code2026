@@ -144,21 +144,6 @@ class Controller:
                         position=IntakePositions.DEPLOYED,
                     )
                 )
-                self._test_controller.x().onTrue(
-                    cmd.runOnce(lambda: container.intake.set_velocity(0.1))
-                ).onFalse(
-                    cmd.runOnce(lambda: container.intake.stop())
-                )
-
-                self._test_controller.y().onTrue(
-                    cmd.runOnce(lambda: container.spindex.move(9))
-                ).onFalse(
-                    cmd.runOnce(lambda: container.spindex.stop())
-                )
-                # controller.a().whileTrue(cmd.runOnce(lambda: container.intake.set_velocity(1)))
-                # self.intake_sub.set_velocity(overall_velocity)
-
-
                 controller.a().onTrue(
                     IntakePositionCommand(
                         drive_sub=container.drivetrain,
@@ -166,6 +151,48 @@ class Controller:
                         position=IntakePositions.HOME,
                     )
                 )
+
+                self._test_controller.x().onTrue(
+                    cmd.runOnce(lambda: container.intake.set_velocity(0.1))
+                ).onFalse(
+                    cmd.runOnce(lambda: container.intake.stop())
+                )
+
+                self._test_controller.leftBumper().onTrue(
+                    cmd.runOnce(lambda: container.intake.go_to_position(IntakePositions.DEPLOYED))
+                )
+                self._test_controller.rightBumper().onTrue(
+                    cmd.runOnce(lambda: container.intake.go_to_position(IntakePositions.HOME))
+                )
+
+
+                self._test_controller.y().onTrue(
+                    cmd.runOnce(lambda: container.spindex.move(9))
+                ).onFalse(
+                    cmd.runOnce(lambda: container.spindex.stop())
+                )
+
+                self._test_controller.rightTrigger().onTrue(
+                    cmd.runOnce(lambda: container.shooter.set_velocity(0.5))
+                ).onFalse(
+                    cmd.runOnce(lambda: container.shooter.set_velocity(0))
+                )
+
+                self._test_controller.leftTrigger().onTrue(
+                    cmd.runOnce(lambda: container.turret.set_angle_hood(5))
+                ).onFalse(
+                    cmd.runOnce(lambda: container.turret.set_angle_hood(0))
+                )
+
+
+
+
+
+
+                # controller.a().whileTrue(cmd.runOnce(lambda: container.intake.set_velocity(1)))
+                # self.intake_sub.set_velocity(overall_velocity)
+
+
 
                 # controller.y().onTrue(
                 #     IntakePositionCommand(
