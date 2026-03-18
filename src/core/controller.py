@@ -39,23 +39,41 @@ class Controller:
         container.drivetrain.setDefaultCommand(
             container.drivetrain.apply_request(
                 lambda: (
-                    container.drivetrain.movement.with_velocity_x(
-                        -self._driver.getRawAxis(1)
-                        * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                        * self._current_state
-                    )
-                    .with_velocity_y(
-                        -self._driver.getRawAxis(0)
-                        * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                        * self._current_state
-                    )
-                    .with_rotational_rate(
-                        -self._driver.getRawAxis(
-                            2 if type(self._driver) is CommandJoystick else 4
+                    # --- Normal joystick rotation mode ---
+                    container.drivetrain.movement
+                        .with_velocity_x(
+                            -self._driver.getRawAxis(1)
+                            * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                            * self._current_state
                         )
-                        * DriveConstants.MAX_ANGULAR_VELOCITY
-                        * self._current_state
-                    )
+                        .with_velocity_y(
+                            -self._driver.getRawAxis(0)
+                            * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                            * self._current_state
+                        )
+                        .with_rotational_rate(
+                            -self._driver.getRawAxis(
+                                2 if type(self._driver) is CommandJoystick else 4
+                            )
+                            * DriveConstants.MAX_ANGULAR_VELOCITY
+                            * self._current_state
+                        )
+                ) if container.drivetrain.target_field_heading == 0 else (
+                    # --- Snap-to-angle mode ---
+                    container.drivetrain.facing_angle
+                        .with_velocity_x(
+                            -self._driver.getRawAxis(1)
+                            * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                            * self._current_state
+                        )
+                        .with_velocity_y(
+                            -self._driver.getRawAxis(0)
+                            * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+                            * self._current_state
+                        )
+                        .with_target_direction(
+                            container.drivetrain.target_field_heading  # Rotation2d
+                        )
                 )
             )
         )
@@ -124,14 +142,13 @@ class Controller:
                 #         position=IntakePositions.DEPLOYED,
                 #     )
                 # )
-                # controller.leftTrigger().whileTrue(
-                #     lambda: container.intake.set_velocity(0.1)
-                # )
-
-                controller.leftTrigger().whileTrue(
-                    cmd.runOnce(lambda: container.spindex.move(9))
+                controller.button(3).whileTrue(
+                    cmd.runOnce(lambda: (container.intake.set_velocity(1)))
                 )
-                controller.a().whileTrue(cmd.runOnce(lambda: container.intake.set_velocity(1)))
+
+                # controller.leftTrigger().whileTrue(
+                #     lambda: container.spindex.move(0.1)
+                # )
                 # self.intake_sub.set_velocity(overall_velocity)
 
 
@@ -170,7 +187,7 @@ class Controller:
             and RobotFeatures.HAS_SPINDEX
         ):
             for controller in [self._driver, self._operator]:
-                controller.rightTrigger().whileTrue(
+                controller.button(1).whileTrue(
                     ShootCommand(
                         container.drivetrain,
                         container.shooter,
