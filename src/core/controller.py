@@ -33,6 +33,8 @@ class Controller:
     def __init__(self, container: "RobotContainer"):
         self._operator = CommandXboxController(self._OPERATOR_PORT)
         self._driver = CommandXboxController(self._DRIVER_PORT)
+        self._test_controller = CommandXboxController(3)
+
         self._current_state = StartingState.NORMAL.value
         # Drivetrain default command (field-centric drive)
         # Note that X is forward and Y is left per WPILib convention.
@@ -117,31 +119,35 @@ class Controller:
         # Subsystem button bindings
         if RobotFeatures.HAS_INTAKE:
             for controller in [self._driver]:
-                # controller.leftStick().onTrue(
-                #     IntakePositionCommand(
-                #         drive_sub=container.drivetrain,
-                #         intake_sub=container.intake,
-                #         position=IntakePositions.DEPLOYED,
-                #     )
-                # )
-                # controller.leftTrigger().whileTrue(
-                #     lambda: container.intake.set_velocity(0.1)
-                # )
-
-                controller.leftTrigger().whileTrue(
-                    cmd.runOnce(lambda: container.spindex.move(9))
+                controller.b().onTrue(
+                    IntakePositionCommand(
+                        drive_sub=container.drivetrain,
+                        intake_sub=container.intake,
+                        position=IntakePositions.DEPLOYED,
+                    )
                 )
-                controller.a().whileTrue(cmd.runOnce(lambda: container.intake.set_velocity(1)))
+                self._test_controller.x().onTrue(
+                    cmd.runOnce(lambda: container.intake.set_velocity(0.1))
+                ).onFalse(
+                    cmd.runOnce(lambda: container.intake.stop())
+                )
+
+                self._test_controller.y().onTrue(
+                    cmd.runOnce(lambda: container.spindex.move(9))
+                ).onFalse(
+                    cmd.runOnce(lambda: container.spindex.stop())
+                )
+                # controller.a().whileTrue(cmd.runOnce(lambda: container.intake.set_velocity(1)))
                 # self.intake_sub.set_velocity(overall_velocity)
 
 
-                # controller.a().onTrue(
-                #     IntakePositionCommand(
-                #         drive_sub=container.drivetrain,
-                #         intake_sub=container.intake,
-                #         position=IntakePositions.HOME,
-                #     )
-                # )
+                controller.a().onTrue(
+                    IntakePositionCommand(
+                        drive_sub=container.drivetrain,
+                        intake_sub=container.intake,
+                        position=IntakePositions.HOME,
+                    )
+                )
 
                 # controller.y().onTrue(
                 #     IntakePositionCommand(

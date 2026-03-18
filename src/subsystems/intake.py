@@ -147,9 +147,9 @@ class Intake(commands2.Subsystem):
         self.motor_arm_leader.set_control(
             self._motion_magic_position_voltage_arm_leader.with_position(arm_rot)
         )
-        self.motor_arm_follower.set_control(
-            self._motion_magic_position_voltage_arm_follower.with_position(arm_rot)
-        )
+        # self.motor_arm_follower.set_control(
+        #     self._motion_magic_position_voltage_arm_follower.with_position(arm_rot)
+        # )
 
         if position == IntakePositions.DEPLOYED:
             self.set_velocity(current_velocity)
