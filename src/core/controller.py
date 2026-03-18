@@ -72,7 +72,7 @@ class Controller:
                             * self._current_state
                         )
                         .with_target_direction(
-                            container.drivetrain.target_field_heading  # Rotation2d
+                            container.drivetrain.target_field_heading 
                         )
                 )
             )

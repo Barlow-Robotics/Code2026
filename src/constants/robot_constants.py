@@ -117,7 +117,7 @@ class TurretConstants:
 
     SHOOTER_HEIGHT_FOR_FUEL_IN = 20.57
     SHOOTER_HEIGHT_FOR_FUEL_M = 20.57 * SI.inches_to_meters
-    SHOOTER_SET_VELOCITY_CONSTANT = 9.5
+    SHOOTER_SET_VELOCITY_CONSTANT = 11
 
 
 class SpindexConstants:
