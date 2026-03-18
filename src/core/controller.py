@@ -58,7 +58,7 @@ class Controller:
                             * DriveConstants.MAX_ANGULAR_VELOCITY
                             * self._current_state
                         )
-                ) if container.drivetrain.target_field_heading == 0 else (
+                ) if container.drivetrain.changeAng == False else (
                     # --- Snap-to-angle mode ---
                     container.drivetrain.facing_angle
                         .with_velocity_x(

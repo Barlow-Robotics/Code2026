@@ -163,7 +163,7 @@ class Turret(Subsystem):
 
     def clear_robot_heading_lock(self):
         self.driveSub.changeAng = False
-        self.target_robot_heading = 0
+        self.driveSub.target_field_heading = 0
 
     def reset_target_hood_and_turret(self):
         self.set_angle_hood(0)
