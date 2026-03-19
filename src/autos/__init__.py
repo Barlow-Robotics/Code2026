@@ -10,3 +10,4 @@ from .HumanPlayer_Center_L2 import HP_Center_L2 as HP_Center_L2
 from .HumanPlayer_Center_L2_autoAlign import (
     HP_Center_L2_AutoAlign as HP_Center_L2_AutoAlign,
 )
+from .Simple_Path import Simple as Simple
