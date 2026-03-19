@@ -34,8 +34,8 @@ class Shooter(Subsystem):
         leader_config.smartCurrentLimit(80, freeLimit=5700)  # set to 5700 for max
 
         leader_config.closedLoop.setFeedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(
-            0.000, 0.0, 0.0
-        ).velocityFF(0.00174895).outputRange(-1, 1)
+            0.0000, 0.0, 0.0000
+        ).velocityFF(0.0019).outputRange(-1, 1)
 
         leader_config.closedLoop.maxMotion.maxVelocity(5700).maxAcceleration(
             10000

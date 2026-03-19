@@ -18,6 +18,7 @@ from utils import TalonConfigFX, generateSysIdProfile, IntakePositions
 @dataclass
 class IntakeCommandTelemetry:
     target_position: str
+    
     commanded_velocity_ft_per_sec: float
     converted_velocity_rps: float
     stop_requested: bool
@@ -26,8 +27,11 @@ class IntakeCommandTelemetry:
 @dataclass
 class IntakeTelemetry:
     arm_position: float
+    arm_position_follower: float
     arm_target_position: float
-    # arm_supply_current: float
+    # follower_voltage: float
+    # leader_voltage: float
+    # # arm_supply_current: float
     # arm_stator_current: float
     roller_velocity: float
     # roller_supply_current: float
@@ -71,10 +75,12 @@ class Intake(commands2.Subsystem):
             gear_ratio=IntakeConstants.ROLLER_GEARING,
         )
         INTAKE_CONFIG_ARM = TalonConfigFX(
-            kP=1,
+            kP=0,
             kI=0,
             kD=0,
-            kV=0.0016,
+            kV=0.03,
+            kG=0.8,
+            kS=0.1,
             brake_mode=True,
             gear_ratio=IntakeConstants.ARM_GEARING,
         )
@@ -82,6 +88,7 @@ class Intake(commands2.Subsystem):
         INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=False)
         INTAKE_CONFIG_ARM._apply_settings(self.motor_arm_leader, inverted=False)
         INTAKE_CONFIG_ARM._apply_settings(self.motor_arm_follower, inverted=True)
+
 
         self._motion_magic_velocity_voltage_roller = (
             controls.MotionMagicVelocityVoltage(0, enable_foc=MotorIDs.foc_active)
@@ -179,6 +186,7 @@ class Intake(commands2.Subsystem):
             "Intake/Telemetry",
             IntakeTelemetry(
                 arm_position=float(self.motor_arm_leader.get_position().value),
+                arm_position_follower=float(self.motor_arm_follower.get_position().value),
                 arm_target_position=float(self.target_rot),
                 # arm_supply_current=float(self.motor_arm.get_supply_current().value),
                 # arm_stator_current=float(self.motor_arm.get_stator_current().value),
@@ -199,6 +207,12 @@ class Intake(commands2.Subsystem):
                 converted_velocity_rps=self._converted_velocity_rps,
                 stop_requested=self._stop_requested,
             ),
+        )
+        PyKitLogger.recordOutput(
+            "Intake/Volt/Leader", self.motor_arm_leader.get_motor_voltage().value
+        )
+        PyKitLogger.recordOutput(
+            "Intake/Volt/Follower", self.motor_arm_follower.get_motor_voltage().value
         )
 
         self._loop_timer.stop()

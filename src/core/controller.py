@@ -180,10 +180,15 @@ class Controller:
                 )
 
                 self._test_controller.leftTrigger().onTrue(
-                    cmd.runOnce(lambda: container.turret.set_angle_hood(60))
+                    cmd.runOnce(lambda: container.turret.set_angle_hood(25))
                 ).onFalse(
                     cmd.runOnce(lambda: container.turret.set_angle_hood(0))
                 )
+
+
+                # self._test_controller.b().onTrue(
+
+                # )
 
 
 

@@ -25,7 +25,7 @@ class RobotFeatures:
         if RobotBase.isReal():
             cls.HAS_DRIVETRAIN = True
             cls.HAS_VISION = True
-            cls.vision_camera_count = 2
+            cls.vision_camera_count = 3
             cls.HAS_SHOOTER = True
             cls.HAS_TURRET = True
             cls.HAS_INTAKE = True
@@ -87,7 +87,7 @@ class IntakeConstants:
     ARM_MOI = 0.01
     ARM_HOME_ROTATIONS = 0
     ARM_DEPLOYED_LENGTH_IN = 12.191
-    ARM_DEPLOYED_ROTATIONS = ARM_DEPLOYED_LENGTH_IN / (58 / 20 * math.pi) / 4
+    ARM_DEPLOYED_ROTATIONS = 20.59
 
     INTAKE_VELOCITY_CONSTANT = 2.6*6*2
       # Amplified from robot speed
