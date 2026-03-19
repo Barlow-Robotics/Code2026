@@ -17,7 +17,7 @@ from utils import TalonConfigFX, generateSysIdProfile, IntakePositions
 
 @dataclass
 class IntakeCommandTelemetry:
-    target_position: float
+    target_position: str
     commanded_velocity_ft_per_sec: float
     converted_velocity_rps: float
     stop_requested: bool
@@ -71,7 +71,7 @@ class Intake(commands2.Subsystem):
             gear_ratio=IntakeConstants.ROLLER_GEARING,
         )
         INTAKE_CONFIG_ARM = TalonConfigFX(
-            kP=0,
+            kP=1,
             kI=0,
             kD=0,
             kV=0.0016,
