@@ -463,9 +463,3 @@ class Turret(Subsystem):
 
     def sysIdDynamicHood(self, direction: SysIdRoutine.Direction):
         return self.sys_id_routine_hood.dynamic(direction)
-
-    def sysIdQuasistaticTurret(self, direction: SysIdRoutine.Direction):
-        return self.sys_id_routine_turret.quasistatic(direction)
-
-    def sysIdDynamicTurret(self, direction: SysIdRoutine.Direction):
-        return self.sys_id_routine_turret.dynamic(direction)

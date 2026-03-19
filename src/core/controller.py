@@ -15,6 +15,7 @@ from commands import IntakePositionCommand, ShootCommand
 from commands.throw_feeder_command import ThrowFeederCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
+from commands2.sysid import SysIdRoutine
 
 if TYPE_CHECKING:
     from core import RobotContainer
@@ -183,6 +184,12 @@ class Controller:
                 ).onFalse(
                     cmd.runOnce(lambda: container.turret.set_angle_hood(0))
                 )
+
+                self._test_controller.button(8).onTrue(
+                    cmd.runOnce(lambda: container.turret.sysIdQuasistaticHood(SysIdRoutine.Direction.kForward))
+                )#.onFalse(
+                    # cmd.runOnce(lambda: container.turret.set_angle_turret(0))
+                # )
 
 
 
