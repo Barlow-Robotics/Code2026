@@ -75,12 +75,12 @@ class Intake(commands2.Subsystem):
             gear_ratio=IntakeConstants.ROLLER_GEARING,
         )
         INTAKE_CONFIG_ARM = TalonConfigFX(
-            kP=0,
+            kP=0.1,
             kI=0,
             kD=0,
             kV=0.03,
-            kG=0.8,
-            kS=0.1,
+            kG=-0.17,
+            kS=0.3,
             brake_mode=True,
             gear_ratio=IntakeConstants.ARM_GEARING,
         )
