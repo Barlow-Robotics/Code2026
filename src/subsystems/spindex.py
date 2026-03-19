@@ -15,10 +15,10 @@ class Spindex(commands2.Subsystem):
         super().__init__()
         self._loop_timer = LoopTimer("Spindex")
         SPINDEX_CONFIG = TalonConfigFX(
-            kP=0.11,
+            kP=0,
             kI=0,
             kD=0,
-            kV=0,
+            kV=0.0016,
             brake_mode=True,
             gear_ratio=SpindexConstants.GEARING,
         )

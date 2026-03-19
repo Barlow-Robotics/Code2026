@@ -18,14 +18,16 @@ from constants import TurretConstants
 from constants import SI
 from pykit.logger import Logger as PyKitLogger
 
-from utils import TalonConfigFX
-from phoenix6.hardware import TalonFX
+from utils import TalonConfigFXS
+from phoenix6.hardware import TalonFXS
 from utils import generateSysIdProfile, get_red_pose
 from utils.profiler import LoopTimer
 from wpimath.geometry import Rotation2d
-from phoenix6.hardware import TalonFX, CANcoder
+from phoenix6.hardware import CANcoder
 from phoenix6.configs import CANcoderConfiguration
 from phoenix6.signals import SensorDirectionValue
+
+from utils.talon_config_FXS import TalonConfigFXS
 
 
 class Turret(Subsystem):
@@ -34,16 +36,16 @@ class Turret(Subsystem):
         self._loop_timer = LoopTimer("Turret")
         self.driveSub = driveSub
 
-        HOOD_MOTOR_CONFIG = TalonConfigFX(
+        HOOD_MOTOR_CONFIG = TalonConfigFXS(
             kP=0.2,
             kI=0.0,
             kD=0,
-            kV=0,
+            kV=0.0016,
             brake_mode=True,
-            gear_ratio=TurretConstants.HOOD_GEARING,
+            # gear_ratio=TurretConstants.HOOD_GEARING,
         )
         if not RobotBase.isReal():
-            HOOD_MOTOR_CONFIG = TalonConfigFX(
+            HOOD_MOTOR_CONFIG = TalonConfigFXS(
                 kP=10,
                 kI=0,
                 kD=6,
@@ -53,7 +55,7 @@ class Turret(Subsystem):
             )
 
         if not RobotBase.isReal():
-            TURRET_MOTOR_CONFIG = TalonConfigFX(
+            TURRET_MOTOR_CONFIG = TalonConfigFXS(
                 kP=0.85,
                 kI=0,
                 kD=0.6,
@@ -64,7 +66,7 @@ class Turret(Subsystem):
                 gear_ratio=TurretConstants.TURRET_GEARING,
             )
         else:
-            TURRET_MOTOR_CONFIG = TalonConfigFX(
+            TURRET_MOTOR_CONFIG = TalonConfigFXS(
                 kP=0.2,
                 kI=0,
                 kD=0,
@@ -73,7 +75,7 @@ class Turret(Subsystem):
                 gear_ratio=TurretConstants.TURRET_GEARING,
             )
 
-        self.hood_motor = TalonFX(MotorIDs.motor_id_hood, "*")
+        self.hood_motor = TalonFXS(MotorIDs.motor_id_hood, "*")
         # self.turret_motor = TalonFX(MotorIDs.motor_id_turret, "*")
         self.hood_cancoder = CANcoder(MotorIDs.cancoder_id_hood, "*")
 
@@ -86,7 +88,7 @@ class Turret(Subsystem):
         self.hood_cancoder.configurator.apply(hood_cancoder_config)
 
 
-        HOOD_MOTOR_CONFIG._apply_settings(self.hood_motor, inverted=False)
+        HOOD_MOTOR_CONFIG._apply_settings(self.hood_motor, inverted=True)
         # TURRET_MOTOR_CONFIG._apply_settings(self.turret_motor, inverted=False)
 
         self._motion_magic_position_voltage_hood = controls.MotionMagicVoltage(
@@ -130,7 +132,7 @@ class Turret(Subsystem):
         self.target_hood_angle = angle_deg
         self.hood_motor.set_control(
             self._motion_magic_position_voltage_hood.with_position(
-                SI.degrees_to_rotations * angle_deg
+                SI.degrees_to_rotations * angle_deg *TurretConstants.HOOD_GEARING
             )
         )
 

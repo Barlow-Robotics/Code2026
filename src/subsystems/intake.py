@@ -63,18 +63,18 @@ class Intake(commands2.Subsystem):
         self.motor_arm_follower: TalonFX = TalonFX(MotorIDs.motor_id_arm_follower, "*")
 
         INTAKE_ROLLER = TalonConfigFX(
-            kP=0.11,
+            kP=0,
             kI=0,
             kD=0,
-            kV=0,
+            kV=0.0016,
             brake_mode=False,
             gear_ratio=IntakeConstants.ROLLER_GEARING,
         )
         INTAKE_CONFIG_ARM = TalonConfigFX(
-            kP=0.11,
+            kP=0,
             kI=0,
             kD=0,
-            kV=0,
+            kV=0.0016,
             brake_mode=True,
             gear_ratio=IntakeConstants.ARM_GEARING,
         )
@@ -147,9 +147,9 @@ class Intake(commands2.Subsystem):
         self.motor_arm_leader.set_control(
             self._motion_magic_position_voltage_arm_leader.with_position(arm_rot)
         )
-        # self.motor_arm_follower.set_control(
-        #     self._motion_magic_position_voltage_arm_follower.with_position(arm_rot)
-        # )
+        self.motor_arm_follower.set_control(
+            self._motion_magic_position_voltage_arm_follower.with_position(arm_rot)
+        )
 
         if position == IntakePositions.DEPLOYED:
             self.set_velocity(current_velocity)
