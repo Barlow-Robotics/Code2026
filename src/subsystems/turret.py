@@ -26,6 +26,8 @@ from wpimath.geometry import Rotation2d
 from phoenix6.hardware import CANcoder
 from phoenix6.configs import CANcoderConfiguration
 from phoenix6.signals import SensorDirectionValue
+from phoenix6.configs import FeedbackConfigs
+from phoenix6.signals import FeedbackSensorSourceValue
 
 from utils.talon_config_FXS import TalonConfigFXS
 
@@ -84,11 +86,19 @@ class Turret(Subsystem):
             SensorDirectionValue.COUNTER_CLOCKWISE_POSITIVE
         )
 
-        hood_cancoder_config.magnet_sensor.magnet_offset = 0.0
+        hood_cancoder_config.magnet_sensor.magnet_offset = -0.4606
         self.hood_cancoder.configurator.apply(hood_cancoder_config)
 
+        feedback_cfg = FeedbackConfigs()
 
+        feedback_cfg.feedback_sensor_source = FeedbackSensorSourceValue.FUSED_CANCODER
+        feedback_cfg.feedback_remote_sensor_id = MotorIDs.cancoder_id_hood
+
+        feedback_cfg.sensor_to_mechanism_ratio = 11.6
+        feedback_cfg.rotor_to_sensor_ratio = TurretConstants.HOOD_GEARING
         HOOD_MOTOR_CONFIG._apply_settings(self.hood_motor, inverted=True)
+        self.hood_motor.configurator.apply(feedback_cfg)
+
         # TURRET_MOTOR_CONFIG._apply_settings(self.turret_motor, inverted=False)
 
         self._motion_magic_position_voltage_hood = controls.MotionMagicVoltage(
@@ -132,7 +142,7 @@ class Turret(Subsystem):
         self.target_hood_angle = angle_deg
         self.hood_motor.set_control(
             self._motion_magic_position_voltage_hood.with_position(
-                SI.degrees_to_rotations * angle_deg *TurretConstants.HOOD_GEARING
+                SI.degrees_to_rotations * angle_deg
             )
         )
 
@@ -251,11 +261,11 @@ class Turret(Subsystem):
             self.get_actual_hood_angle_cancoder(),
         )
 
-        PyKitLogger.recordOutput(
-            "Turret/hood_angle",
-            float(self.hood_motor.get_position().value_as_double),
+        # PyKitLogger.recordOutput(
+        #     "Turret/hood_angle",
+        #     float(self.hood_motor.get_position().value_as_double),
 
-        )
+        # )
 
 
         

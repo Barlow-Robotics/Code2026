@@ -185,11 +185,7 @@ class Controller:
                     cmd.runOnce(lambda: container.turret.set_angle_hood(0))
                 )
 
-                self._test_controller.button(8).onTrue(
-                    cmd.runOnce(lambda: container.turret.sysIdQuasistaticHood(SysIdRoutine.Direction.kForward))
-                )#.onFalse(
-                    # cmd.runOnce(lambda: container.turret.set_angle_turret(0))
-                # )
+
 
 
 
