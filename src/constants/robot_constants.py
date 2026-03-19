@@ -26,7 +26,7 @@ class RobotFeatures:
             cls.HAS_DRIVETRAIN = True
             cls.HAS_VISION = True
             cls.vision_camera_count = 2
-            cls.HAS_SHOOTER = False
+            cls.HAS_SHOOTER = True
             cls.HAS_TURRET = True
             cls.HAS_INTAKE = True
             cls.HAS_SPINDEX = True

@@ -34,7 +34,7 @@ class Shooter(Subsystem):
         leader_config.smartCurrentLimit(80, freeLimit=5700)  # set to 5700 for max
 
         leader_config.closedLoop.setFeedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(
-            0.002, 0.0, 0.0
+            0.000, 0.0, 0.0
         ).velocityFF(0.00174895).outputRange(-1, 1)
 
         leader_config.closedLoop.maxMotion.maxVelocity(5700).maxAcceleration(
@@ -53,6 +53,7 @@ class Shooter(Subsystem):
         follower_config.smartCurrentLimit(80, freeLimit=5700)  # set to 5700 for max
 
         follower_config.follow(self.flywheel_motor_left_leader, True)
+        follower_config.inverted(True)
 
         self.flywheel_motor_right_follower.configure(
             follower_config,

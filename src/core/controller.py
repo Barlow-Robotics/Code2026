@@ -173,7 +173,7 @@ class Controller:
                 )
 
                 self._test_controller.rightTrigger().onTrue(
-                    cmd.runOnce(lambda: container.shooter.set_velocity(0.5))
+                    cmd.runOnce(lambda: container.shooter.set_velocity(11))
                 ).onFalse(
                     cmd.runOnce(lambda: container.shooter.set_velocity(0))
                 )

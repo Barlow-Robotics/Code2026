@@ -68,7 +68,7 @@ class Turret(Subsystem):
                 kP=0.2,
                 kI=0,
                 kD=0,
-                kA=0,
+                kV=0,
                 brake_mode=True,
                 gear_ratio=TurretConstants.TURRET_GEARING,
             )
@@ -248,6 +248,15 @@ class Turret(Subsystem):
             "Turret/actual_hood_angle_cancoder",
             self.get_actual_hood_angle_cancoder(),
         )
+
+        PyKitLogger.recordOutput(
+            "Turret/hood_angle",
+            float(self.hood_motor.get_position().value_as_double),
+
+        )
+
+
+        
 
         self._loop_timer.stop()
 
