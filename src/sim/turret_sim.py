@@ -11,13 +11,13 @@ class TurretSim:
             TurretConstants.HOOD_GEARING,
             TurretConstants.HOOD_MOI,
         )
-        self._turret_motor = FlywheelMotorSim(
-            turret.turret_motor,
-            TurretConstants.TURRET_MOTOR,
-            TurretConstants.TURRET_GEARING,
-            TurretConstants.TURRET_MOI,
-        )
+        # self._turret_motor = FlywheelMotorSim(
+        #     turret.turret_motor,
+        #     TurretConstants.TURRET_MOTOR,
+        #     TurretConstants.TURRET_GEARING,
+        #     TurretConstants.TURRET_MOI,
+        # )
 
     def update_sim(self, now: float, tm_diff: float) -> None:
         self._hood_motor.update(tm_diff)
-        self._turret_motor.update(tm_diff)
+        # self._turret_motor.update(tm_diff)

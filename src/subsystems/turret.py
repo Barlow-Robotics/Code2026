@@ -74,7 +74,7 @@ class Turret(Subsystem):
             )
 
         self.hood_motor = TalonFX(MotorIDs.motor_id_hood, "*")
-        self.turret_motor = TalonFX(MotorIDs.motor_id_turret, "*")
+        # self.turret_motor = TalonFX(MotorIDs.motor_id_turret, "*")
         self.hood_cancoder = CANcoder(MotorIDs.cancoder_id_hood, "*")
 
         hood_cancoder_config = CANcoderConfiguration()
@@ -87,7 +87,7 @@ class Turret(Subsystem):
 
 
         HOOD_MOTOR_CONFIG._apply_settings(self.hood_motor, inverted=False)
-        TURRET_MOTOR_CONFIG._apply_settings(self.turret_motor, inverted=False)
+        # TURRET_MOTOR_CONFIG._apply_settings(self.turret_motor, inverted=False)
 
         self._motion_magic_position_voltage_hood = controls.MotionMagicVoltage(
             0, enable_foc=MotorIDs.foc_active
@@ -119,9 +119,9 @@ class Turret(Subsystem):
         self.sys_id_routine_hood = generateSysIdProfile(
             self, self.hood_motor, name="Hood_Motor"
         )
-        self.sys_id_routine_turret = generateSysIdProfile(
-            self, self.turret_motor, name="Turret_Motor"
-        )
+        # self.sys_id_routine_turret = generateSysIdProfile(
+        #     self, self.turret_motor, name="Turret_Motor"
+        # )
         self.left_turret_limit_switch = DigitalInput(0)
         self.right_turret_limit_switch = DigitalInput(1)
         self.target_robot_heading: Rotation2d | None = None
@@ -188,15 +188,15 @@ class Turret(Subsystem):
         self.set_angle_turret(turret_yaw_deg)
         return v_fixed, hood_angle_deg, turret_yaw_deg
 
-    def get_actual_turret_yaw(self):
-        return float(self.turret_motor.get_position().value) * SI.rotations_to_degrees
+    # def get_actual_turret_yaw(self):
+    #     return float(self.turret_motor.get_position().value) * SI.rotations_to_degrees
 
     def periodic(self):
         self._loop_timer.start()
 
-        actual_turret_yaw = (
-            float(self.turret_motor.get_position().value) * SI.rotations_to_degrees
-        )
+        # actual_turret_yaw = (
+        #     float(self.turret_motor.get_position().value) * SI.rotations_to_degrees
+        # )
         actual_hood_angle = (
             float(self.hood_motor.get_position().value) * SI.rotations_to_degrees
         )
@@ -205,7 +205,7 @@ class Turret(Subsystem):
         robot_pose = self.driveSub.get_pose()
         if robot_pose is not None:
             self.base_ligament.setAngle(robot_pose.rotation().degrees())
-        self.turret_ligament.setAngle(actual_turret_yaw)
+        # self.turret_ligament.setAngle(actual_turret_yaw)
         # Hood angle controls turret length — 0° = min length, 90° = max length
         hood_fraction = max(0, min(actual_hood_angle, 90)) / 90.0
         self.turret_ligament.setLength(0.3 + hood_fraction * 0.9)
@@ -228,22 +228,22 @@ class Turret(Subsystem):
             "Turret/actual_hood_angle",
             float(self.hood_motor.get_position().value) * SI.rotations_to_degrees,
         )
-        PyKitLogger.recordOutput(
-            "Turret/actual_turret_yaw",
-            float(self.turret_motor.get_position().value) * SI.rotations_to_degrees,
-        )
+        # PyKitLogger.recordOutput(
+        #     "Turret/actual_turret_yaw",
+        #     float(self.turret_motor.get_position().value) * SI.rotations_to_degrees,
+        # )
         PyKitLogger.recordOutput(
             "Turret/hood_motor_voltage",
             float(self.hood_motor.get_motor_voltage().value_as_double),
         )
-        PyKitLogger.recordOutput(
-            "Turret/turret_motor_voltage",
-            float(self.turret_motor.get_motor_voltage().value_as_double),
-        )
-        PyKitLogger.recordOutput(
-            "Turret/turret_motor_current",
-            float(self.turret_motor.get_stator_current().value_as_double),
-        )
+        # PyKitLogger.recordOutput(
+        #     "Turret/turret_motor_voltage",
+        #     float(self.turret_motor.get_motor_voltage().value_as_double),
+        # )
+        # PyKitLogger.recordOutput(
+        #     "Turret/turret_motor_current",
+        #     float(self.turret_motor.get_stator_current().value_as_double),
+        # )
         PyKitLogger.recordOutput(
             "Turret/actual_hood_angle_cancoder",
             self.get_actual_hood_angle_cancoder(),
