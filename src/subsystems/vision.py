@@ -132,7 +132,6 @@ class Vision(Subsystem):
         self._auto_align_triggered: bool = False
         self._auto_align_starting_pose: Optional[Pose2d] = None
         self._auto_align_target_pose: Optional[Pose2d] = None
-        self.timer = Timer()
 
         self.tag_pose_cache = {}
         for i in range(1, 33):
@@ -170,16 +169,13 @@ class Vision(Subsystem):
             self.simulation_periodic()
 
         if not self.disabled_vision:
-            self.timer.start()
+            self._loop_timer.start()
 
             current_pose = self.drive_sub.get_pose()
             current_speeds = self.drive_sub.get_speeds()  # once for all cameras
             current_rotation = self.drive_sub.get_rotation()  # once for all cameras
 
             self._update_all_cameras(current_pose, current_speeds, current_rotation)
-            # print(self.timer.get())
-            self.timer.reset()
-            self.timer.stop()
 
         # self._total_detected_targets = float(len(self.get_all_detected_targets()))
 
@@ -254,7 +250,6 @@ class Vision(Subsystem):
 
         all_observations.sort(key=lambda o: o.timestamp)
         self._observations_per_cycle = float(len(all_observations))
-        self.timer.start()
 
         for obs in all_observations:
             self.drive_sub.add_vision_measurement(obs.pose, obs.timestamp, obs.std_devs)
