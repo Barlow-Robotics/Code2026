@@ -100,7 +100,7 @@ class Vision(Subsystem):
                 estimator=PhotonPoseEstimator(
                     field_layout, VisionConstants.FRONT_RIGHT_SWERVE_TO_ROBOT
                 ),
-                name="right_cam_swerve",
+                name="Right_Cam_Swerve",
                 robot_to_camera=VisionConstants.FRONT_RIGHT_SWERVE_TO_ROBOT,
             ),
             _CameraConfig(
@@ -108,7 +108,7 @@ class Vision(Subsystem):
                 estimator=PhotonPoseEstimator(
                     field_layout, VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT
                 ),
-                name="left_cam_swerve",
+                name="Left_Cam_Swerve",
                 robot_to_camera=VisionConstants.FRONT_LEFT_SWERVE_TO_ROBOT,
             ),
             _CameraConfig(
@@ -116,7 +116,7 @@ class Vision(Subsystem):
                 estimator=PhotonPoseEstimator(
                     field_layout, VisionConstants.BACK_RIGHT_SWERVE_TO_ROBOT
                 ),
-                name="back_right_swerve",
+                name="Back_Right_Swerve",
                 robot_to_camera=VisionConstants.BACK_RIGHT_SWERVE_TO_ROBOT,
             ),
         ]
@@ -192,39 +192,36 @@ class Vision(Subsystem):
         #     PyKitLogger.recordOutput("Vision/closest_april_tag", closest_tag)
 
         for stat_name, stat_key in [
-            ("front_left_swerve", "front_left"),
-            ("front_right_swerve", "front_right"),
-            ("back_left_swerve", "back_left"),
-            ("back_right_swerve", "back_right"),
+            ("Front_Left_Swerve", "front_left"),
+            ("Front_Right_Swerve", "front_right"),
+            ("Back_Right_Swerve", "back_right"),
         ]:
             stats = self._camera_stats.get(stat_name)
             if stats is not None:
-                PyKitLogger.recordOutput(f"Vision/{stat_key}/std_dev", stats.std_dev)
+                # PyKitLogger.recordOutput(f"Vision/{stat_key}/std_dev", stats.std_dev)
                 PyKitLogger.recordOutput(
                     f"Vision/{stat_key}/tag_count", stats.tag_count
                 )
-                PyKitLogger.recordOutput(f"Vision/{stat_key}/distance", stats.distance)
+                # PyKitLogger.recordOutput(f"Vision/{stat_key}/distance", stats.distance)
 
         # --- VisionStateTelemetry ---
-        PyKitLogger.recordOutput("Vision/State/vision_disabled", self.disabled_vision)
-        PyKitLogger.recordOutput(
-            "Vision/State/observations_per_cycle", self._observations_per_cycle
-        )
-        # PyKitLogger.recordOutput(
-        #     "Vision/State/total_detected_targets", self._total_detected_targets
-        # )
-        PyKitLogger.recordOutput(
-            "Vision/State/auto_align_triggered", self._auto_align_triggered
-        )
+        if RobotFeatures.LOGGING:
+            PyKitLogger.recordOutput("Vision/State/vision_disabled", self.disabled_vision)
+            PyKitLogger.recordOutput(
+                "Vision/State/observations_per_cycle", self._observations_per_cycle
+            )
+            PyKitLogger.recordOutput(
+                "Vision/State/auto_align_triggered", self._auto_align_triggered
+            )
 
-        if self._auto_align_starting_pose is not None:
-            PyKitLogger.recordOutput(
-                "Vision/State/auto_align_starting_pose", self._auto_align_starting_pose
-            )
-        if self._auto_align_target_pose is not None:
-            PyKitLogger.recordOutput(
-                "Vision/State/auto_align_target_pose", self._auto_align_target_pose
-            )
+            if self._auto_align_starting_pose is not None:
+                PyKitLogger.recordOutput(
+                    "Vision/State/auto_align_starting_pose", self._auto_align_starting_pose
+                )
+            if self._auto_align_target_pose is not None:
+                PyKitLogger.recordOutput(
+                    "Vision/State/auto_align_target_pose", self._auto_align_target_pose
+                )
 
         # --- Camera connection status ---
         for cam_cfg in self._cameras:
