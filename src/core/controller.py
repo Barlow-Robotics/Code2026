@@ -12,6 +12,7 @@ from phoenix6 import swerve
 from wpilib import DriverStation, SmartDashboard
 from wpimath.geometry import Rotation2d
 from commands import IntakePositionCommand, ShootCommand
+from commands.hood_sequence_command import HoodSequenceCommand
 from commands.throw_feeder_command import ThrowFeederCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
@@ -185,9 +186,14 @@ class Controller:
                     cmd.runOnce(lambda: container.shooter.set_velocity(11))
                 ).onFalse(cmd.runOnce(lambda: container.shooter.set_velocity(0)))
                 
-                self._test_controller.leftTrigger().onTrue(
-                    cmd.runOnce(lambda: container.turret.set_angle_hood(SmartDashboard.getNumber("hood_angle_intro", 25)))
-                ).onFalse(cmd.runOnce(lambda: container.turret.set_angle_hood(SmartDashboard.getNumber("hood_angle_final", 0))))
+                self._driver.button(5).onTrue(
+                    HoodSequenceCommand(
+                        container.turret,
+                        SmartDashboard.getNumber("hood_angle_final", 10)
+                    )
+                )
+                            
+                
                 self._test_controller.x().whileTrue(
                     ShootCommand(
                         container.drivetrain,
