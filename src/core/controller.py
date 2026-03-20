@@ -9,10 +9,9 @@ from commands2.button import CommandXboxController, CommandJoystick, Trigger
 
 import wpilib
 from phoenix6 import swerve
-from wpilib import DriverStation, SmartDashboard
+from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
 from commands import IntakePositionCommand, ShootCommand
-from commands.hood_sequence_command import HoodSequenceCommand
 from commands.throw_feeder_command import ThrowFeederCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
@@ -60,7 +59,7 @@ class Controller:
                             * self._current_state
                         )
                     )
-                    if container.drivetrain.changeAng
+                    if not container.drivetrain.changeAng
                     # --- Snap-to-angle mode ---
                     else (
                         container.drivetrain.facing_angle.with_velocity_x(
@@ -81,31 +80,31 @@ class Controller:
             )
         )
 
-        if RobotFeatures.HAS_VISION:
-            for controller in [self._driver, self._operator]:
-                controller.x().whileTrue(
-                    container.drivetrain.apply_request(
-                        lambda: container.vision.auto_align_modify_request(
-                            container.drivetrain.movement.with_velocity_x(
-                                -self._driver.getRawAxis(1)
-                                * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                                * self._current_state
-                            )
-                            .with_velocity_y(
-                                -self._driver.getRawAxis(0)
-                                * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                                * self._current_state
-                            )
-                            .with_rotational_rate(
-                                -self._driver.getRawAxis(
-                                    2 if type(self._driver) is CommandJoystick else 4
-                                )
-                                * DriveConstants.MAX_ANGULAR_VELOCITY
-                                * self._current_state
-                            )
-                        )
-                    )
-                )
+        # if RobotFeatures.HAS_VISION:
+        #     for controller in [self._driver, self._operator]:
+        #         controller.x().whileTrue(
+        #             container.drivetrain.apply_request(
+        #                 lambda: container.vision.auto_align_modify_request(
+        #                     container.drivetrain.movement.with_velocity_x(
+        #                         -self._driver.getRawAxis(1)
+        #                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+        #                         * self._current_state
+        #                     )
+        #                     .with_velocity_y(
+        #                         -self._driver.getRawAxis(0)
+        #                         * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
+        #                         * self._current_state
+        #                     )
+        #                     .with_rotational_rate(
+        #                         -self._driver.getRawAxis(
+        #                             2 if type(self._driver) is CommandJoystick else 4
+        #                         )
+        #                         * DriveConstants.MAX_ANGULAR_VELOCITY
+        #                         * self._current_state
+        #                     )
+        #                 )
+        #             )
+        #         )
 
         for controller in [self._driver]:
             controller.rightBumper().onTrue(
@@ -190,13 +189,13 @@ class Controller:
                 self._test_controller.rightTrigger().onTrue(
                     cmd.runOnce(lambda: container.shooter.set_velocity(11))
                 ).onFalse(cmd.runOnce(lambda: container.shooter.set_velocity(0)))
-                
+
                 self._test_controller.leftTrigger().onTrue(
                     cmd.runOnce(lambda: container.turret.set_angle_hood(10))
                 ).onFalse(
                     cmd.runOnce(lambda: container.turret.set_angle_hood(0))
                 )
-                            
+
                 
                 self._test_controller.x().whileTrue(
                     ShootCommand(
