@@ -204,9 +204,9 @@ class Controller:
 
 
 
-                # self._test_controller.b().onTrue(
-
-                # )
+                self._test_controller.b().onTrue(
+                    cmd.runOnce(lambda: container.intake.reset_zero())
+                )
 
 
 

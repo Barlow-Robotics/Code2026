@@ -217,6 +217,10 @@ class Intake(commands2.Subsystem):
 
         self._loop_timer.stop()
 
+    def reset_zero(self):
+        self.motor_arm_leader.set_position(0)
+        self.motor_arm_follower.set_position(0)
+
     def sysIdQuasistaticRollerTop(self, direction: SysIdRoutine.Direction):
         return self.sys_id_routine_roller.quasistatic(direction)
 
