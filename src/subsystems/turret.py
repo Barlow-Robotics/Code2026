@@ -122,20 +122,21 @@ class Turret(Subsystem):
         self.target_turret_yaw = 0.0
 
         # Mechanism2d — top-down view: base = robot heading, turret = yaw, length = hood
-        self.mechanism = Mechanism2d(3, 3)
-        turret_root = self.mechanism.getRoot("TurretRoot", 1.5, 1.5)
+        if RobotFeatures.LOGGING:
+            self.mechanism = Mechanism2d(3, 3)
+            turret_root = self.mechanism.getRoot("TurretRoot", 1.5, 1.5)
 
-        # Robot base — rotates with robot heading (0° = right)
-        self.base_ligament = turret_root.appendLigament(
-            "Base", 0.4, 0, 4, Color8Bit(100, 100, 100)
-        )
+            # Robot base — rotates with robot heading (0° = right)
+            self.base_ligament = turret_root.appendLigament(
+                "Base", 0.4, 0, 4, Color8Bit(100, 100, 100)
+            )
 
-        # Turret — rotates relative to base with turret yaw, length scales with hood angle
-        self.turret_ligament = self.base_ligament.appendLigament(
-            "Turret", 1.0, 0, 8, Color8Bit(0, 150, 255)
-        )
+            # Turret — rotates relative to base with turret yaw, length scales with hood angle
+            self.turret_ligament = self.base_ligament.appendLigament(
+                "Turret", 1.0, 0, 8, Color8Bit(0, 150, 255)
+            )
 
-        SmartDashboard.putData("Turret/Mechanism2d", self.mechanism)
+            SmartDashboard.putData("Turret/Mechanism2d", self.mechanism)
 
         self.sys_id_routine_hood = generateSysIdProfile(
             self, self.hood_motor, name="Hood_Motor"
@@ -228,13 +229,14 @@ class Turret(Subsystem):
         )
 
         # Update Mechanism2d
-        robot_pose = self.driveSub.get_pose()
-        if robot_pose is not None:
-            self.base_ligament.setAngle(robot_pose.rotation().degrees())
-        # self.turret_ligament.setAngle(actual_turret_yaw)
-        # Hood angle controls turret length — 0° = min length, 90° = max length
-        hood_fraction = max(0, min(actual_hood_angle, 90)) / 90.0
-        self.turret_ligament.setLength(0.3 + hood_fraction * 0.9)
+        if RobotFeatures.LOGGING:
+            robot_pose = self.driveSub.get_pose()
+            if robot_pose is not None:
+                self.base_ligament.setAngle(robot_pose.rotation().degrees())
+            # self.turret_ligament.setAngle(actual_turret_yaw)
+            # Hood angle controls turret length — 0° = min length, 90° = max length
+            hood_fraction = max(0, min(actual_hood_angle, 90)) / 90.0
+            self.turret_ligament.setLength(0.3 + hood_fraction * 0.9)
 
         # PyKitLogger.recordOutput(
         #     "Turret/left_limit_switch", not (self.left_turret_limit_switch.get())

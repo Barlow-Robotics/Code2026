@@ -78,7 +78,8 @@ class RobotContainer:
             self.feeder = Feeder()
 
         # Combined shooter/feeder/spindex mechanism
-        self._setup_scoring_mechanism()
+        if RobotFeatures.LOGGING:
+            self._setup_scoring_mechanism()
 
         # Telemetry
         self._swerve_telemetry = SwerveTelemetry(

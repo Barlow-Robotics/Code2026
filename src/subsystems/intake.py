@@ -10,6 +10,7 @@ import wpilib
 from wpilib import RobotBase, Mechanism2d, Color8Bit, SmartDashboard
 from pykit.logger import Logger as PyKitLogger
 
+from constants.robot_constants import RobotFeatures
 from utils.profiler import LoopTimer
 from constants import IntakeConstants, MotorIDs
 from utils import TalonConfigFX, generateSysIdProfile, IntakePositions
@@ -54,13 +55,14 @@ class Intake(commands2.Subsystem):
         self.target_rot: float = -1.0
 
         # Mechanism2d
-        self.mechanism = Mechanism2d(4, 3)
-        root = self.mechanism.getRoot("IntakeRoot", 2.5, 0.3)
-        self.arm_ligament = root.appendLigament("Arm", 1.2, 75, 8, Color8Bit(0, 200, 0))
-        self.head_ligament = self.arm_ligament.appendLigament(
-            "Head", 0.4, -90, 10, Color8Bit(0, 150, 0)
-        )
-        wpilib.SmartDashboard.putData("Intake/Mechanism2d", self.mechanism)
+        if RobotFeatures.LOGGING:
+            self.mechanism = Mechanism2d(4, 3)
+            root = self.mechanism.getRoot("IntakeRoot", 2.5, 0.3)
+            self.arm_ligament = root.appendLigament("Arm", 1.2, 75, 8, Color8Bit(0, 200, 0))
+            self.head_ligament = self.arm_ligament.appendLigament(
+                "Head", 0.4, -90, 10, Color8Bit(0, 150, 0)
+            )
+            wpilib.SmartDashboard.putData("Intake/Mechanism2d", self.mechanism)
 
         self.motor_roller: TalonFX = TalonFX(MotorIDs.motor_id_roller, "*")
         self.motor_arm_leader: TalonFX = TalonFX(MotorIDs.motor_id_arm_leader, "*")
@@ -183,7 +185,7 @@ class Intake(commands2.Subsystem):
     def periodic(self):
         self._loop_timer.start()
 
-        if not RobotBase.isReal():
+        if not RobotBase.isReal() and RobotFeatures.LOGGING:
             arm_degrees = self.motor_arm_leader.get_position().value * 360
             self.arm_ligament.setAngle(75 + arm_degrees)
 
