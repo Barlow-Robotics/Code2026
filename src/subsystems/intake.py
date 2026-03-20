@@ -67,7 +67,7 @@ class Intake(commands2.Subsystem):
         self.motor_arm_follower: TalonFX = TalonFX(MotorIDs.motor_id_arm_follower, "*")
 
         INTAKE_ROLLER = TalonConfigFX(
-            kP=0,
+            kP=0.4,
             kI=0,
             kD=0,
             kV=0.16,
