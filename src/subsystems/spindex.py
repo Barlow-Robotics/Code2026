@@ -1,6 +1,7 @@
 from phoenix6.hardware import TalonFX
 from phoenix6 import controls
 import commands2
+from constants.robot_constants import RobotFeatures
 from utils import TalonConfigFX
 from constants import MotorIDs
 from pykit.logger import Logger as PyKitLogger
@@ -61,30 +62,31 @@ class Spindex(commands2.Subsystem):
         self._loop_timer.stop()
 
     def log_motor(self, motor: TalonFX, prefix: str, target_velocity: float):
-        PyKitLogger.recordOutput(f"{prefix}/target_velocity", target_velocity)
-        PyKitLogger.recordOutput(
-            f"{prefix}/current_velocity", float(motor.get_velocity().value)
-        )
-        PyKitLogger.recordOutput(
-            f"{prefix}/current_supply_current",
-            float(motor.get_supply_current().value),
-        )
-        PyKitLogger.recordOutput(
-            f"{prefix}/current_stator_current",
-            float(motor.get_stator_current().value),
-        )
-        PyKitLogger.recordOutput(
-            f"{prefix}/current_supply_voltage",
-            float(motor.get_supply_voltage().value),
-        )
-        PyKitLogger.recordOutput(
-            f"{prefix}/current_motor_voltage",
-            float(motor.get_motor_voltage().value),
-        )
-        PyKitLogger.recordOutput(
-            f"{prefix}/current_device_temp",
-            float(motor.get_device_temp().value),
-        )
+        if RobotFeatures.LOGGING:   
+            PyKitLogger.recordOutput(f"{prefix}/target_velocity", target_velocity)
+            PyKitLogger.recordOutput(
+                f"{prefix}/current_velocity", float(motor.get_velocity().value)
+            )
+            PyKitLogger.recordOutput(
+                f"{prefix}/current_supply_current",
+                float(motor.get_supply_current().value),
+            )
+            PyKitLogger.recordOutput(
+                f"{prefix}/current_stator_current",
+                float(motor.get_stator_current().value),
+            )
+            PyKitLogger.recordOutput(
+                f"{prefix}/current_supply_voltage",
+                float(motor.get_supply_voltage().value),
+            )
+            PyKitLogger.recordOutput(
+                f"{prefix}/current_motor_voltage",
+                float(motor.get_motor_voltage().value),
+            )
+            PyKitLogger.recordOutput(
+                f"{prefix}/current_device_temp",
+                float(motor.get_device_temp().value),
+            )
 
     def sysIdQuasistaticSpindex(self, direction: SysIdRoutine.Direction):
         return self.sys_id_routine_spindex.quasistatic(direction)

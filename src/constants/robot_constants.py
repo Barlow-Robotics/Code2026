@@ -47,6 +47,7 @@ class RobotFeatures:
             cls.HAS_CPROFILE = True
             cls.TESTING = False
             cls.HAS_TURRET_ANGLE = False
+            cls.LOGGING = False
 
 
 class MotorIDs:
