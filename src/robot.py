@@ -16,7 +16,7 @@ from utils import (
 
 from core import RobotContainer
 from phoenix6 import HootAutoReplay
-from wpilib import DriverStation, RobotBase
+from wpilib import DriverStation, RobotBase, SmartDashboard
 from constants import RobotFeatures
 from utils.profiler import LoopTimer, PeriodicProfiler
 
@@ -65,6 +65,7 @@ class Robot(
         # --- cProfile setup (sim-only by default) ---
         self._cprofile = PeriodicProfiler(enabled=RobotFeatures.HAS_CPROFILE)
         self._scheduler_timer = LoopTimer("Scheduler")
+        SmartDashboard.putNumber("hood_angle", 10)
 
     def robotPeriodic(self) -> None:
         self._time_and_joystick_replay.update()
