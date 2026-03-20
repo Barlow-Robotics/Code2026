@@ -18,7 +18,7 @@ class Spindex(commands2.Subsystem):
             kP=0,
             kI=0,
             kD=0,
-            kV=0.0016,
+            kV=0.16,
             brake_mode=True,
             gear_ratio=SpindexConstants.GEARING,
         )

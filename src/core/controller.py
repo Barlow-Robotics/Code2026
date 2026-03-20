@@ -145,19 +145,19 @@ class Controller:
                         position=IntakePositions.DEPLOYED,
                     )
                 )
-                controller.a().onTrue(
-                    IntakePositionCommand(
-                        drive_sub=container.drivetrain,
-                        intake_sub=container.intake,
-                        position=IntakePositions.HOME,
-                    )
-                )
+                # controller.a().onTrue(
+                #     IntakePositionCommand(
+                #         drive_sub=container.drivetrain,
+                #         intake_sub=container.intake,
+                #         position=IntakePositions.HOME,
+                #     )
+                # )
 
-                self._test_controller.x().onTrue(
-                    cmd.runOnce(lambda: container.intake.set_velocity(0.1))
-                ).onFalse(
-                    cmd.runOnce(lambda: container.intake.stop())
-                )
+                # self._test_controller.x().onTrue(
+                #     cmd.runOnce(lambda: container.intake.set_velocity(0.1))
+                # ).onFalse(
+                #     cmd.runOnce(lambda: container.intake.stop())
+                # )
 
                 self._test_controller.leftBumper().onTrue(
                     cmd.runOnce(lambda: container.intake.go_to_position(IntakePositions.DEPLOYED))
@@ -168,10 +168,18 @@ class Controller:
 
 
                 self._test_controller.y().onTrue(
+                    cmd.runOnce(lambda: container.feeder.move(9))
+                ).onFalse(
+                    cmd.runOnce(lambda: container.feeder.stop())
+                )
+
+
+                self._test_controller.a().onTrue(
                     cmd.runOnce(lambda: container.spindex.move(9))
                 ).onFalse(
                     cmd.runOnce(lambda: container.spindex.stop())
                 )
+
 
                 self._test_controller.rightTrigger().onTrue(
                     cmd.runOnce(lambda: container.shooter.set_velocity(11))
@@ -184,6 +192,16 @@ class Controller:
                 ).onFalse(
                     cmd.runOnce(lambda: container.turret.set_angle_hood(0))
                 )
+                self._test_controller.x().whileTrue(
+                    ShootCommand(
+                        container.drivetrain,
+                        container.shooter,
+                        container.feeder,
+                        container.spindex,
+                        container.turret,
+                    )
+                )
+
 
 
                 # self._test_controller.b().onTrue(
@@ -229,7 +247,7 @@ class Controller:
             and RobotFeatures.HAS_SPINDEX
         ):
             for controller in [self._driver, self._operator]:
-                controller.button(1).whileTrue(
+                controller.x().whileTrue(
                     ShootCommand(
                         container.drivetrain,
                         container.shooter,

@@ -57,8 +57,8 @@ class ShootCommand(Command):
             abs(current_velocity - ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT)
             <= ShooterConstants.FLYWHEEL_VELOCITY_TOLERANCE
         ):
-            self.feeder.move()
-            self.spindex.move()
+            self.feeder.move(9)
+            self.spindex.move(9)
             self._feeding = True
 
     def isFinished(self):
