@@ -1,5 +1,6 @@
 import math
 from commands2 import Subsystem
+from wpilib import SmartDashboard
 from constants.robot_constants import MotorIDs
 from constants import SI, ShooterConstants
 from rev import (
@@ -19,6 +20,10 @@ class Shooter(Subsystem):
     def __init__(self):
         super().__init__()
         self._loop_timer = LoopTimer("Shooter")
+
+        SmartDashboard.putNumber(
+            "CustomFloatVelocity", ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT
+        )
 
         self.flywheel_motor_left_leader = SparkFlex(
             MotorIDs.motor_id_flywheel_left, type=SparkFlex.MotorType.kBrushless

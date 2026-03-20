@@ -83,6 +83,8 @@ class Robot(
     def disabledInit(self) -> None:
         self.container.turret.hood_cancoder.set_position(0, 0.2)
         """This function is called once each time the robot enters Disabled mode."""
+        self.container.reinitialize_subsystems()
+
         pass
 
     def disabledPeriodic(self) -> None:

@@ -113,6 +113,7 @@ class TurretConstants:
     HOOD_MOTOR = DCMotor.minion(1)
     HOOD_GEARING = 29 / 1.0
     HOOD_MOI = 0.1  # TODO: calculate from roller mass/geometry (kg*m^2)
+    HOOD_MECHANICAL_RATIO = 11.6
 
     SHOOTER_HEIGHT_FOR_FUEL_IN = 20.57
     SHOOTER_HEIGHT_FOR_FUEL_M = 20.57 * SI.inches_to_meters

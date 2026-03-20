@@ -7,7 +7,6 @@ from wpilib import (
     Color8Bit,
     RobotBase,
     SmartDashboard,
-    DigitalInput,
 )
 from wpimath.geometry import Translation3d
 from constants.robot_constants import MotorIDs, RobotFeatures
@@ -31,16 +30,20 @@ from phoenix6.signals import FeedbackSensorSourceValue
 
 
 class Turret(Subsystem):
-    def __init__(self, driveSub: Drivetrain):
+    def __init__(self, driveSub: Drivetrain, init2: bool = False):
         super().__init__()
         self._loop_timer = LoopTimer("Turret")
         self.driveSub = driveSub
+        SmartDashboard.putNumber("kV", 0.7)
+        SmartDashboard.putNumber("kD", 0.0)
+        SmartDashboard.putNumber("kI", 0.0)
+        SmartDashboard.putNumber("kP", 0.0)
 
         HOOD_MOTOR_CONFIG = TalonConfigFXS(
-            kP=0.0,
-            kI=0.0,
-            kD=0,
-            kV=0.8,
+            kP=SmartDashboard.getNumber("kP", 0.0),
+            kI=SmartDashboard.getNumber("kI", 0.0),
+            kD=SmartDashboard.getNumber("kD", 0.0),
+            kV=SmartDashboard.getNumber("kV", 0.7),
             kS=0.3,
             brake_mode=True,
             # gear_ratio=TurretConstants.HOOD_GEARING,
@@ -89,14 +92,16 @@ class Turret(Subsystem):
         self.hood_cancoder.configurator.apply(hood_cancoder_config, 0.2)
         # hood_cancoder_config.magnet_sensor.magnet_offset = -self.hood_cancoder.get_absolute_position().value
         # self.hood_cancoder.configurator.apply(hood_cancoder_config, 0.4)
-        self.hood_cancoder.set_position(0, 0.2)
+        if not init2:
+            print("REININT")
+            self.hood_cancoder.set_position(0, 0.2)
 
         feedback_cfg = FeedbackConfigs()
 
         feedback_cfg.feedback_sensor_source = FeedbackSensorSourceValue.FUSED_CANCODER
         feedback_cfg.feedback_remote_sensor_id = MotorIDs.cancoder_id_hood
 
-        feedback_cfg.sensor_to_mechanism_ratio = 11.6
+        feedback_cfg.sensor_to_mechanism_ratio = TurretConstants.HOOD_MECHANICAL_RATIO
         feedback_cfg.rotor_to_sensor_ratio = TurretConstants.HOOD_GEARING
         HOOD_MOTOR_CONFIG._apply_settings(self.hood_motor, inverted=True)
         self.hood_motor.configurator.apply(feedback_cfg)
@@ -136,8 +141,9 @@ class Turret(Subsystem):
         # self.sys_id_routine_turret = generateSysIdProfile(
         #     self, self.turret_motor, name="Turret_Motor"
         # )
-        self.left_turret_limit_switch = DigitalInput(0)
-        self.right_turret_limit_switch = DigitalInput(1)
+
+        # self.left_turret_limit_switch = DigitalInput(0)
+        # self.right_turret_limit_switch = DigitalInput(1)
         self.target_robot_heading: Rotation2d | None = None
 
     def set_angle_hood(self, angle_deg: float):
@@ -149,11 +155,11 @@ class Turret(Subsystem):
             )
         )
 
-    def left_limit_switch_on(self):
-        return not self.left_turret_limit_switch.get()
+    # def left_limit_switch_on(self):
+    #     return not self.left_turret_limit_switch.get()
 
-    def right_limit_switch_on(self):
-        return not self.right_turret_limit_switch.get()
+    # def right_limit_switch_on(self):
+    #     return not self.right_turret_limit_switch.get()
 
     def set_angle_turret(self, angle_deg: float):
         if not RobotFeatures.HAS_TURRET_ANGLE:
@@ -191,10 +197,7 @@ class Turret(Subsystem):
 
     def get_actual_hood_angle_cancoder(self) -> float:
         """Returns the absolute hood angle in degrees from the CANcoder."""
-        return (
-            float(self.hood_cancoder.get_absolute_position().value)
-            * SI.rotations_to_degrees
-        )
+        return float(self.hood_cancoder.get_position().value) * SI.rotations_to_degrees
 
     def set_target_hood_and_turret(self, shooting_location=Hub.TOP_CENTER_POINT):
         v_fixed, hood_angle_deg, turret_yaw_deg = self._optimal_angle_calc(
@@ -232,13 +235,13 @@ class Turret(Subsystem):
         hood_fraction = max(0, min(actual_hood_angle, 90)) / 90.0
         self.turret_ligament.setLength(0.3 + hood_fraction * 0.9)
 
-        PyKitLogger.recordOutput(
-            "Turret/left_limit_switch", not (self.left_turret_limit_switch.get())
-        )
+        # PyKitLogger.recordOutput(
+        #     "Turret/left_limit_switch", not (self.left_turret_limit_switch.get())
+        # )
 
-        PyKitLogger.recordOutput(
-            "Turret/right_limit_switch", not (self.right_turret_limit_switch.get())
-        )
+        # PyKitLogger.recordOutput(
+        #     "Turret/right_limit_switch", not (self.right_turret_limit_switch.get())
+        # )
 
         PyKitLogger.recordOutput(
             "Turret/target_hood_angle", float(self.target_hood_angle)

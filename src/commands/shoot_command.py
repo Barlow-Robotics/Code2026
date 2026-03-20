@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 from commands2 import Command
+from wpilib import SmartDashboard
 from constants import ShooterConstants
 from constants.field_constants import CustomPoints
 from subsystems.drivetrain import Drivetrain
@@ -29,7 +30,10 @@ class ShootCommand(Command):
 
     def initialize(self):
         self._feeding = False
-        self.shooter.set_velocity(ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT)
+        self.target_velocity = SmartDashboard.getNumber(
+            "CustomFloatVelocity", ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT
+        )
+        self.shooter.set_velocity(self.target_velocity)
 
     def execute(self):
         if not self.driveSub.allow_center_auto_align:
@@ -54,7 +58,7 @@ class ShootCommand(Command):
             return
         current_velocity = self.shooter.get_current_velocity()
         if (
-            abs(current_velocity - ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT)
+            abs(current_velocity - self.target_velocity)
             <= ShooterConstants.FLYWHEEL_VELOCITY_TOLERANCE
         ):
             self.feeder.move(9)
