@@ -37,8 +37,6 @@ class Controller:
         self._test_controller = CommandXboxController(3)
 
         self._current_state = StartingState.NORMAL.value
-        # Drivetrain default command (field-centric drive)
-        # Note that X is forward and Y is left per WPILib convention.
         container.drivetrain.setDefaultCommand(
             container.drivetrain.apply_request(
                 lambda: (
@@ -161,11 +159,18 @@ class Controller:
                 #     cmd.runOnce(lambda: container.intake.stop())
                 # )
 
+                # self._test_controller.leftBumper().onTrue(
+                #     cmd.runOnce(
+                #         lambda: container.intake.go_to_position(
+                #             IntakePositions.DEPLOYED
+                #         )
+                #     )
+                # )
+
+
                 self._test_controller.leftBumper().onTrue(
                     cmd.runOnce(
-                        lambda: container.intake.go_to_position(
-                            IntakePositions.DEPLOYED
-                        )
+                        lambda: container.intake.set_velocity(5)   
                     )
                 )
                 self._test_controller.rightBumper().onTrue(
