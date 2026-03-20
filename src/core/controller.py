@@ -186,8 +186,8 @@ class Controller:
                 ).onFalse(cmd.runOnce(lambda: container.shooter.set_velocity(0)))
                 
                 self._test_controller.leftTrigger().onTrue(
-                    cmd.runOnce(lambda: container.turret.set_angle_hood(SmartDashboard.getNumber("hood_angle", 10)))
-                ).onFalse(cmd.runOnce(lambda: container.turret.set_angle_hood(0)))
+                    cmd.runOnce(lambda: container.turret.set_angle_hood(SmartDashboard.getNumber("hood_angle_intro", 25)))
+                ).onFalse(cmd.runOnce(lambda: container.turret.set_angle_hood(SmartDashboard.getNumber("hood_angle_final", 0))))
                 self._test_controller.x().whileTrue(
                     ShootCommand(
                         container.drivetrain,

@@ -65,7 +65,8 @@ class Robot(
         # --- cProfile setup (sim-only by default) ---
         self._cprofile = PeriodicProfiler(enabled=RobotFeatures.HAS_CPROFILE)
         self._scheduler_timer = LoopTimer("Scheduler")
-        SmartDashboard.putNumber("hood_angle", 10)
+        SmartDashboard.putNumber("hood_angle", 25)
+        SmartDashboard.putNumber("hood_angle_final", 0)
 
     def robotPeriodic(self) -> None:
         self._time_and_joystick_replay.update()
