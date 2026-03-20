@@ -34,6 +34,7 @@ class RobotFeatures:
             cls.HAS_CPROFILE = False
             cls.TESTING = False
             cls.HAS_TURRET_ANGLE = False
+            cls.LOGGING = False
         else:
             cls.HAS_DRIVETRAIN = True
             cls.vision_camera_count = 4
@@ -171,7 +172,7 @@ class VisionConstants:
     CAMERA_3_NAME = "Back_Right_Swerve"
     CAMERA_4_NAME = "Back_Left_Swerve"
 
-    VISION_SIM = False
+    VISION_SIM = True
 
     HALF_WIDTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)
     HALF_LENGTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)
