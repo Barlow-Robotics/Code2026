@@ -164,12 +164,16 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             swerve.requests.FieldCentricFacingAngle()
             .with_deadband(DriveConstants.MAX_TRANSLATIONAL_VELOCITY * 0.1)
             .with_rotational_deadband(DriveConstants.MAX_ANGULAR_VELOCITY * 0.1)
-            .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
+            .with_drive_request_type(
+                swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
+            )
         )
 
         # Tune the heading PID (adjust kP to taste)
         self.heading_lock_movement.heading_controller.setPID(10.0, 0.0, 0.0)
-        self.heading_lock_movement.heading_controller.enableContinuousInput(-math.pi, math.pi)
+        self.heading_lock_movement.heading_controller.enableContinuousInput(
+            -math.pi, math.pi
+        )
 
         self.facing_angle.heading_controller.setPID(10.0, 0.0, 0.0)
 
@@ -315,7 +319,7 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             self.set_control(
                 self.facing_angle.with_target_direction(self.target_field_heading)
             )
-# 
+        #
         self.determine_turret_state()
         # Periodically try to apply the operator perspective.
         # If we haven't applied the operator perspective before, then we should apply it regardless of DS state.

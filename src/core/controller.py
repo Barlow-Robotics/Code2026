@@ -15,7 +15,6 @@ from commands import IntakePositionCommand, ShootCommand
 from commands.throw_feeder_command import ThrowFeederCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
-from commands2.sysid import SysIdRoutine
 
 if TYPE_CHECKING:
     from core import RobotContainer
@@ -42,9 +41,9 @@ class Controller:
         container.drivetrain.setDefaultCommand(
             container.drivetrain.apply_request(
                 lambda: (
-                    # --- Normal joystick rotation mode ---
-                    container.drivetrain.movement
-                        .with_velocity_x(
+                    (
+                        # --- Normal joystick rotation mode ---
+                        container.drivetrain.movement.with_velocity_x(
                             -self._driver.getRawAxis(1)
                             * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
                             * self._current_state
@@ -61,10 +60,11 @@ class Controller:
                             * DriveConstants.MAX_ANGULAR_VELOCITY
                             * self._current_state
                         )
-                ) if container.drivetrain.changeAng == False else (
+                    )
+                    if not container.drivetrain.changeAng
                     # --- Snap-to-angle mode ---
-                    container.drivetrain.facing_angle
-                        .with_velocity_x(
+                    else (
+                        container.drivetrain.facing_angle.with_velocity_x(
                             -self._driver.getRawAxis(1)
                             * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
                             * self._current_state
@@ -75,8 +75,9 @@ class Controller:
                             * self._current_state
                         )
                         .with_target_direction(
-                            container.drivetrain.target_field_heading 
+                            container.drivetrain.target_field_heading
                         )
+                    )
                 )
             )
         )
@@ -160,38 +161,33 @@ class Controller:
                 # )
 
                 self._test_controller.leftBumper().onTrue(
-                    cmd.runOnce(lambda: container.intake.go_to_position(IntakePositions.DEPLOYED))
+                    cmd.runOnce(
+                        lambda: container.intake.go_to_position(
+                            IntakePositions.DEPLOYED
+                        )
+                    )
                 )
                 self._test_controller.rightBumper().onTrue(
-                    cmd.runOnce(lambda: container.intake.go_to_position(IntakePositions.HOME))
+                    cmd.runOnce(
+                        lambda: container.intake.go_to_position(IntakePositions.HOME)
+                    )
                 )
-
 
                 self._test_controller.y().onTrue(
                     cmd.runOnce(lambda: container.feeder.move(9))
-                ).onFalse(
-                    cmd.runOnce(lambda: container.feeder.stop())
-                )
-
+                ).onFalse(cmd.runOnce(lambda: container.feeder.stop()))
 
                 self._test_controller.a().onTrue(
                     cmd.runOnce(lambda: container.spindex.move(9))
-                ).onFalse(
-                    cmd.runOnce(lambda: container.spindex.stop())
-                )
-
+                ).onFalse(cmd.runOnce(lambda: container.spindex.stop()))
 
                 self._test_controller.rightTrigger().onTrue(
                     cmd.runOnce(lambda: container.shooter.set_velocity(11))
-                ).onFalse(
-                    cmd.runOnce(lambda: container.shooter.set_velocity(0))
-                )
+                ).onFalse(cmd.runOnce(lambda: container.shooter.set_velocity(0)))
 
                 self._test_controller.leftTrigger().onTrue(
                     cmd.runOnce(lambda: container.turret.set_angle_hood(25))
-                ).onFalse(
-                    cmd.runOnce(lambda: container.turret.set_angle_hood(0))
-                )
+                ).onFalse(cmd.runOnce(lambda: container.turret.set_angle_hood(0)))
                 self._test_controller.x().whileTrue(
                     ShootCommand(
                         container.drivetrain,
@@ -202,23 +198,12 @@ class Controller:
                     )
                 )
 
-
-
                 self._test_controller.b().onTrue(
                     cmd.runOnce(lambda: container.intake.reset_zero())
                 )
 
-
-
-
-
-
-
-
                 # controller.a().whileTrue(cmd.runOnce(lambda: container.intake.set_velocity(1)))
                 # self.intake_sub.set_velocity(overall_velocity)
-
-
 
                 # controller.y().onTrue(
                 #     IntakePositionCommand(

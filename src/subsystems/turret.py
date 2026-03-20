@@ -29,8 +29,6 @@ from phoenix6.signals import SensorDirectionValue
 from phoenix6.configs import FeedbackConfigs
 from phoenix6.signals import FeedbackSensorSourceValue
 
-from utils.talon_config_FXS import TalonConfigFXS
-
 
 class Turret(Subsystem):
     def __init__(self, driveSub: Drivetrain):
@@ -57,26 +55,26 @@ class Turret(Subsystem):
                 gear_ratio=TurretConstants.HOOD_GEARING,
             )
 
-        if not RobotBase.isReal():
-            TURRET_MOTOR_CONFIG = TalonConfigFXS(
-                kP=0.85,
-                kI=0,
-                kD=0.6,
-                kV=0,
-                brake_mode=True,
-                motion_magic_cruise_velocity=8,
-                motion_magic_acceleration=30,
-                gear_ratio=TurretConstants.TURRET_GEARING,
-            )
-        else:
-            TURRET_MOTOR_CONFIG = TalonConfigFXS(
-                kP=0.2,
-                kI=0,
-                kD=0,
-                kV=0,
-                brake_mode=True,
-                gear_ratio=TurretConstants.TURRET_GEARING,
-            )
+        # if not RobotBase.isReal():
+        #     TURRET_MOTOR_CONFIG = TalonConfigFXS(
+        #         kP=0.85,
+        #         kI=0,
+        #         kD=0.6,
+        #         kV=0,
+        #         brake_mode=True,
+        #         motion_magic_cruise_velocity=8,
+        #         motion_magic_acceleration=30,
+        #         gear_ratio=TurretConstants.TURRET_GEARING,
+        #     )
+        # else:
+        #     TURRET_MOTOR_CONFIG = TalonConfigFXS(
+        #         kP=0.2,
+        #         kI=0,
+        #         kD=0,
+        #         kV=0,
+        #         brake_mode=True,
+        #         gear_ratio=TurretConstants.TURRET_GEARING,
+        #     )
 
         self.hood_motor = TalonFXS(MotorIDs.motor_id_hood, "*")
         # self.turret_motor = TalonFX(MotorIDs.motor_id_turret, "*")
@@ -92,7 +90,7 @@ class Turret(Subsystem):
         # hood_cancoder_config.magnet_sensor.magnet_offset = -self.hood_cancoder.get_absolute_position().value
         # self.hood_cancoder.configurator.apply(hood_cancoder_config, 0.4)
         self.hood_cancoder.set_position(0, 0.2)
-        
+
         feedback_cfg = FeedbackConfigs()
 
         feedback_cfg.feedback_sensor_source = FeedbackSensorSourceValue.FUSED_CANCODER
@@ -143,8 +141,8 @@ class Turret(Subsystem):
         self.target_robot_heading: Rotation2d | None = None
 
     def set_angle_hood(self, angle_deg: float):
-        angle_deg*=11.6
-        self.target_hood_angle = angle_deg 
+        angle_deg *= 11.6
+        self.target_hood_angle = angle_deg
         self.hood_motor.set_control(
             self._motion_magic_position_voltage_hood.with_position(
                 SI.degrees_to_rotations * angle_deg
@@ -160,15 +158,20 @@ class Turret(Subsystem):
     def set_angle_turret(self, angle_deg: float):
         if not RobotFeatures.HAS_TURRET_ANGLE:
             current_robot_yaw_deg = self.driveSub.get_rotation().degrees()
-            self.driveSub.target_field_heading = Rotation2d.fromDegrees(current_robot_yaw_deg - angle_deg + 180.0)
+            self.driveSub.target_field_heading = Rotation2d.fromDegrees(
+                current_robot_yaw_deg - angle_deg + 180.0
+            )
             self.driveSub.changeAng = True
 
-            print("SET_ANGLE_TURRET")
+            # print("SET_ANGLE_TURRET")
         else:
             self.target_turret_yaw = angle_deg
             if self.left_limit_switch_on() and angle_deg < self.get_actual_turret_yaw():
                 print("Left limit switch triggered, preventing further left movement")
-            elif self.right_limit_switch_on() and angle_deg > self.get_actual_turret_yaw():
+            elif (
+                self.right_limit_switch_on()
+                and angle_deg > self.get_actual_turret_yaw()
+            ):
                 print("Right limit switch triggered, preventing further right movement")
             else:
                 self.turret_motor.set_control(
@@ -176,7 +179,6 @@ class Turret(Subsystem):
                         SI.degrees_to_rotations * angle_deg
                     )
                 )
-
 
     def clear_robot_heading_lock(self):
         self.driveSub.changeAng = False
@@ -186,11 +188,14 @@ class Turret(Subsystem):
         self.set_angle_hood(0)
         self.clear_robot_heading_lock()
         return 0, 0, 0
-    
+
     def get_actual_hood_angle_cancoder(self) -> float:
         """Returns the absolute hood angle in degrees from the CANcoder."""
-        return float(self.hood_cancoder.get_absolute_position().value) * SI.rotations_to_degrees
-    
+        return (
+            float(self.hood_cancoder.get_absolute_position().value)
+            * SI.rotations_to_degrees
+        )
+
     def set_target_hood_and_turret(self, shooting_location=Hub.TOP_CENTER_POINT):
         v_fixed, hood_angle_deg, turret_yaw_deg = self._optimal_angle_calc(
             TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location
@@ -271,9 +276,6 @@ class Turret(Subsystem):
         #     float(self.hood_motor.get_position().value_as_double),
 
         # )
-
-
-        
 
         self._loop_timer.stop()
 

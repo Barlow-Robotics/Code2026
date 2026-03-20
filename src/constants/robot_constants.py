@@ -71,7 +71,6 @@ class MotorIDs:
     cancoder_id_hood = 54
 
 
-
 class IntakeConstants:
     ROLLER_MOTOR = DCMotor.krakenX44(1)
     ROLLER_GEARING = 30 / 58
@@ -89,8 +88,8 @@ class IntakeConstants:
     ARM_DEPLOYED_LENGTH_IN = 12.191
     ARM_DEPLOYED_ROTATIONS = 20.59
 
-    INTAKE_VELOCITY_CONSTANT = 2.6*6*2
-      # Amplified from robot speed
+    INTAKE_VELOCITY_CONSTANT = 2.6 * 6 * 2
+    # Amplified from robot speed
 
     PID = {"kP": 0.11, "kI": 0, "kD": 0, "kF": 0, "kA": 0}  # TODO: tune PID
 
@@ -202,20 +201,21 @@ class VisionConstants:
         Translation3d(
             -HALF_LENGTH + (0.5 * SI.inches_to_meters),
             -HALF_WIDTH + (2.625 * SI.inches_to_meters),  # RIGHT
-            (12.625 * SI.inches_to_meters)
-            + DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR,
+            DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR
+            + (12.625 * SI.inches_to_meters),
         ),
         Rotation3d(0, 0, units.degreesToRadians(180)),
     )
 
-    BACK_RIGHT_SWERVE_TO_ROBOT = Transform3d(
-        Translation3d(
-            -HALF_LENGTH,
-            -HALF_WIDTH,
-            HEIGHT,
-        ),
-        Rotation3d(0, 0, units.degreesToRadians((180 - 45))),
-    )
+    # BACK_RIGHT_SWERVE_TO_ROBOT = Transform3d(
+    #     Translation3d(
+    #         -HALF_LENGTH,
+    #         -HALF_WIDTH,
+    #         HEIGHT,
+    #     ),
+    #     Rotation3d(0, 0, units.degreesToRadians((180 - 45))),
+    # )
+
     AUTO_ALIGN_VELOCITY_CONSTANT = 3.0
     AUTO_ALIGN_ACCELERATION_CONSTANT = 3.0
 

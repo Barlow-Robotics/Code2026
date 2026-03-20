@@ -97,7 +97,7 @@ class Feeder(commands2.Subsystem):
         self._loop_timer.stop()
 
     def log_motor(self, motor: TalonFXS, prefix: str, target_velocity: float):
-        PyKitLogger.recordOutput(f"{prefix}/target_velocity", target_velocity)
+        PyKitLogger.recordOutput(f"{prefix}/target_velocity", float(target_velocity))
         PyKitLogger.recordOutput(
             f"{prefix}/current_RPS", float(motor.get_velocity().value)
         )

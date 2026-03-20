@@ -5,15 +5,11 @@ from pathplannerlib.auto import AutoBuilder
 from autos import AutoRoutine
 
 from commands2 import (
-    ParallelDeadlineGroup,
     SequentialCommandGroup,
-    ParallelCommandGroup,
 )
 
 if typing.TYPE_CHECKING:
     from core import RobotContainer
-from commands import IntakePositionCommand
-from subsystems import IntakePositions
 
 path_name = "Simple"
 

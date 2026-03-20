@@ -18,7 +18,7 @@ from utils import TalonConfigFX, generateSysIdProfile, IntakePositions
 @dataclass
 class IntakeCommandTelemetry:
     target_position: str
-    
+
     commanded_velocity_ft_per_sec: float
     converted_velocity_rps: float
     stop_requested: bool
@@ -88,7 +88,6 @@ class Intake(commands2.Subsystem):
         INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=False)
         INTAKE_CONFIG_ARM._apply_settings(self.motor_arm_leader, inverted=False)
         INTAKE_CONFIG_ARM._apply_settings(self.motor_arm_follower, inverted=True)
-
 
         self._motion_magic_velocity_voltage_roller = (
             controls.MotionMagicVelocityVoltage(0, enable_foc=MotorIDs.foc_active)
@@ -186,7 +185,9 @@ class Intake(commands2.Subsystem):
             "Intake/Telemetry",
             IntakeTelemetry(
                 arm_position=float(self.motor_arm_leader.get_position().value),
-                arm_position_follower=float(self.motor_arm_follower.get_position().value),
+                arm_position_follower=float(
+                    self.motor_arm_follower.get_position().value
+                ),
                 arm_target_position=float(self.target_rot),
                 # arm_supply_current=float(self.motor_arm.get_supply_current().value),
                 # arm_stator_current=float(self.motor_arm.get_stator_current().value),

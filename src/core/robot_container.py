@@ -32,7 +32,7 @@ from autos import (
     HP_Center_L1,
     HP_Center_L1_standalone,
     HP_Center_L2_AutoAlign,
-    Simple
+    Simple,
 )
 
 
