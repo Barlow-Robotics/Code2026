@@ -108,7 +108,7 @@ class RobotContainer:
         self.configure_autos()
 
     def reinitialize_subsystems(self):
-        from subsystems import Turret
+        from subsystems import Turret, Intake
 
         # if RobotFeatures.HAS_VISION:
         #     self.vision = Vision(drive_sub=self.drivetrain)
@@ -117,8 +117,8 @@ class RobotContainer:
         if RobotFeatures.HAS_TURRET:
             self.turret = Turret(driveSub=self.drivetrain, init2=True)
         self.controller = Controller(self)
-        # if RobotFeatures.HAS_INTAKE:
-        #     self.intake = Intake()
+        if RobotFeatures.HAS_INTAKE:
+            self.intake = Intake()
         # if RobotFeatures.HAS_SPINDEX:
         #     self.spindex = Spindex()
         # if RobotFeatures.HAS_FEEDER:
@@ -153,6 +153,8 @@ class RobotContainer:
         self.auto_selection.addOption(
             "HP_Center_L2_AutoAlign", HP_Center_L2_AutoAlign(self).get_command()
         )
+
+        
         self.auto_selection.addOption("Simple", Simple(self).get_command())
         # allow us to choose our auto in Smart Dashboard
         wpilib.SmartDashboard.putData("Auto", self.auto_selection)

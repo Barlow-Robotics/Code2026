@@ -7,7 +7,7 @@ from commands2.sysid import SysIdRoutine
 from phoenix6 import controls
 from phoenix6.hardware import TalonFX
 import wpilib
-from wpilib import RobotBase, Mechanism2d, Color8Bit
+from wpilib import RobotBase, Mechanism2d, Color8Bit, SmartDashboard
 from pykit.logger import Logger as PyKitLogger
 
 from utils.profiler import LoopTimer
@@ -65,12 +65,16 @@ class Intake(commands2.Subsystem):
         self.motor_roller: TalonFX = TalonFX(MotorIDs.motor_id_roller, "*")
         self.motor_arm_leader: TalonFX = TalonFX(MotorIDs.motor_id_arm_leader, "*")
         self.motor_arm_follower: TalonFX = TalonFX(MotorIDs.motor_id_arm_follower, "*")
+        SmartDashboard.putNumber("kP_Roller", 0.0)
+        SmartDashboard.putNumber("kI_Roller", 0.0)
+        SmartDashboard.putNumber("kD_Roller", 0.0)
+        SmartDashboard.putNumber("kV_Roller", 0.16)
 
         INTAKE_ROLLER = TalonConfigFX(
-            kP=0.4,
-            kI=0,
-            kD=0,
-            kV=0.16,
+            kP=SmartDashboard.getNumber("kP_Roller", 0.0),
+            kI=SmartDashboard.getNumber("kI_Roller", 0.0),
+            kD=SmartDashboard.getNumber("kD_Roller", 0.0),
+            kV=SmartDashboard.getNumber("kV_Roller", 0.16),
             brake_mode=False,
             gear_ratio=IntakeConstants.ROLLER_GEARING,
         )

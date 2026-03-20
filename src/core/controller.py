@@ -108,7 +108,7 @@ class Controller:
 
         # Subsystem button bindings
         if RobotFeatures.HAS_INTAKE:
-            for controller in [self._driver]:
+            for controller in [self._operator, self._operator]:
                 # Y → Deploy intake
                 controller.y().onTrue(
                     IntakePositionCommand(
@@ -145,7 +145,7 @@ class Controller:
                             position=IntakePositions.DEPLOYED,
                         ),
                         # Condition: is it currently deployed?
-                        lambda: container.intake.get_position() == IntakePositions.DEPLOYED,
+                        lambda: container.intake.get_target_position() == IntakePositions.DEPLOYED,
                     )
                 )
 
@@ -192,7 +192,7 @@ class Controller:
                     cmd.runOnce(lambda: container.intake.reset_zero())
                 )
 
-        for controller in [self._driver, self._operator]:
+        for controller in [self._driver]:
             controller.button(8).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
 
         if RobotFeatures.HAS_VISION:
@@ -222,6 +222,28 @@ class Controller:
                     )
                 )
 
+        if RobotFeatures.HAS_TURRET:
+            for controller in [self._driver, self._operator]:
+                # Left trigger → Aim
+                controller.povDown().onTrue(
+                    cmd.runOnce(
+                        lambda: container.turret.set_angle_hood(
+                            container.turret.hood_cancoder.get_position() - 10
+                        ) if container.vision.disabled_vision else container.turret.set_angle_hood(
+                            container.turret.hood_cancoder.get_position()
+                        )
+                    )
+                )
+                controller.povUp().onTrue(
+                    cmd.runOnce(
+                        lambda: container.turret.set_angle_hood(
+                            container.turret.hood_cancoder.get_position() + 10
+                        )
+                        if container.vision.disabled_vision else container.turret.set_angle_hood(
+                            container.turret.hood_cancoder.get_position()
+                        )
+                    )
+                )
         # Periodically warn about missing controllers during teleop
         Trigger(DriverStation.isTeleopEnabled).whileTrue(
             cmd.sequence(
