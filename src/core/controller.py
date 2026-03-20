@@ -62,7 +62,7 @@ class Controller:
                             * self._current_state
                         )
                     )
-                    if not container.drivetrain.changeAng
+                    if container.drivetrain.changeAng
                     # --- Snap-to-angle mode ---
                     else (
                         container.drivetrain.facing_angle.with_velocity_x(
@@ -147,13 +147,13 @@ class Controller:
                         position=IntakePositions.DEPLOYED,
                     )
                 )
-                # controller.a().onTrue(
-                #     IntakePositionCommand(
-                #         drive_sub=container.drivetrain,
-                #         intake_sub=container.intake,
-                #         position=IntakePositions.HOME,
-                #     )
-                # )
+                controller.a().onTrue(
+                    IntakePositionCommand(
+                        drive_sub=container.drivetrain,
+                        intake_sub=container.intake,
+                        position=IntakePositions.HOME,
+                    )
+                )
 
                 # self._test_controller.x().onTrue(
                 #     cmd.runOnce(lambda: container.intake.set_velocity(0.1))
@@ -186,11 +186,10 @@ class Controller:
                     cmd.runOnce(lambda: container.shooter.set_velocity(11))
                 ).onFalse(cmd.runOnce(lambda: container.shooter.set_velocity(0)))
                 
-                self._driver.button(5).onTrue(
-                    HoodSequenceCommand(
-                        container.turret,
-                        SmartDashboard.getNumber("hood_angle_final", 10)
-                    )
+                self._test_controller.leftTrigger().onTrue(
+                    cmd.runOnce(lambda: container.turret.set_angle_hood(10))
+                ).onFalse(
+                    cmd.runOnce(lambda: container.turret.set_angle_hood(0))
                 )
                             
                 
@@ -248,11 +247,11 @@ class Controller:
                     )
                 )
 
-        if RobotFeatures.HAS_FEEDER and RobotFeatures.HAS_SPINDEX:
-            for controller in [self._driver, self._operator]:
-                controller.b().whileTrue(
-                    ThrowFeederCommand(container.feeder, container.spindex)
-                )
+        # if RobotFeatures.HAS_FEEDER and RobotFeatures.HAS_SPINDEX:
+        #     for controller in [self._driver, self._operator]:
+        #         controller.b().whileTrue(
+        #             ThrowFeederCommand(container.feeder, container.spindex)
+        #         )
 
         # Periodically warn about missing controllers during teleop
         Trigger(DriverStation.isTeleopEnabled).whileTrue(

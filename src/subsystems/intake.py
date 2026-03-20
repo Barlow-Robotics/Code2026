@@ -70,7 +70,7 @@ class Intake(commands2.Subsystem):
             kP=0,
             kI=0,
             kD=0,
-            kV=0.0016,
+            kV=0.16,
             brake_mode=False,
             gear_ratio=IntakeConstants.ROLLER_GEARING,
         )
@@ -150,6 +150,7 @@ class Intake(commands2.Subsystem):
         self._target_position = position
         arm_rot = self._POSITION_MAP[position]
 
+
         self.motor_arm_leader.set_control(
             self._motion_magic_position_voltage_arm_leader.with_position(arm_rot)
         )
@@ -158,6 +159,7 @@ class Intake(commands2.Subsystem):
         )
 
         if position == IntakePositions.DEPLOYED:
+            print("SET VELOCITY")
             self.set_velocity(current_velocity)
         else:
             self.stop()
