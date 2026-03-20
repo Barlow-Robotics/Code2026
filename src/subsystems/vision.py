@@ -80,14 +80,14 @@ class Vision(Subsystem):
         inst.startClient3("connect-auto-align")
         inst.setServerTeam(4572)
 
-        table = inst.getTable("BallVision")
+        # table = inst.getTable("BallVision")
 
-        self.xSub: DoubleSubscriber = table.getDoubleTopic("x").subscribe(0.0)
-        self.ySub: DoubleSubscriber = table.getDoubleTopic("y").subscribe(0.0)
-        self.angleSub: DoubleSubscriber = table.getDoubleTopic("angle").subscribe(0.0)
-        self.targetSub: BooleanSubscriber = table.getBooleanTopic(
-            "has_target"
-        ).subscribe(False)
+        # self.xSub: DoubleSubscriber = table.getDoubleTopic("x").subscribe(0.0)
+        # self.ySub: DoubleSubscriber = table.getDoubleTopic("y").subscribe(0.0)
+        # self.angleSub: DoubleSubscriber = table.getDoubleTopic("angle").subscribe(0.0)
+        # self.targetSub: BooleanSubscriber = table.getBooleanTopic(
+        #     "has_target"
+        # ).subscribe(False)
 
         self.drive_sub = drive_sub
 
@@ -656,13 +656,14 @@ class Vision(Subsystem):
         )
 
     def auto_align(self):
-        hasTarget: bool = self.targetSub.get()
+        # hasTarget: bool = self.targetSub.get()
+        hasTarget = False  # Placeholder value - replace with actual target detection logic 
         if not hasTarget:
             print("AUTO ALIGN: No target detected, aborting auto align.")
             return None
-        x: float = self.xSub.get()
-        y: float = self.ySub.get()
-        angle: float = self.angleSub.get()
+        # x: float = self.xSub.get()
+        # y: float = self.ySub.get()
+        # angle: float = self.angleSub.get()
 
         print("AUTO ALIGN")
         starting_pose = self.drive_sub.get_pose()
