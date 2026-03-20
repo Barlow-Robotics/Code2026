@@ -93,7 +93,6 @@ class Turret(Subsystem):
         # hood_cancoder_config.magnet_sensor.magnet_offset = -self.hood_cancoder.get_absolute_position().value
         # self.hood_cancoder.configurator.apply(hood_cancoder_config, 0.4)
         if not init2:
-            print("REININT")
             self.hood_cancoder.set_position(0, 0.2)
 
         feedback_cfg = FeedbackConfigs()
@@ -105,6 +104,7 @@ class Turret(Subsystem):
         feedback_cfg.rotor_to_sensor_ratio = TurretConstants.HOOD_GEARING
         HOOD_MOTOR_CONFIG._apply_settings(self.hood_motor, inverted=True)
         self.hood_motor.configurator.apply(feedback_cfg)
+
 
         # TURRET_MOTOR_CONFIG._apply_settings(self.turret_motor, inverted=False)
 
@@ -147,7 +147,6 @@ class Turret(Subsystem):
         self.target_robot_heading: Rotation2d | None = None
 
     def set_angle_hood(self, angle_deg: float):
-        angle_deg *= 11.6
         self.target_hood_angle = angle_deg
         self.hood_motor.set_control(
             self._motion_magic_position_voltage_hood.with_position(
@@ -197,7 +196,7 @@ class Turret(Subsystem):
 
     def get_actual_hood_angle_cancoder(self) -> float:
         """Returns the absolute hood angle in degrees from the CANcoder."""
-        return float(self.hood_cancoder.get_position().value) * SI.rotations_to_degrees
+        return float(self.hood_cancoder.get_position().value) / TurretConstants.HOOD_MECHANICAL_RATIO * SI.rotations_to_degrees
 
     def set_target_hood_and_turret(self, shooting_location=Hub.TOP_CENTER_POINT):
         v_fixed, hood_angle_deg, turret_yaw_deg = self._optimal_angle_calc(
@@ -250,7 +249,7 @@ class Turret(Subsystem):
             "Turret/target_turret_yaw", float(self.target_turret_yaw)
         )
         PyKitLogger.recordOutput(
-            "Turret/actual_hood_angle",
+            "Turret/actual_hood_angle_motor",
             float(self.hood_motor.get_position().value) * SI.rotations_to_degrees,
         )
         # PyKitLogger.recordOutput(
