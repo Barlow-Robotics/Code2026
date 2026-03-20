@@ -9,10 +9,9 @@ from commands2.button import CommandXboxController, CommandJoystick, Trigger
 
 import wpilib
 from phoenix6 import swerve
-from wpilib import DriverStation, SmartDashboard
+from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
 from commands import IntakePositionCommand, ShootCommand
-from commands.hood_sequence_command import HoodSequenceCommand
 from commands.throw_feeder_command import ThrowFeederCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
@@ -41,7 +40,6 @@ class Controller:
             container.drivetrain.apply_request(
                 lambda: (
                     (
-                        # --- Normal joystick rotation mode ---
                         container.drivetrain.movement.with_velocity_x(
                             -self._driver.getRawAxis(1)
                             * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
@@ -60,8 +58,7 @@ class Controller:
                             * self._current_state
                         )
                     )
-                    if container.drivetrain.changeAng
-                    # --- Snap-to-angle mode ---
+                    if not container.drivetrain.changeAng
                     else (
                         container.drivetrain.facing_angle.with_velocity_x(
                             -self._driver.getRawAxis(1)
@@ -80,32 +77,6 @@ class Controller:
                 )
             )
         )
-
-        if RobotFeatures.HAS_VISION:
-            for controller in [self._driver, self._operator]:
-                controller.x().whileTrue(
-                    container.drivetrain.apply_request(
-                        lambda: container.vision.auto_align_modify_request(
-                            container.drivetrain.movement.with_velocity_x(
-                                -self._driver.getRawAxis(1)
-                                * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                                * self._current_state
-                            )
-                            .with_velocity_y(
-                                -self._driver.getRawAxis(0)
-                                * DriveConstants.MAX_TRANSLATIONAL_VELOCITY
-                                * self._current_state
-                            )
-                            .with_rotational_rate(
-                                -self._driver.getRawAxis(
-                                    2 if type(self._driver) is CommandJoystick else 4
-                                )
-                                * DriveConstants.MAX_ANGULAR_VELOCITY
-                                * self._current_state
-                            )
-                        )
-                    )
-                )
 
         for controller in [self._driver]:
             controller.rightBumper().onTrue(
@@ -138,13 +109,15 @@ class Controller:
         # Subsystem button bindings
         if RobotFeatures.HAS_INTAKE:
             for controller in [self._driver]:
-                controller.b().onTrue(
+                # Y → Deploy intake
+                controller.y().onTrue(
                     IntakePositionCommand(
                         drive_sub=container.drivetrain,
                         intake_sub=container.intake,
                         position=IntakePositions.DEPLOYED,
                     )
                 )
+                # A → Retract intake
                 controller.a().onTrue(
                     IntakePositionCommand(
                         drive_sub=container.drivetrain,
@@ -152,21 +125,29 @@ class Controller:
                         position=IntakePositions.HOME,
                     )
                 )
+                # B → Throw out feeder
+                controller.b().whileTrue(
+                    ThrowFeederCommand(container.feeder, container.spindex)
+                )
 
-                # self._test_controller.x().onTrue(
-                #     cmd.runOnce(lambda: container.intake.set_velocity(0.1))
-                # ).onFalse(
-                #     cmd.runOnce(lambda: container.intake.stop())
-                # )
-
-                # self._test_controller.leftBumper().onTrue(
-                #     cmd.runOnce(
-                #         lambda: container.intake.go_to_position(
-                #             IntakePositions.DEPLOYED
-                #         )
-                #     )
-                # )
-
+                controller.leftBumper().onTrue(
+                    cmd.either(
+                        # If intake is deployed/active → retract home
+                        IntakePositionCommand(
+                            drive_sub=container.drivetrain,
+                            intake_sub=container.intake,
+                            position=IntakePositions.HOME,
+                        ),
+                        # If intake is home/disabled → deploy and enable
+                        IntakePositionCommand(
+                            drive_sub=container.drivetrain,
+                            intake_sub=container.intake,
+                            position=IntakePositions.DEPLOYED,
+                        ),
+                        # Condition: is it currently deployed?
+                        lambda: container.intake.get_position() == IntakePositions.DEPLOYED,
+                    )
+                )
 
                 self._test_controller.leftBumper().onTrue(
                     cmd.runOnce(
@@ -190,14 +171,13 @@ class Controller:
                 self._test_controller.rightTrigger().onTrue(
                     cmd.runOnce(lambda: container.shooter.set_velocity(11))
                 ).onFalse(cmd.runOnce(lambda: container.shooter.set_velocity(0)))
-                
+
                 self._test_controller.leftTrigger().onTrue(
                     cmd.runOnce(lambda: container.turret.set_angle_hood(10))
                 ).onFalse(
                     cmd.runOnce(lambda: container.turret.set_angle_hood(0))
                 )
-                            
-                
+
                 self._test_controller.x().whileTrue(
                     ShootCommand(
                         container.drivetrain,
@@ -211,17 +191,6 @@ class Controller:
                 self._test_controller.b().onTrue(
                     cmd.runOnce(lambda: container.intake.reset_zero())
                 )
-
-                # controller.a().whileTrue(cmd.runOnce(lambda: container.intake.set_velocity(1)))
-                # self.intake_sub.set_velocity(overall_velocity)
-
-                # controller.y().onTrue(
-                #     IntakePositionCommand(
-                #         drive_sub=container.drivetrain,
-                #         intake_sub=container.intake,
-                #         position=IntakePositions.DEPLOYED,
-                #     )
-                # )
 
         for controller in [self._driver, self._operator]:
             controller.button(8).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
@@ -242,6 +211,7 @@ class Controller:
             and RobotFeatures.HAS_SPINDEX
         ):
             for controller in [self._driver, self._operator]:
+                # X → Fire / Shoot
                 controller.x().whileTrue(
                     ShootCommand(
                         container.drivetrain,
@@ -251,50 +221,6 @@ class Controller:
                         container.turret,
                     )
                 )
-
-        # if RobotFeatures.HAS_FEEDER and RobotFeatures.HAS_SPINDEX:
-        #     for controller in [self._driver, self._operator]:
-        #         controller.b().whileTrue(
-        #             ThrowFeederCommand(container.feeder, container.spindex)
-        #         )
-
-        # Periodically warn about missing controllers during teleop
-        Trigger(DriverStation.isTeleopEnabled).whileTrue(
-            cmd.sequence(
-                cmd.waitSeconds(5),
-                cmd.runOnce(self._log_missing_connections),
-            ).repeatedly()
-        )
-
-        # if RobotFeatures.TESTING:
-
-        # SysId bindings (uncomment as needed)
-        # self._driver.button(1).onTrue(
-        #     container.shooter.sysIdDynamicTurret(SysIdRoutine.Direction.kForward)
-        # )
-        # self._driver.button(2).onTrue(
-        #     container.shooter.sysIdDynamicTurret(SysIdRoutine.Direction.kReverse)
-        # )
-        # self._driver.button(3).onTrue(
-        #     container.shooter.sysIdQuasistaticTurret(
-        #         SysIdRoutine.Direction.kForward
-        #     )
-        # )
-        # self._driver.button(4).onTrue(
-        #     container.shooter.sysIdQuasistaticTurret(
-        #         SysIdRoutine.Direction.kReverse
-        #     )
-        # )
-        # self._operator.button(3).onTrue(
-        #     container.shooter.sysIdDynamicHood(SysIdRoutine.Direction.kForward)
-        # )
-        # self._operator.button(4).onTrue(
-        #     container.shooter.sysIdDynamicHood(SysIdRoutine.Direction.kReverse)
-        # )
-        # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse))
-        # self._joystick.button(4).onTrue(container.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward))
-        # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse))
-        # self._joystick.button(4).onTrue(container.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward))
 
         # Periodically warn about missing controllers during teleop
         Trigger(DriverStation.isTeleopEnabled).whileTrue(
