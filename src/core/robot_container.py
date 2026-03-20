@@ -116,6 +116,7 @@ class RobotContainer:
         #     self.shooter = Shooter()
         if RobotFeatures.HAS_TURRET:
             self.turret = Turret(driveSub=self.drivetrain, init2=True)
+        self.controller = Controller(self)
         # if RobotFeatures.HAS_INTAKE:
         #     self.intake = Intake()
         # if RobotFeatures.HAS_SPINDEX:

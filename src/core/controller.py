@@ -9,7 +9,7 @@ from commands2.button import CommandXboxController, CommandJoystick, Trigger
 
 import wpilib
 from phoenix6 import swerve
-from wpilib import DriverStation
+from wpilib import DriverStation, SmartDashboard
 from wpimath.geometry import Rotation2d
 from commands import IntakePositionCommand, ShootCommand
 from commands.throw_feeder_command import ThrowFeederCommand
@@ -173,7 +173,7 @@ class Controller:
                 ).onFalse(cmd.runOnce(lambda: container.shooter.set_velocity(0)))
 
                 self._test_controller.leftTrigger().onTrue(
-                    cmd.runOnce(lambda: container.turret.set_angle_hood(10))
+                    cmd.runOnce(lambda: container.turret.set_angle_hood(SmartDashboard.getNumber("hood_angle", 10)))
                 ).onFalse(
                     cmd.runOnce(lambda: container.turret.set_angle_hood(0))
                 )
