@@ -39,10 +39,11 @@ class Turret(Subsystem):
         self.driveSub = driveSub
 
         HOOD_MOTOR_CONFIG = TalonConfigFXS(
-            kP=0.2,
+            kP=0.0,
             kI=0.0,
             kD=0,
-            kV=0.0016,
+            kV=0.8,
+            kS=0.3,
             brake_mode=True,
             # gear_ratio=TurretConstants.HOOD_GEARING,
         )
@@ -83,12 +84,15 @@ class Turret(Subsystem):
 
         hood_cancoder_config = CANcoderConfiguration()
         hood_cancoder_config.magnet_sensor.sensor_direction = (
-            SensorDirectionValue.COUNTER_CLOCKWISE_POSITIVE
+            SensorDirectionValue.CLOCKWISE_POSITIVE
         )
 
-        hood_cancoder_config.magnet_sensor.magnet_offset = -0.4606
-        self.hood_cancoder.configurator.apply(hood_cancoder_config)
-
+        # hood_cancoder_config.magnet_sensor.magnet_offset = +66 * SI.degrees_to_rotations
+        self.hood_cancoder.configurator.apply(hood_cancoder_config, 0.2)
+        # hood_cancoder_config.magnet_sensor.magnet_offset = -self.hood_cancoder.get_absolute_position().value
+        # self.hood_cancoder.configurator.apply(hood_cancoder_config, 0.4)
+        self.hood_cancoder.set_position(0, 0.2)
+        
         feedback_cfg = FeedbackConfigs()
 
         feedback_cfg.feedback_sensor_source = FeedbackSensorSourceValue.FUSED_CANCODER
@@ -139,7 +143,8 @@ class Turret(Subsystem):
         self.target_robot_heading: Rotation2d | None = None
 
     def set_angle_hood(self, angle_deg: float):
-        self.target_hood_angle = angle_deg
+        angle_deg*=11.6
+        self.target_hood_angle = angle_deg 
         self.hood_motor.set_control(
             self._motion_magic_position_voltage_hood.with_position(
                 SI.degrees_to_rotations * angle_deg
