@@ -81,11 +81,12 @@ class PeriodicProfiler:
     View results by opening the .html file in a browser.
     """
 
-    __slots__ = ("_profiler", "_enabled", "_output_dir")
+    __slots__ = ("_profiler", "_enabled", "_output_dir", "_session")
 
     def __init__(self):
         self._enabled = False
         self._profiler = None
+        self._session: int = 0
         from utils.advantagekit import ddatetime_obj
 
         if RobotBase.isReal():
@@ -104,6 +105,7 @@ class PeriodicProfiler:
 
         self._profiler = Profiler()
         self._enabled = True
+        self._session += 1
         self._profiler.start()
 
     def disable(self) -> None:
@@ -116,7 +118,7 @@ class PeriodicProfiler:
 
     def _flush(self) -> None:
         if self._profiler is not None and self._output_dir:
-            output_path = f"{self._output_dir}/periodic.html"
+            output_path = f"{self._output_dir}/periodic_{self._session}.html"
             with open(output_path, "w", encoding="utf-8") as f:
                 f.write(self._profiler.output_html())
             print(f"Profile written to {output_path}")
