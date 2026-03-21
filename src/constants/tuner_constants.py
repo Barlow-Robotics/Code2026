@@ -63,7 +63,7 @@ class TunerConstants:
     # Some configs will be overwritten; check the `with_*_initial_configs()` API documentation.
     _drive_initial_configs = configs.TalonFXConfiguration().with_current_limits(
         configs.CurrentLimitsConfigs()
-        .with_supply_current_limit(40.0)
+        .with_supply_current_limit(60.0)
         .with_supply_current_limit_enable(True)
         # Swerve azimuth does not require much torque output, so we can set a relatively low
         # stator current limit to help avoid brownouts without impacting performance.
@@ -73,7 +73,7 @@ class TunerConstants:
     )
     _steer_initial_configs = configs.TalonFXConfiguration().with_current_limits(
         configs.CurrentLimitsConfigs()
-        .with_supply_current_limit(40.0)
+        .with_supply_current_limit(60.0)
         .with_supply_current_limit_enable(True)
         # Swerve azimuth does not require much torque output, so we can set a relatively low
         # stator current limit to help avoid brownouts without impacting performance.
