@@ -153,6 +153,11 @@ class Controller:
                     cmd.runOnce(
                         lambda: container.intake.set_velocity(5)   
                     )
+                ).onFalse(
+                    cmd.runOnce(
+                            lambda: container.intake.stop()   
+
+                    )
                 )
                 self._test_controller.rightBumper().onTrue(
                     cmd.runOnce(

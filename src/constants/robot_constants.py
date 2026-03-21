@@ -113,7 +113,7 @@ class TurretConstants:
     TURRET_MOI = 0.4  # TODO: calculate from roller mass/geometry (kg*m^2)
 
     HOOD_MOTOR = DCMotor.minion(1)
-    HOOD_GEARING = 29 / 1.0
+    HOOD_GEARING = 1.5
     HOOD_MOI = 0.1  # TODO: calculate from roller mass/geometry (kg*m^2)
     HOOD_MECHANICAL_RATIO = 11.6
 
