@@ -67,7 +67,7 @@ class TunerConstants:
         .with_supply_current_limit_enable(True)
         # Swerve azimuth does not require much torque output, so we can set a relatively low
         # stator current limit to help avoid brownouts without impacting performance.
-        .with_stator_current_limit(60.0)
+        .with_stator_current_limit(80.0)
         .with_stator_current_limit_enable(True)
 
     )
@@ -77,7 +77,7 @@ class TunerConstants:
         .with_supply_current_limit_enable(True)
         # Swerve azimuth does not require much torque output, so we can set a relatively low
         # stator current limit to help avoid brownouts without impacting performance.
-        .with_stator_current_limit(60.0)
+        .with_stator_current_limit(80.0)
         .with_stator_current_limit_enable(True)
     )
     _encoder_initial_configs = configs.CANcoderConfiguration()
