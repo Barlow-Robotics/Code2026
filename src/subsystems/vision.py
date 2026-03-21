@@ -171,15 +171,14 @@ class Vision(Subsystem):
             current_rotation = self.drive_sub.get_rotation()  # once for all cameras
 
             self._update_all_cameras(current_pose, current_speeds, current_rotation)
-
-        for stat_name, stat_key in [
-            ("Front_Left_Swerve", "front_left"),
-            ("Front_Right_Swerve", "front_right"),
-            ("Back_Right_Swerve", "back_right"),
-        ]:
-            stats = self._camera_stats.get(stat_name)
-            if stats is not None:
-                if RobotFeatures.LOGGING_VISION:
+        if RobotFeatures.LOGGING_VISION:
+            for stat_name, stat_key in [
+                ("Front_Left_Swerve", "front_left"),
+                ("Front_Right_Swerve", "front_right"),
+                ("Back_Right_Swerve", "back_right"),
+            ]:
+                stats = self._camera_stats.get(stat_name)
+                if stats is not None:
                     PyKitLogger.recordOutput(
                         f"Vision/{stat_key}/std_dev", stats.std_dev
                     )
@@ -213,11 +212,11 @@ class Vision(Subsystem):
                 )
 
         # --- Camera connection status ---
-        if RobotFeatures.LOGGING_VISION:
-            for cam_cfg in self._cameras:
-                PyKitLogger.recordOutput(
-                    f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
-                )
+        # if RobotFeatures.LOGGING_VISION:
+        for cam_cfg in self._cameras:
+            PyKitLogger.recordOutput(
+                f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
+            )
 
         self._loop_timer.stop()
 
