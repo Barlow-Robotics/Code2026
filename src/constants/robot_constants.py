@@ -248,4 +248,4 @@ class VisionConstants:
 class AutoConstants:
     auto_translation_pid = PIDConstants(4.0, 0.0, 0)  # TB tuned.
     auto_rotation_pid = PIDConstants(5.0, 0.0, 0.0)
-    period = 0.02  # seconds per scheduler run
+    period = 0.04  # seconds per scheduler run
