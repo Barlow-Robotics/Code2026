@@ -25,7 +25,7 @@ if typing.TYPE_CHECKING:
 
 from phoenix6 import SignalLogger
 from pykit.loggedrobot import LoggedRobot
-
+LoggedRobot.default_period = 0.04  # seconds slowed down to from 0.02 -> 0.04 to reduce 
 
 class Robot(
     LoggedRobot
@@ -73,7 +73,7 @@ class Robot(
 
         self._scheduler_timer.start()
         commands2.CommandScheduler.getInstance().run()
-        if RobotFeatures.LOGGING:
+        if RobotFeatures.LOGGING_ROBOT:
             self.container.update_scoring_mechanism()
         self._scheduler_timer.stop()
 

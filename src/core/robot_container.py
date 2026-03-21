@@ -31,8 +31,10 @@ from autos import (
     HP_Center_L2,
     HP_Center_L1,
     HP_Center_L1_standalone,
-    HP_Center_L2_AutoAlign,
     Simple,
+    Depot_Center_L1,
+    Depot_Center_L1_Standalone,
+    Depot_Center_L2,
 )
 
 
@@ -78,7 +80,7 @@ class RobotContainer:
             self.feeder = Feeder()
 
         # Combined shooter/feeder/spindex mechanism
-        if RobotFeatures.LOGGING:
+        if RobotFeatures.LOGGING_ROBOT:
             self._setup_scoring_mechanism()
 
         # Telemetry
@@ -152,10 +154,15 @@ class RobotContainer:
         )
         self.auto_selection.addOption("HP_Center_L2", HP_Center_L2(self).get_command())
         self.auto_selection.addOption(
-            "HP_Center_L2_AutoAlign", HP_Center_L2_AutoAlign(self).get_command()
+            "Depot_Center_L1", Depot_Center_L1(self).get_command()
+        )
+        self.auto_selection.addOption(
+            "Depot_Center_L1_Standalone", Depot_Center_L1_Standalone(self).get_command()
+        )
+        self.auto_selection.addOption(
+            "Depot_Center_L2", Depot_Center_L2(self).get_command()
         )
 
-        
         self.auto_selection.addOption("Simple", Simple(self).get_command())
         # allow us to choose our auto in Smart Dashboard
         wpilib.SmartDashboard.putData("Auto", self.auto_selection)

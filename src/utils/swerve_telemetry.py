@@ -1,3 +1,4 @@
+
 from phoenix6 import SignalLogger, swerve, units
 from wpilib import (
     Color,
@@ -11,6 +12,8 @@ from wpimath.geometry import Pose2d
 from wpimath.kinematics import ChassisSpeeds, SwerveModulePosition, SwerveModuleState
 
 from pykit.logger import Logger as PyKitLogger
+
+from constants.robot_constants import RobotFeatures
 
 
 class SwerveTelemetry:
@@ -60,35 +63,39 @@ class SwerveTelemetry:
 
     def telemeterize(self, state: swerve.SwerveDrivetrain.SwerveDriveState):
         # PyKit logging
-        PyKitLogger.recordOutput("DriveState/Pose", state.pose)
-        PyKitLogger.recordOutput("DriveState/Speeds", state.speeds)
-        PyKitLogger.recordOutput("DriveState/ModuleStates", state.module_states)
-        PyKitLogger.recordOutput("DriveState/ModuleTargets", state.module_targets)
-        PyKitLogger.recordOutput("DriveState/ModulePositions", state.module_positions)
-        PyKitLogger.recordOutput("DriveState/Timestamp", state.timestamp)
-        PyKitLogger.recordOutput(
-            "DriveState/OdometryFrequency", 1.0 / state.odometry_period
-        )
-
-        # Field2d for SmartDashboard/Shuffleboard
         self._field.setRobotPose(state.pose)
+
         PyKitLogger.recordOutput("Pose/robotPose", state.pose)
 
-        # Write to .hoot log file (keep for Phoenix Tuner X compatibility)
+        # Write pose only to .hoot log file
         SignalLogger.write_struct("DriveState/Pose", Pose2d, state.pose)
-        SignalLogger.write_struct("DriveState/Speeds", ChassisSpeeds, state.speeds)
-        SignalLogger.write_struct_array(
-            "DriveState/ModuleStates", SwerveModuleState, state.module_states
-        )
-        SignalLogger.write_struct_array(
-            "DriveState/ModuleTargets", SwerveModuleState, state.module_targets
-        )
-        SignalLogger.write_struct_array(
-            "DriveState/ModulePositions", SwerveModulePosition, state.module_positions
-        )
-        SignalLogger.write_double(
-            "DriveState/OdometryPeriod", state.odometry_period, "seconds"
-        )
+        if RobotFeatures.LOGGING_DRIVETRAIN:
+            PyKitLogger.recordOutput("DriveState/Pose", state.pose)
+            PyKitLogger.recordOutput("DriveState/Speeds", state.speeds)
+            PyKitLogger.recordOutput("DriveState/ModuleStates", state.module_states)
+            PyKitLogger.recordOutput("DriveState/ModuleTargets", state.module_targets)
+            PyKitLogger.recordOutput(
+                "DriveState/ModulePositions", state.module_positions
+            )
+            PyKitLogger.recordOutput("DriveState/Timestamp", state.timestamp)
+            PyKitLogger.recordOutput(
+                "DriveState/OdometryFrequency", 1.0 / state.odometry_period
+            )
+            SignalLogger.write_struct("DriveState/Speeds", ChassisSpeeds, state.speeds)
+            SignalLogger.write_struct_array(
+                "DriveState/ModuleStates", SwerveModuleState, state.module_states
+            )
+            SignalLogger.write_struct_array(
+                "DriveState/ModuleTargets", SwerveModuleState, state.module_targets
+            )
+            SignalLogger.write_struct_array(
+                "DriveState/ModulePositions",
+                SwerveModulePosition,
+                state.module_positions,
+            )
+            SignalLogger.write_double(
+                "DriveState/OdometryPeriod", state.odometry_period, "seconds"
+            )
         for i, module_state in enumerate(state.module_states):
             self._module_speeds[i].setAngle(module_state.angle.degrees())
             self._module_directions[i].setAngle(module_state.angle.degrees())

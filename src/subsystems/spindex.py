@@ -62,7 +62,7 @@ class Spindex(commands2.Subsystem):
         self._loop_timer.stop()
 
     def log_motor(self, motor: TalonFX, prefix: str, target_velocity: float):
-        if RobotFeatures.LOGGING:   
+        if RobotFeatures.LOGGING_SPINDEX:
             PyKitLogger.recordOutput(f"{prefix}/target_velocity", target_velocity)
             PyKitLogger.recordOutput(
                 f"{prefix}/current_velocity", float(motor.get_velocity().value)
