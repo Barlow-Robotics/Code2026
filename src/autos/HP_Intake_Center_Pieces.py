@@ -6,7 +6,7 @@ from autos import AutoRoutine
 from commands import IntakePositionCommand
 from constants import RobotFeatures
 
-from commands2 import SequentialCommandGroup, ParallelCommandGroup, cmd
+from commands2 import SequentialCommandGroup, ParallelCommandGroup, ParallelDeadlineGroup, cmd
 
 if typing.TYPE_CHECKING:
     from core import RobotContainer
@@ -37,7 +37,10 @@ class HP_Intake_Center_Pieces:
             home_cmd = cmd.none()
 
         self.command = SequentialCommandGroup(
-            self.container.shoot_command_factory().withTimeout(5),
+            ParallelDeadlineGroup(
+                self.container.shoot_command_factory().withTimeout(5),
+                self.container.drivetrain.hold_position_and_aim_command(),
+            ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[0]),
             ),
@@ -49,7 +52,10 @@ class HP_Intake_Center_Pieces:
                 AutoBuilder.followPath(self.paths[2]),
                 home_cmd,
             ),
-            self.container.shoot_command_factory().withTimeout(5),
+            ParallelDeadlineGroup(
+                self.container.shoot_command_factory().withTimeout(5),
+                self.container.drivetrain.hold_position_and_aim_command(),
+            ),
         )
 
     def get_command(self):
