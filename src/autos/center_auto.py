@@ -31,6 +31,7 @@ class Depot_Side_Balls:
             ),
             ParallelDeadlineGroup(
                 self.container.shoot_command_factory().withTimeout(5),
+                self.container.drivetrain.hold_position_command(),
             ),
             ParallelDeadlineGroup(
                 AutoBuilder.followPath(self.paths[1]),
@@ -50,7 +51,7 @@ class Depot_Side_Balls:
             ),
             ParallelDeadlineGroup(
                 self.container.shoot_command_factory().withTimeout(5),
-                # self.container.drivetrain.hold_position_command(),
+                self.container.drivetrain.hold_position_command(),
             ),
         )
 
