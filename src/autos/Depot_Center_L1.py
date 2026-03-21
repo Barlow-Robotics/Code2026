@@ -18,10 +18,10 @@ from subsystems import IntakePositions
 path_name = "Depot_Center_1L"
 
 
-class HP_Center_L1:
+class Depot_Center_L1:
     def __init__(self, container: "RobotContainer"):
         self.paths = [
-            PathPlannerPath.fromChoreoTrajectory(path_name, i) for i in range(5)
+            PathPlannerPath.fromChoreoTrajectory(path_name, i) for i in range(4)
         ]
         self.container = container
 
@@ -51,7 +51,7 @@ class HP_Center_L1:
             ),
             ParallelCommandGroup(
                 SequentialCommandGroup(
-                    AutoBuilder.followPath(self.paths[4]),
+                    # AutoBuilder.followPath(self.paths[4]),
                     # AutoBuilder.followPath(self.paths[5]),
                     # self.container.drivetrain.hold_position_command(),
                 ),

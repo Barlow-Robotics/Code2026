@@ -17,7 +17,7 @@ from subsystems import IntakePositions
 path_name = "Depot_Center_1L_standalone"
 
 
-class HP_Center_L1_standalone:
+class Depot_Center_L1_Standalone:
     def __init__(self, container: "RobotContainer"):
         self.paths = [
             PathPlannerPath.fromChoreoTrajectory(path_name, i) for i in range(3)
