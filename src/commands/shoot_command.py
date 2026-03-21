@@ -3,6 +3,7 @@ from commands2 import Command
 from wpilib import SmartDashboard
 from constants import ShooterConstants
 from constants.field_constants import CustomPoints
+from constants.robot_constants import RobotFeatures
 from subsystems.drivetrain import Drivetrain
 
 if TYPE_CHECKING:
@@ -37,7 +38,8 @@ class ShootCommand(Command):
 
     def execute(self):
         if not self.driveSub.allow_center_auto_align:
-            self.turret.set_target_hood_and_turret()
+            if RobotFeatures.HAS_TURRET:
+                self.turret.set_target_hood_and_turret()
         else:
             pose = self.driveSub.get_pose()
             target_pose = pose.nearest(
@@ -52,7 +54,8 @@ class ShootCommand(Command):
                 ]
             )
             target_pose = Translation3d(target_pose.X(), target_pose.Y(), 0)
-            self.turret.set_target_hood_and_turret(shooting_location=target_pose)
+            if RobotFeatures.HAS_TURRET:
+                self.turret.set_target_hood_and_turret(shooting_location=target_pose)
 
         if self._feeding:
             return
@@ -72,4 +75,5 @@ class ShootCommand(Command):
         self.shooter.stop_flywheel()
         self.feeder.stop()
         self.spindex.stop()
-        self.turret.reset_target_hood_and_turret()
+        if RobotFeatures.HAS_TURRET:
+            self.turret.reset_target_hood_and_turret()
