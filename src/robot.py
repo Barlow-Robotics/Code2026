@@ -18,7 +18,7 @@ from core import RobotContainer
 from phoenix6 import HootAutoReplay
 from wpilib import DriverStation, RobotBase, SmartDashboard
 from constants import RobotFeatures
-from utils.profiler import LoopTimer, PeriodicProfiler
+from utils.profiler import LoopTimer
 
 if typing.TYPE_CHECKING:
     from autos import AutoRoutine
@@ -62,8 +62,13 @@ class Robot(
             HootAutoReplay().with_timestamp_replay().with_joystick_replay()
         )
 
-        # --- cProfile setup (sim-only by default) ---
-        self._cprofile = PeriodicProfiler(available=RobotFeatures.HAS_CPROFILE)
+        # --- Profiler setup (sim-only by default) ---
+        if RobotFeatures.HAS_CPROFILE:
+            from utils.profiler import PeriodicProfiler
+
+            self._cprofile = PeriodicProfiler()
+        else:
+            self._cprofile = None
         self._scheduler_timer = LoopTimer("Scheduler")
         SmartDashboard.putNumber("hood_angle", 25)
         SmartDashboard.putNumber("hood_angle_final", 0)
@@ -81,7 +86,8 @@ class Robot(
         self.container.turret.hood_cancoder.set_position(0, 0.2)
         """This function is called once each time the robot enters Disabled mode."""
         self.container.reinitialize_subsystems()
-        self._cprofile.disable()
+        if self._cprofile:
+            self._cprofile.disable()
 
     def disabledPeriodic(self) -> None:
         """This function is called periodically when disabled"""
@@ -108,7 +114,8 @@ class Robot(
         pass
 
     def teleopInit(self) -> None:
-        self._cprofile.enable()
+        if self._cprofile:
+            self._cprofile.enable()
         # This makes sure that the autonomous stops running when
         # teleop starts running. If you want the autonomous to
         # continue until interrupted by another command, remove

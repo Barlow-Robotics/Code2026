@@ -81,30 +81,25 @@ class PeriodicProfiler:
     View results by opening the .html file in a browser.
     """
 
-    __slots__ = ("_available", "_profiler", "_enabled", "_output_dir")
+    __slots__ = ("_profiler", "_enabled", "_output_dir")
 
-    def __init__(self, available: bool = False):
-        self._available = available
+    def __init__(self):
         self._enabled = False
         self._profiler = None
-        self._output_dir: str = ""
-        if available:
-            from utils.advantagekit import ddatetime_obj
+        from utils.advantagekit import ddatetime_obj
 
-            if RobotBase.isReal():
-                self._output_dir = f"/home/lvuser/logs2/{ddatetime_obj}"
-            else:
-                self._output_dir = f"logs/{ddatetime_obj}"
-            os.makedirs(self._output_dir, exist_ok=True)
-            atexit.register(self._flush)
+        if RobotBase.isReal():
+            self._output_dir = f"/home/lvuser/logs2/{ddatetime_obj}"
+        else:
+            self._output_dir = f"logs/{ddatetime_obj}"
+        os.makedirs(self._output_dir, exist_ok=True)
+        atexit.register(self._flush)
 
     @property
     def enabled(self) -> bool:
         return self._enabled
 
     def enable(self) -> None:
-        if not self._available:
-            return
         from pyinstrument import Profiler
 
         self._profiler = Profiler()
@@ -125,3 +120,7 @@ class PeriodicProfiler:
             with open(output_path, "w", encoding="utf-8") as f:
                 f.write(self._profiler.output_html())
             print(f"Profile written to {output_path}")
+            if not RobotBase.isReal():
+                import webbrowser
+
+                webbrowser.open(os.path.abspath(output_path))
