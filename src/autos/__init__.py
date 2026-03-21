@@ -17,3 +17,4 @@ from .Depot_Center_L1_Standalone import (
     Depot_Center_L1_Standalone as Depot_Center_L1_Standalone,
 )
 from .Depot_Center_L2 import Depot_Center_L2 as Depot_Center_L2
+from .center_auto import Depot_Side_Balls as Depot_Side_Balls
