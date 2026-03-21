@@ -174,7 +174,7 @@ class Turret(Subsystem):
             #     (-angle_deg + (abs(current_robot_yaw_deg)))
             # )
             self.driveSub.target_field_heading = Rotation2d.fromDegrees(
-                current_robot_yaw_deg - (angle_deg + 180.0)
+                current_robot_yaw_deg - angle_deg
             )
 
             self.driveSub.changeAng = True

@@ -5,6 +5,7 @@ from pathplannerlib.auto import AutoBuilder
 from autos import AutoRoutine
 
 from commands2 import (
+    ParallelDeadlineGroup,
     SequentialCommandGroup,
 )
 
@@ -23,7 +24,10 @@ class Simple:
 
         self.command = SequentialCommandGroup(
             AutoBuilder.followPath(self.paths[0]),
-            self.container.shoot_command_factory().withTimeout(5),
+            ParallelDeadlineGroup(
+                self.container.shoot_command_factory().withTimeout(5),
+                self.container.drivetrain.hold_position_and_aim_command(),
+            ),
         )
 
     def get_command(self):

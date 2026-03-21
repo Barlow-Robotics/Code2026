@@ -4,7 +4,7 @@ from pathplannerlib.auto import AutoBuilder
 
 from autos import AutoRoutine
 
-from commands2 import SequentialCommandGroup, ParallelCommandGroup
+from commands2 import SequentialCommandGroup, ParallelCommandGroup, ParallelDeadlineGroup
 
 if typing.TYPE_CHECKING:
     from core import RobotContainer
@@ -22,7 +22,10 @@ class Kenny_auto2:
         self.container = container
 
         self.command = SequentialCommandGroup(
-            self.container.shoot_command_factory().withTimeout(5),
+            ParallelDeadlineGroup(
+                self.container.shoot_command_factory().withTimeout(5),
+                self.container.drivetrain.hold_position_and_aim_command(),
+            ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[0]),
             ),
@@ -61,7 +64,10 @@ class Kenny_auto2:
                     IntakePositions.HOME,
                 ).withTimeout(3),
             ),
-            self.container.shoot_command_factory().withTimeout(5),
+            ParallelDeadlineGroup(
+                self.container.shoot_command_factory().withTimeout(5),
+                self.container.drivetrain.hold_position_and_aim_command(),
+            ),
         )
 
     def get_command(self):
