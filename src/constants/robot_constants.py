@@ -24,10 +24,10 @@ class RobotFeatures:
 
         if RobotBase.isReal():
             cls.HAS_DRIVETRAIN = True
-            cls.HAS_VISION = False
+            cls.HAS_VISION = True
             cls.vision_camera_count = 3
             cls.HAS_SHOOTER = True
-            cls.HAS_TURRET = False
+            cls.HAS_TURRET = True
             cls.HAS_INTAKE = True
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
@@ -189,7 +189,7 @@ class VisionConstants:
     CAMERA_3_NAME = "Back_Right_Swerve"
     CAMERA_4_NAME = "Back_Left_Swerve"
 
-    VISION_SIM = False
+    VISION_SIM = True
 
     HALF_WIDTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)
     HALF_LENGTH = units.inchesToMeters(DriveConstants.TOTAL_WIDTH_INCHES / 2)

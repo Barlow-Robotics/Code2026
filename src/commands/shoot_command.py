@@ -54,6 +54,7 @@ class ShootCommand(Command):
                 ]
             )
             target_pose = Translation3d(target_pose.X(), target_pose.Y(), 0)
+            self.driveSub.driveSubTarget = target_pose
             if RobotFeatures.HAS_TURRET:
                 self.turret.set_target_hood_and_turret(shooting_location=target_pose)
 

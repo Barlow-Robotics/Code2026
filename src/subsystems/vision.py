@@ -67,6 +67,8 @@ class _CameraConfig:
     camera_sim: Optional[PhotonCameraSim] = None
     _last_result_timestamp: float = -1.0
     is_stale: bool = False
+    last_connected: bool = False
+    reconnect_attempts: int = 0
 
 
 class Vision(Subsystem):
@@ -159,12 +161,12 @@ class Vision(Subsystem):
             self._vision_sim = None
 
     def periodic(self):
+        self._loop_timer.start()
 
         if not RobotBase.isReal() and VisionConstants.VISION_SIM:
             self.simulation_periodic()
 
         if not self.disabled_vision:
-            self._loop_timer.start()
 
             current_pose = self.drive_sub.get_pose()
             current_speeds = self.drive_sub.get_speeds()  # once for all cameras
@@ -212,11 +214,36 @@ class Vision(Subsystem):
                 )
 
         # --- Camera connection status ---
-        # if RobotFeatures.LOGGING_VISION:
         for cam_cfg in self._cameras:
-            PyKitLogger.recordOutput(
-                f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
-            )
+            try:
+                connected = cam_cfg.camera.isConnected()
+            except Exception as e:
+                connected = False
+                print(f"Vision: isConnected() threw for {cam_cfg.name}: {e}")
+
+            PyKitLogger.recordOutput(f"Vision/Connection/{cam_cfg.name}", connected)
+            # Log transitions so we can see when connection drops/returns
+            if connected != cam_cfg.last_connected:
+                PyKitLogger.recordOutput(
+                    f"Vision/Connection/{cam_cfg.name}_transition",
+                    1.0 if connected else 0.0,
+                )
+                cam_cfg.last_connected = connected
+
+            # If disconnected, attempt a small number of reconnects by recreating the PhotonCamera
+            # if not connected and cam_cfg.reconnect_attempts < 3:
+            #     try:
+            #         PyKitLogger.recordOutput(
+            #             f"Vision/Connection/{cam_cfg.name}_reconnect_attempt",
+            #             float(cam_cfg.reconnect_attempts + 1),
+            #         )
+            #         # Recreate camera object using the configured name
+            #         cam_cfg.camera = PhotonCamera(cam_cfg.name)
+            #         cam_cfg.reconnect_attempts += 1
+            #     except Exception as e:
+            #         print(f"Vision: reconnect attempt failed for {cam_cfg.name}: {e}")
+            # if connected:
+            #     cam_cfg.reconnect_attempts = 0
 
         self._loop_timer.stop()
 
@@ -257,6 +284,20 @@ class Vision(Subsystem):
         try:
             result = cam_cfg.camera.getLatestResult()
         except IndexError:
+            return observations
+        except Exception as e:
+            # Log unexpected errors from the camera library and attempt a reconnect
+            print(f"Vision: getLatestResult() threw for {cam_cfg.name}: {e}")
+            PyKitLogger.recordOutput(f"Vision/Connection/{cam_cfg.name}_error", 1.0)
+            # Try a quick reconnect
+            try:
+                cam_cfg.camera = PhotonCamera(cam_cfg.name)
+                cam_cfg.reconnect_attempts += 1
+                PyKitLogger.recordOutput(
+                    f"Vision/Connection/{cam_cfg.name}_reconnect_attempt", float(cam_cfg.reconnect_attempts)
+                )
+            except Exception as e2:
+                print(f"Vision: reconnect after error failed for {cam_cfg.name}: {e2}")
             return observations
         result_timestamp = result.getTimestampSeconds()
         if result_timestamp == cam_cfg._last_result_timestamp:

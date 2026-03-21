@@ -203,15 +203,20 @@ class Controller:
                         )
                     )
                 )
+                controller.x().onTrue(
+                    container.turret.set_target_hood_and_turret()
+                ).onFalse(
+                    container.turret.reset_target_hood_and_turret()
+                )
 
         if (
             RobotFeatures.HAS_SHOOTER
             and RobotFeatures.HAS_FEEDER
             and RobotFeatures.HAS_SPINDEX
         ):
-            for controller in [self._driver, self._operator]:
+            for controller in [self._driver]:
                 # X → Fire / Shoot
-                controller.x().whileTrue(
+                controller.rightTrigger().whileTrue(
                     ShootCommand(
                         container.drivetrain,
                         container.shooter,

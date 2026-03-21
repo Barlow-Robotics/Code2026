@@ -185,8 +185,12 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         self._steer_characterization = swerve.requests.SysIdSwerveSteerGains()
         self._rotation_characterization = swerve.requests.SysIdSwerveRotation()
         self.nt = ntcore.NetworkTableInstance.getDefault()
+        self.nt.setServerTeam(4572)  # or inst.setServer("10.45.72.201")
+        self.nt.startClient4("robot")
         self.target_field_heading = 0
         self.changeAng = False
+        self.driveSubTarget = Pose2d()
+
         self._sys_id_routine_translation = SysIdRoutine(
             SysIdRoutine.Config(
                 # Use default ramp rate (1 V/s) and timeout (10 s)

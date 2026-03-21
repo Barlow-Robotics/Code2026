@@ -5,6 +5,7 @@
 # the WPILib BSD license file in the root directory of this project.
 #
 
+from ntcore import NetworkTableInstance
 from phoenix6.swerve import Pose2d
 import wpilib
 import commands2
@@ -72,6 +73,10 @@ class Robot(
         self._scheduler_timer = LoopTimer("Scheduler")
         SmartDashboard.putNumber("hood_angle", 25)
         SmartDashboard.putNumber("hood_angle_final", 0)
+        # inst = NetworkTableInstance.getDefault()
+        # inst.setServerTeam(4572)  # or inst.setServer("10.45.72.201")
+        # inst.startClient4("robot")
+
 
     def robotPeriodic(self) -> None:
         self._time_and_joystick_replay.update()
