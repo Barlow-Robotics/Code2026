@@ -82,9 +82,7 @@ class Controller:
             controller.rightBumper().onTrue(
                 cmd.runOnce(
                     lambda: (
-                        self.update_state(sub=False)
-                        if round(self._current_state, 2) < 1.0
-                        else print("HI2")
+                        self.update_driver(sub=False)
                     )
                 )
             )
@@ -92,9 +90,7 @@ class Controller:
             controller.leftBumper().onTrue(
                 cmd.runOnce(
                     lambda: (
-                        self.update_state(sub=True)
-                        if round(self._current_state, 2) > 0.5
-                        else print("hi")
+                        self.update_driver(sub=True)
                     )
                 )
             )
@@ -264,10 +260,20 @@ class Controller:
 
     def update_state(self, sub=False):
         print(self._current_state)
+        
         if sub:
             self._current_state -= 0.1
         else:
             self._current_state += 0.1
+
+
+    def update_driver(self, sub: bool):
+        if sub:
+            if round(self._current_state, 2) > 0.5:
+                self.update_state(sub=sub)
+        elif not sub:
+            if round(self._current_state, 2) < 1.0:
+                self.update_state(sub=sub)
 
     def _log_missing_connections(self):
         if not DriverStation.isJoystickConnected(self._OPERATOR_PORT):
