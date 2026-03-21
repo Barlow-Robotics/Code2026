@@ -13,5 +13,7 @@ from .HumanPlayer_Center_L2_autoAlign import (
 from .Simple_Path import Simple as Simple
 
 from .Depot_Center_L1 import Depot_Center_L1 as Depot_Center_L1
-from .Depot_Center_L1_Standalone import Depot_Center_L1_Standalone as Depot_Center_L1_Standalone
+from .Depot_Center_L1_Standalone import (
+    Depot_Center_L1_Standalone as Depot_Center_L1_Standalone,
+)
 from .Depot_Center_L2 import Depot_Center_L2 as Depot_Center_L2

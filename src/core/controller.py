@@ -145,19 +145,16 @@ class Controller:
                             position=IntakePositions.DEPLOYED,
                         ),
                         # Condition: is it currently deployed?
-                        lambda: container.intake.get_target_position() == IntakePositions.DEPLOYED,
+                        lambda: (
+                            container.intake.get_target_position()
+                            == IntakePositions.DEPLOYED
+                        ),
                     )
                 )
 
                 self._test_controller.leftBumper().onTrue(
-                    cmd.runOnce(
-                        lambda: container.intake.set_velocity(0)   
-                    )
-                ).onFalse(
-                    cmd.runOnce(
-                            lambda: container.intake.stop()   
-                    )
-                )
+                    cmd.runOnce(lambda: container.intake.set_velocity(0))
+                ).onFalse(cmd.runOnce(lambda: container.intake.stop()))
                 self._test_controller.rightBumper().onTrue(
                     cmd.runOnce(
                         lambda: container.intake.go_to_position(IntakePositions.HOME)
@@ -177,10 +174,12 @@ class Controller:
                 ).onFalse(cmd.runOnce(lambda: container.shooter.set_velocity(0)))
 
                 self._test_controller.leftTrigger().onTrue(
-                    cmd.runOnce(lambda: container.turret.set_angle_hood(SmartDashboard.getNumber("hood_angle", 10)))
-                ).onFalse(
-                    cmd.runOnce(lambda: container.turret.set_angle_hood(0))
-                )
+                    cmd.runOnce(
+                        lambda: container.turret.set_angle_hood(
+                            SmartDashboard.getNumber("hood_angle", 10)
+                        )
+                    )
+                ).onFalse(cmd.runOnce(lambda: container.turret.set_angle_hood(0)))
 
                 self._test_controller.x().whileTrue(
                     ShootCommand(
@@ -231,20 +230,27 @@ class Controller:
                 # Left trigger → Aim
                 controller.povDown().onTrue(
                     cmd.runOnce(
-                        lambda: container.turret.set_angle_hood(
-                            container.turret.hood_cancoder.get_position() - 10
-                        ) if container.vision.disabled_vision else container.turret.set_angle_hood(
-                            container.turret.hood_cancoder.get_position()
+                        lambda: (
+                            container.turret.set_angle_hood(
+                                container.turret.hood_cancoder.get_position() - 10
+                            )
+                            if container.vision.disabled_vision
+                            else container.turret.set_angle_hood(
+                                container.turret.hood_cancoder.get_position()
+                            )
                         )
                     )
                 )
                 controller.povUp().onTrue(
                     cmd.runOnce(
-                        lambda: container.turret.set_angle_hood(
-                            container.turret.hood_cancoder.get_position() + 10
-                        )
-                        if container.vision.disabled_vision else container.turret.set_angle_hood(
-                            container.turret.hood_cancoder.get_position()
+                        lambda: (
+                            container.turret.set_angle_hood(
+                                container.turret.hood_cancoder.get_position() + 10
+                            )
+                            if container.vision.disabled_vision
+                            else container.turret.set_angle_hood(
+                                container.turret.hood_cancoder.get_position()
+                            )
                         )
                     )
                 )

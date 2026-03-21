@@ -1,7 +1,7 @@
 import math
 from commands2 import Subsystem
 from wpilib import SmartDashboard
-from constants.robot_constants import MotorIDs
+from constants.robot_constants import MotorIDs, RobotFeatures
 from constants import SI, ShooterConstants
 from rev import (
     FeedbackSensor,
@@ -105,32 +105,33 @@ class Shooter(Subsystem):
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_RPM", float(self.get_current_rpm())
         )
-
-        PyKitLogger.recordOutput(
-            "Shooter/flywheel_motor_right_RPM", float(self.get_current_rpm_follower())
-        )
-
-        PyKitLogger.recordOutput(
-            "Shooter/flywheel_motor_left_current_velocity",
-            float(self.get_current_velocity()),
-        )
-        PyKitLogger.recordOutput(
-            "Shooter/flywheel_motor_left_target_velocity",
-            float(self.flywheel_target_velocity),
-        )
         PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_target_RPM",
             float(self.flywheel_target_RPM),
         )
+        if RobotFeatures.LOGGING_SHOOTER:
+            PyKitLogger.recordOutput(
+                "Shooter/flywheel_motor_right_RPM",
+                float(self.get_current_rpm_follower()),
+            )
 
-        PyKitLogger.recordOutput(
-            "Shooter/flywheel_motor_current_limit",
-            float(self.flywheel_motor_left_leader.getOutputCurrent()),
-        )
-        # PyKitLogger.recordOutput(
-        #     "Shooter/flywheel_motor_current_volts",
-        #     float(self.flywheel_motor_left_leader.getAppliedOutput()),
-        # )
+            PyKitLogger.recordOutput(
+                "Shooter/flywheel_motor_left_current_velocity",
+                float(self.get_current_velocity()),
+            )
+            PyKitLogger.recordOutput(
+                "Shooter/flywheel_motor_left_target_velocity",
+                float(self.flywheel_target_velocity),
+            )
+
+            PyKitLogger.recordOutput(
+                "Shooter/flywheel_motor_current_limit",
+                float(self.flywheel_motor_left_leader.getOutputCurrent()),
+            )
+            PyKitLogger.recordOutput(
+                "Shooter/flywheel_motor_current_volts",
+                float(self.flywheel_motor_left_leader.getAppliedOutput()),
+            )
 
         self._loop_timer.stop()
 

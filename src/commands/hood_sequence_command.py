@@ -25,7 +25,7 @@ class HoodSequenceCommand(Command):
             if abs(actual - self.STAGING_ANGLE_DEG) <= self.STAGING_TOLERANCE_DEG:
                 self._at_staging = True
                 self.turret.set_angle_hood(self.target_angle_deg)
-        
+
     def isFinished(self) -> bool:
         if not self._at_staging:
             return False

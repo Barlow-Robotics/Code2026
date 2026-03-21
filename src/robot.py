@@ -76,7 +76,7 @@ class Robot(
 
         self._scheduler_timer.start()
         commands2.CommandScheduler.getInstance().run()
-        if RobotFeatures.LOGGING:
+        if RobotFeatures.LOGGING_ROBOT:
             self.container.update_scoring_mechanism()
         self._scheduler_timer.stop()
 

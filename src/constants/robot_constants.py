@@ -35,6 +35,14 @@ class RobotFeatures:
             cls.TESTING = False
             cls.HAS_TURRET_ANGLE = False
             cls.LOGGING = False
+            cls.LOGGING_ROBOT = False
+            cls.LOGGING_DRIVETRAIN = False
+            cls.LOGGING_VISION = False
+            cls.LOGGING_SHOOTER = False
+            cls.LOGGING_TURRET = False
+            cls.LOGGING_INTAKE = False
+            cls.LOGGING_SPINDEX = False
+            cls.LOGGING_FEEDER = False
         else:
             cls.HAS_DRIVETRAIN = True
             cls.vision_camera_count = 4
@@ -48,6 +56,14 @@ class RobotFeatures:
             cls.TESTING = False
             cls.HAS_TURRET_ANGLE = False
             cls.LOGGING = False
+            cls.LOGGING_ROBOT = False
+            cls.LOGGING_DRIVETRAIN = False
+            cls.LOGGING_VISION = False
+            cls.LOGGING_SHOOTER = False
+            cls.LOGGING_TURRET = False
+            cls.LOGGING_INTAKE = False
+            cls.LOGGING_SPINDEX = False
+            cls.LOGGING_FEEDER = False
 
 
 class MotorIDs:
