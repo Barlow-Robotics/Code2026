@@ -1,17 +1,15 @@
 """
-Lightweight loop profiler for subsystem periodic timing and optional cProfile support.
+Lightweight loop profiler for subsystem periodic timing and optional pyinstrument support.
 
 LoopTimer: Tracks per-subsystem periodic() durations with zero-allocation hot path.
            Logs avg/max every ~1 second under Profiling/ in NetworkTables.
 
-cProfile: Wraps robotPeriodic() when enabled (sim-only by default via RobotFeatures).
-         Writes a .prof file on disable that can be viewed with:
-           python -m pstats profile.prof
-           snakeviz profile.prof
+pyinstrument: Statistical profiler (~1ms sampling) enabled via RobotFeatures.HAS_CPROFILE.
+              Starts on teleopInit, stops on disable, writes an interactive HTML report.
+              Open the .html file in a browser to view the flamegraph.
 """
 
 import atexit
-import cProfile
 import os
 import time
 
@@ -75,55 +73,55 @@ class LoopTimer:
 
 
 class PeriodicProfiler:
-    """Optional cProfile wrapper around robotPeriodic().
+    """Optional pyinstrument profiler for robotPeriodic().
 
-    Enable via RobotFeatures.HAS_CPROFILE. Accumulates profiling data across
-    the entire session and writes a .prof file on exit.
+    Enable via RobotFeatures.HAS_CPROFILE. Samples the call stack at ~1ms
+    intervals (low overhead). Starts on teleopInit, stops on disable.
 
-    View results with:
-        python -m pstats logs/<timestamp>/periodic.prof
-        snakeviz logs/<timestamp>/periodic.prof
+    View results by opening the .html file in a browser.
     """
 
-    __slots__ = ("_profiler", "_enabled", "_output_path", "_last_flush_time")
+    __slots__ = ("_available", "_profiler", "_enabled", "_output_dir")
 
-    FLUSH_INTERVAL_S = 10.0
-
-    def __init__(self, enabled: bool = False):
-        self._enabled = enabled
-        self._profiler: cProfile.Profile | None = None
-        self._output_path: str = ""
-        self._last_flush_time: float = 0.0
-        if enabled:
-            self._profiler = cProfile.Profile()
-            # Put the .prof next to the other logs
+    def __init__(self, available: bool = False):
+        self._available = available
+        self._enabled = False
+        self._profiler = None
+        self._output_dir: str = ""
+        if available:
             from utils.advantagekit import ddatetime_obj
 
             if RobotBase.isReal():
-                log_dir = f"/home/lvuser/logs2/{ddatetime_obj}"
+                self._output_dir = f"/home/lvuser/logs2/{ddatetime_obj}"
             else:
-                log_dir = f"logs/{ddatetime_obj}"
-            os.makedirs(log_dir, exist_ok=True)
-            self._output_path = os.path.join(log_dir, "periodic.prof")
+                self._output_dir = f"logs/{ddatetime_obj}"
+            os.makedirs(self._output_dir, exist_ok=True)
             atexit.register(self._flush)
 
     @property
     def enabled(self) -> bool:
         return self._enabled
 
-    def start(self) -> None:
-        if self._profiler is not None:
-            self._profiler.enable()
+    def enable(self) -> None:
+        if not self._available:
+            return
+        from pyinstrument import Profiler
 
-    def stop(self) -> None:
-        if self._profiler is not None:
-            self._profiler.disable()
-            now = time.perf_counter()
-            if now - self._last_flush_time >= self.FLUSH_INTERVAL_S:
-                self._last_flush_time = now
-                self._flush()
+        self._profiler = Profiler()
+        self._enabled = True
+        self._profiler.start()
+
+    def disable(self) -> None:
+        if not self._enabled:
+            return
+        self._enabled = False
+        self._profiler.stop()
+        self._flush()
+        self._profiler = None
 
     def _flush(self) -> None:
-        if self._profiler is not None and self._output_path:
-            self._profiler.dump_stats(self._output_path)
-            print(f"cProfile data written to {self._output_path}")
+        if self._profiler is not None and self._output_dir:
+            output_path = f"{self._output_dir}/periodic.html"
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(self._profiler.output_html())
+            print(f"Profile written to {output_path}")

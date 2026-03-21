@@ -63,7 +63,7 @@ class Robot(
         )
 
         # --- cProfile setup (sim-only by default) ---
-        self._cprofile = PeriodicProfiler(enabled=RobotFeatures.HAS_CPROFILE)
+        self._cprofile = PeriodicProfiler(available=RobotFeatures.HAS_CPROFILE)
         self._scheduler_timer = LoopTimer("Scheduler")
         SmartDashboard.putNumber("hood_angle", 25)
         SmartDashboard.putNumber("hood_angle_final", 0)
@@ -71,24 +71,17 @@ class Robot(
     def robotPeriodic(self) -> None:
         self._time_and_joystick_replay.update()
 
-        if self._cprofile.enabled:
-            self._cprofile.start()
-
         self._scheduler_timer.start()
         commands2.CommandScheduler.getInstance().run()
         if RobotFeatures.LOGGING:
             self.container.update_scoring_mechanism()
         self._scheduler_timer.stop()
 
-        if self._cprofile.enabled:
-            self._cprofile.stop()
-
     def disabledInit(self) -> None:
         self.container.turret.hood_cancoder.set_position(0, 0.2)
         """This function is called once each time the robot enters Disabled mode."""
         self.container.reinitialize_subsystems()
-
-        pass
+        self._cprofile.disable()
 
     def disabledPeriodic(self) -> None:
         """This function is called periodically when disabled"""
@@ -115,6 +108,7 @@ class Robot(
         pass
 
     def teleopInit(self) -> None:
+        self._cprofile.enable()
         # This makes sure that the autonomous stops running when
         # teleop starts running. If you want the autonomous to
         # continue until interrupted by another command, remove
