@@ -138,6 +138,23 @@ class Intake(commands2.Subsystem):
         )
         self.target_velocity = commanded_velocity
 
+    def reverse_velocity(self, current_velocity: float):
+        if current_velocity < 1:
+            current_velocity = 1
+        commanded_velocity = IntakeConstants.INTAKE_VELOCITY_CONSTANT
+        self._commanded_velocity_ft_per_sec = float(commanded_velocity)
+        self._stop_requested = False
+
+        commanded_velocity /= IntakeConstants.ROLLER_CIRCUMFERENCE_M
+        self._converted_velocity_rps = float(commanded_velocity)
+
+        self.motor_roller.set_control(
+            self._motion_magic_velocity_voltage_roller.with_velocity(
+                -commanded_velocity
+            ).with_acceleration(0.1)
+        )
+        self.target_velocity = -commanded_velocity
+
     def stop(self):
         self._stop_requested = True
         self._commanded_velocity_ft_per_sec = 0.0

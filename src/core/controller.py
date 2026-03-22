@@ -11,7 +11,7 @@ import wpilib
 from phoenix6 import swerve
 from wpilib import DriverStation, SmartDashboard
 from wpimath.geometry import Rotation2d
-from commands import IntakePositionCommand, ShootCommand
+from commands import IntakePositionCommand, ShootCommand, ReverseCommand
 from commands.throw_feeder_command import ThrowFeederCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
@@ -76,7 +76,7 @@ class Controller:
                     )
                 )
             )
-        )
+        )   
 
         for controller in [self._driver]:
             controller.rightBumper().onTrue(
@@ -220,7 +220,20 @@ class Controller:
                     ThrowFeederCommand(container.feeder, container.spindex)
                 )
 
-
+        if (
+            RobotFeatures.HAS_SHOOTER
+            and RobotFeatures.HAS_FEEDER
+            and RobotFeatures.HAS_SPINDEX
+            and RobotFeatures.HAS_INTAKE
+        ):
+            for controller in [self._operator]:
+                controller.x().whileTrue( # reverse intake
+                    ReverseCommand(container.drivetrain, container.shooter, container.feeder, container.spindex, container.turret, container.intake)
+                ).onFalse(
+                    cmd.run(
+                        lambda: container.intake.set_velocity(0)
+                    )
+                )
         if RobotFeatures.HAS_TURRET:
             for controller in [self._driver, self._operator]:
                 # Left trigger → Aim

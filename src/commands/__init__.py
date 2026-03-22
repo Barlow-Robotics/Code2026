@@ -10,3 +10,6 @@ from .go_to_position_command import (
 from .throw_feeder_command import (
     ThrowFeederCommand as ThrowFeederCommand,
 )
+from .reverse_command import (
+    ReverseCommand as ReverseCommand,
+)
