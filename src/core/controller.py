@@ -124,6 +124,10 @@ class Controller:
                 controller.povLeft().whileTrue(
                     cmd.runOnce(lambda: container.intake.stop())
                 )
+                controller.povRight().whileTrue(
+                    cmd.runOnce(lambda: container.intake.set_velocity(1))
+                )
+
                 # B → Throw out feeder
                 controller.leftBumper().onTrue(
                     cmd.either(
