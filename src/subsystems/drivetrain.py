@@ -11,6 +11,7 @@ from constants import SI, TunerSwerveDrivetrain, DriveConstants
 import ntcore
 from wpimath.kinematics import ChassisSpeeds
 from utils.profiler import LoopTimer
+from utils.swerve_facing_angle import FieldCentricFacingAngleAbsolute
 
 
 class Drivetrain(Subsystem, TunerSwerveDrivetrain):
@@ -155,11 +156,10 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             )  # Use open-loop control for drive motors
         )
         self.facing_angle = (
-            swerve.requests.FieldCentricFacingAngle().with_drive_request_type(
+            FieldCentricFacingAngleAbsolute().with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )
             .with_max_abs_rotational_rate(DriveConstants.MAX_ANGULAR_VELOCITY)
-            .with_forward_perspective(swerve.requests.ForwardPerspectiveValue.BLUE_ALLIANCE)
         )
 
         self.heading_lock_movement = (

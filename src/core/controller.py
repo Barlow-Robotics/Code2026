@@ -204,7 +204,7 @@ class Controller:
                     )
                 )
                 controller.button(2).whileTrue(
-                    cmd.runOnce(
+                    cmd.run(
                         lambda: container.turret.enableAutoAim(True)
                     )
                 ).onFalse(
