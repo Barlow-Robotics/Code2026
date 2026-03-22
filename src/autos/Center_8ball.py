@@ -11,8 +11,6 @@ from commands2 import (
 
 if typing.TYPE_CHECKING:
     from core import RobotContainer
-from commands import IntakePositionCommand
-from subsystems import IntakePositions
 
 path_name = "Center_8Ball"
 

@@ -113,7 +113,7 @@ class RobotContainer:
         self.configure_autos()
 
     def reinitialize_subsystems(self):
-        from subsystems import Turret, Intake
+        # from subsystems import Turret, Intake
 
         # if RobotFeatures.HAS_VISION:
         #     self.vision = Vision(drive_sub=self.drivetrain)
@@ -140,46 +140,54 @@ class RobotContainer:
             and RobotFeatures.HAS_FEEDER
             and RobotFeatures.HAS_SPINDEX
             and RobotFeatures.HAS_TURRET
+            and RobotFeatures.HAS_VISION
         ):
             self.auto_selection.setDefaultOption(
                 "HP_Center_L2",
                 HP_Center_L2(self).get_command(),
             )
             self.auto_selection.addOption("Leave", Leave_Shoot(self).get_command())
-        else:
-            self.auto_selection.setDefaultOption(
-                "Leave", Leave_Shoot(self).get_command()
+            self.auto_selection.addOption("HP_Center_L1", HP_Center_L1(self).get_command())
+            self.auto_selection.addOption(
+                "HP_Center_L1_Standalone", HP_Center_L1_standalone(self).get_command()
+            )
+            self.auto_selection.addOption(
+                "Depot_Center_L1", Depot_Center_L1(self).get_command()
+            )
+            self.auto_selection.addOption(
+                "Depot_Center_L1_Standalone", Depot_Center_L1_Standalone(self).get_command()
+            )
+            self.auto_selection.addOption(
+                "Depot_Center_L2", Depot_Center_L2(self).get_command()
+            )
+            self.auto_selection.addOption(
+                "Center_Auto", Center_Auto(self).get_command()
+            )
+            # self.auto_selection.addOption("Simple", Simple(self).get_command())
+        elif (RobotFeatures.HAS_INTAKE
+            and RobotFeatures.HAS_SHOOTER
+            and RobotFeatures.HAS_FEEDER
+            and RobotFeatures.HAS_SPINDEX
+            and RobotFeatures.HAS_TURRET
+        ):
+            self.auto_selection.addOption(
+                "Depot_Side_Balls", Depot_Side_Balls(self).get_command()
             )
 
-        self.auto_selection.addOption("HP_Center_L1", HP_Center_L1(self).get_command())
-        self.auto_selection.addOption(
-            "HP_Center_L1_Standalone", HP_Center_L1_standalone(self).get_command()
-        )
-        self.auto_selection.addOption("HP_Center_L2", HP_Center_L2(self).get_command())
-        self.auto_selection.addOption(
-            "Depot_Center_L1", Depot_Center_L1(self).get_command()
-        )
-        self.auto_selection.addOption(
-            "Depot_Center_L1_Standalone", Depot_Center_L1_Standalone(self).get_command()
-        )
-        self.auto_selection.addOption(
-            "Depot_Center_L2", Depot_Center_L2(self).get_command()
-        )
-        self.auto_selection.addOption(
-            "Depot_Side_Balls", Depot_Side_Balls(self).get_command()
-        )
-        self.auto_selection.addOption(
-            "Center_Auto", Center_Auto(self).get_command()
-        )
+        else:
+            self.auto_selection.setDefaultOption(
+                "Center_Auto", Center_Auto(self).get_command()
+            )
 
-        self.auto_selection.addOption("Simple", Simple(self).get_command())
+
+
         # allow us to choose our auto in Smart Dashboard
         wpilib.SmartDashboard.putData("Auto", self.auto_selection)
         prefix = "Auto"
-        PyKitLogger.recordOutput(f"{prefix}/option_0", "HP_Intake_Center_Pieces")
-        PyKitLogger.recordOutput(f"{prefix}/option_1", "kenny path")
-        PyKitLogger.recordOutput(f"{prefix}/option_2", "Leave")
-        PyKitLogger.recordOutput(f"{prefix}/default", "HP_Intake_Center_Pieces")
+        # PyKitLogger.recordOutput(f"{prefix}/option_0", "HP_Intake_Center_Pieces")
+        # PyKitLogger.recordOutput(f"{prefix}/option_1", "kenny path")
+        # PyKitLogger.recordOutput(f"{prefix}/option_2", "Leave")
+        # PyKitLogger.recordOutput(f"{prefix}/default", "HP_Intake_Center_Pieces")
 
         prefix = prefix + "/PathPlanner"
         PathPlannerLogging.setLogCurrentPoseCallback(
