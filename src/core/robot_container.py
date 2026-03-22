@@ -35,7 +35,8 @@ from autos import (
     Depot_Center_L1,
     Depot_Center_L1_Standalone,
     Depot_Center_L2,
-    Depot_Side_Balls
+    Depot_Side_Balls,
+    Center_Auto
 )
 
 
@@ -166,6 +167,9 @@ class RobotContainer:
         )
         self.auto_selection.addOption(
             "Depot_Side_Balls", Depot_Side_Balls(self).get_command()
+        )
+        self.auto_selection.addOption(
+            "Center_Auto", Center_Auto(self).get_command()
         )
 
         self.auto_selection.addOption("Simple", Simple(self).get_command())

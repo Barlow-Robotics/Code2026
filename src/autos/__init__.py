@@ -18,3 +18,4 @@ from .Depot_Center_L1_Standalone import (
 )
 from .Depot_Center_L2 import Depot_Center_L2 as Depot_Center_L2
 from .center_auto import Depot_Side_Balls as Depot_Side_Balls
+from .Center_8ball import Center_Auto as Center_Auto
