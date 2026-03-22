@@ -38,6 +38,7 @@ class ShootCommand(Command):
     def execute(self):
         if not self.driveSub.allow_center_auto_align:
             self.turret.set_target_hood_and_turret()
+            pass
         else:
             pose = self.driveSub.get_pose()
             target_pose = pose.nearest(

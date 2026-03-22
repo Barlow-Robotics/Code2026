@@ -171,6 +171,7 @@ class Turret(Subsystem):
                 current_robot_yaw_deg - angle_deg
             )
             self.driveSub.changeAng = True
+            self.driveSub.changeAngTelop = False
             
 
             # print("SET_ANGLE_TURRET")
@@ -476,3 +477,10 @@ class Turret(Subsystem):
 
     def sysIdDynamicHood(self, direction: SysIdRoutine.Direction):
         return self.sys_id_routine_hood.dynamic(direction)
+    def enableAutoAim(self, enable: bool):
+        if enable:
+            self.set_target_hood_and_turret()
+            self.driveSub.changeAngTelop = enable
+        else:
+            self.reset_target_hood_and_turret()
+            self.driveSub.changeAngTelop = enable

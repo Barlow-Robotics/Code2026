@@ -11,7 +11,7 @@ import wpilib
 from phoenix6 import swerve
 from wpilib import DriverStation, SmartDashboard
 from wpimath.geometry import Rotation2d
-from commands import IntakePositionCommand, ShootCommand
+from commands import IntakePositionCommand, ShootCommand, AutoAimCommand
 from commands.throw_feeder_command import ThrowFeederCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
@@ -58,7 +58,7 @@ class Controller:
                             * self._current_state
                         )
                     )
-                    if not container.drivetrain.changeAng
+                    if not container.drivetrain.changeAngTelop
                     else (
                         container.drivetrain.facing_angle.with_velocity_x(
                             -self._driver.getRawAxis(1)
@@ -203,6 +203,18 @@ class Controller:
                         )
                     )
                 )
+                controller.button(2).whileTrue(
+                    cmd.runOnce(
+                        lambda: container.turret.enableAutoAim(True)
+                    )
+                ).onFalse(
+                    cmd.runOnce(
+                        lambda: container.turret.enableAutoAim(False)
+                    )
+                )
+                # controller.button(2).whileTrue(
+                #     AutoAimCommand(container.drivetrain, container.vision)
+                # )
 
         if (
             RobotFeatures.HAS_SHOOTER
@@ -211,7 +223,7 @@ class Controller:
         ):
             for controller in [self._driver, self._operator]:
                 # X → Fire / Shoot
-                controller.x().whileTrue(
+                controller.leftTrigger().whileTrue(
                     ShootCommand(
                         container.drivetrain,
                         container.shooter,
@@ -250,6 +262,7 @@ class Controller:
                         )
                     )
                 )
+
         # Periodically warn about missing controllers during teleop
         Trigger(DriverStation.isTeleopEnabled).whileTrue(
             cmd.sequence(

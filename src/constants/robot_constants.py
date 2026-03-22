@@ -52,7 +52,7 @@ class RobotFeatures:
             cls.HAS_INTAKE = True
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
-            cls.HAS_CPROFILE = True
+            cls.HAS_CPROFILE = False
             cls.TESTING = False
             cls.HAS_TURRET_ANGLE = False
             cls.LOGGING = False

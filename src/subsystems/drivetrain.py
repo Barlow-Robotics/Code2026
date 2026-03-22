@@ -158,6 +158,8 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             swerve.requests.FieldCentricFacingAngle().with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )
+            .with_max_abs_rotational_rate(DriveConstants.MAX_ANGULAR_VELOCITY)
+            .with_forward_perspective(swerve.requests.ForwardPerspectiveValue.BLUE_ALLIANCE)
         )
 
         self.heading_lock_movement = (
@@ -198,8 +200,9 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         self._steer_characterization = swerve.requests.SysIdSwerveSteerGains()
         self._rotation_characterization = swerve.requests.SysIdSwerveRotation()
         self.nt = ntcore.NetworkTableInstance.getDefault()
-        self.target_field_heading = 0
+        self.target_field_heading = Rotation2d(0)
         self.changeAng = False
+        self.changeAngTelop = False
         self._sys_id_routine_translation = SysIdRoutine(
             SysIdRoutine.Config(
                 # Use default ramp rate (1 V/s) and timeout (10 s)
