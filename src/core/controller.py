@@ -104,7 +104,7 @@ class Controller:
 
         # Subsystem button bindings
         if RobotFeatures.HAS_INTAKE:
-            for controller in [self._operator, self._operator]:
+            for controller in [self._operator]:
                 # Y → Deploy intake
                 controller.y().onTrue(
                     IntakePositionCommand(
@@ -113,13 +113,16 @@ class Controller:
                         position=IntakePositions.DEPLOYED,
                     )
                 )
-                # A → Retract intake
                 controller.a().onTrue(
                     IntakePositionCommand(
                         drive_sub=container.drivetrain,
                         intake_sub=container.intake,
                         position=IntakePositions.HOME,
                     )
+                )
+                # A → Retract intake
+                controller.povLeft().whileTrue(
+                    cmd.runOnce(lambda: container.intake.stop())
                 )
                 # B → Throw out feeder
                 controller.leftBumper().onTrue(
