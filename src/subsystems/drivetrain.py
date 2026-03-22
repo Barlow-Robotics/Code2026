@@ -177,6 +177,19 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
 
         self.facing_angle.heading_controller.setPID(10.0, 0.0, 0.0)
 
+        self.robot_centric_facing_angle = (
+            swerve.requests.RobotCentricFacingAngle()
+            .with_drive_request_type(
+                swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
+            )
+            .with_max_abs_rotational_rate(DriveConstants.MAX_ANGULAR_VELOCITY)
+            .with_forward_perspective(swerve.requests.ForwardPerspectiveValue.BLUE_ALLIANCE)
+        )
+        self.robot_centric_facing_angle.heading_controller.setPID(10.0, 0.0, 0.0)
+        self.robot_centric_facing_angle.heading_controller.enableContinuousInput(
+            -math.pi, math.pi
+        )
+
         self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""
 
@@ -315,11 +328,6 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
 
     def periodic(self):
         self._loop_timer.start()
-        if self.changeAng and DriverStation.isAutonomous():
-            self.set_control(
-                self.facing_angle.with_target_direction(self.target_field_heading)
-            )
-        #
         self.determine_turret_state()
         # Periodically try to apply the operator perspective.
         # If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
@@ -429,12 +437,20 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     def set_robot_centric_velocities(
         self, speeds: ChassisSpeeds
     ):  # BW needed for AutoBuilder since it only supports robot-centric control, but we want to use field-centric control for teleop
-        self.set_control(
-            swerve.requests.RobotCentric()
-            .with_velocity_x(speeds.vx)
-            .with_velocity_y(speeds.vy)
-            .with_rotational_rate(speeds.omega)
-        )
+        if self.changeAng:
+            self.set_control(
+                self.robot_centric_facing_angle
+                .with_velocity_x(speeds.vx)
+                .with_velocity_y(speeds.vy)
+                .with_target_direction(self.target_field_heading)
+            )
+        else:
+            self.set_control(
+                swerve.requests.RobotCentric()
+                .with_velocity_x(speeds.vx)
+                .with_velocity_y(speeds.vy)
+                .with_rotational_rate(speeds.omega)
+            )
 
     def determine_turret_state(self):
         drivePose = self.get_pose()
@@ -471,6 +487,20 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     def hold_position_command(self):
         """Actively commands 0 velocity in X, Y, and yaw."""
         return self.apply_request(lambda: self._zero_request)
+
+    def hold_position_and_aim_command(self):
+        """Hold position; if changeAng is set, rotate toward target heading."""
+        def _execute():
+            if self.changeAng:
+                self.set_control(
+                    self.robot_centric_facing_angle
+                    .with_velocity_x(0)
+                    .with_velocity_y(0)
+                    .with_target_direction(self.target_field_heading)
+                )
+            else:
+                self.set_control(self._zero_request)
+        return self.run(_execute)
 
     def lock_wheels_command(self):
         """X-stance: physically locks wheels against pushing forces."""

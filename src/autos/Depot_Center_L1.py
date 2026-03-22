@@ -49,13 +49,9 @@ class Depot_Center_L1:
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[3]),
             ),
-            ParallelCommandGroup(
-                SequentialCommandGroup(
-                    # AutoBuilder.followPath(self.paths[4]),
-                    # AutoBuilder.followPath(self.paths[5]),
-                    # self.container.drivetrain.hold_position_command(),
-                ),
+            ParallelDeadlineGroup(
                 self.container.shoot_command_factory().withTimeout(15),
+                self.container.drivetrain.hold_position_and_aim_command(),
             ),
         )
 

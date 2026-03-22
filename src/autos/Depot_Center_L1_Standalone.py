@@ -47,7 +47,7 @@ class Depot_Center_L1_Standalone:
             ),
             ParallelDeadlineGroup(
                 self.container.shoot_command_factory().withTimeout(5),
-                # self.container.drivetrain.hold_position_command(),
+                self.container.drivetrain.hold_position_and_aim_command(),
             ),
         )
 
