@@ -124,7 +124,7 @@ class Intake(commands2.Subsystem):
     def set_velocity(self, current_velocity: float):
         if current_velocity < 1:
             current_velocity = 1
-        commanded_velocity = current_velocity * IntakeConstants.INTAKE_VELOCITY_CONSTANT
+        commanded_velocity = IntakeConstants.INTAKE_VELOCITY_CONSTANT
         self._commanded_velocity_ft_per_sec = float(commanded_velocity)
         self._stop_requested = False
 

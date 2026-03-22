@@ -106,7 +106,7 @@ class IntakeConstants:
     ARM_DEPLOYED_LENGTH_IN = 12.191
     ARM_DEPLOYED_ROTATIONS = 20.59
 
-    INTAKE_VELOCITY_CONSTANT = 2.6 * 6 * 2
+    INTAKE_VELOCITY_CONSTANT = 2.6 * 6
     # Amplified from robot speed
 
     PID = {"kP": 0.11, "kI": 0, "kD": 0, "kF": 0, "kA": 0}  # TODO: tune PID

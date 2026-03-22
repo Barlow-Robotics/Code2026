@@ -122,10 +122,6 @@ class Controller:
                     )
                 )
                 # B → Throw out feeder
-                controller.b().whileTrue(
-                    ThrowFeederCommand(container.feeder, container.spindex)
-                )
-
                 controller.leftBumper().onTrue(
                     cmd.either(
                         # If intake is deployed/active → retract home
@@ -209,9 +205,9 @@ class Controller:
             and RobotFeatures.HAS_FEEDER
             and RobotFeatures.HAS_SPINDEX
         ):
-            for controller in [self._driver, self._operator]:
+            for controller in [self._driver]:
                 # X → Fire / Shoot
-                controller.x().whileTrue(
+                controller.rightTrigger().whileTrue(
                     ShootCommand(
                         container.drivetrain,
                         container.shooter,
@@ -220,6 +216,10 @@ class Controller:
                         container.turret,
                     )
                 )
+                controller.b().whileTrue(
+                    ThrowFeederCommand(container.feeder, container.spindex)
+                )
+
 
         if RobotFeatures.HAS_TURRET:
             for controller in [self._driver, self._operator]:
