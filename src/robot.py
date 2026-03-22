@@ -83,8 +83,7 @@ class Robot(
         self._scheduler_timer.stop()
 
     def disabledInit(self) -> None:
-        if RobotFeatures.HAS_TURRET:
-            self.container.turret.hood_cancoder.set_position(0, 0.2)
+        self.container.turret.hood_cancoder.set_position(0, 0.2)
         """This function is called once each time the robot enters Disabled mode."""
         self.container.reinitialize_subsystems()
         if self._cprofile:

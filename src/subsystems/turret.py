@@ -167,16 +167,9 @@ class Turret(Subsystem):
     def set_angle_turret(self, angle_deg: float):
         if not RobotFeatures.HAS_TURRET_ANGLE:
             current_robot_yaw_deg = self.driveSub.get_rotation().degrees()
-            print(current_robot_yaw_deg)
-            print(angle_deg)
-            print(current_robot_yaw_deg - (angle_deg + 180.0))
-            # self.driveSub.target_field_heading = Rotation2d.fromDegrees( # angle_deg
-            #     (-angle_deg + (abs(current_robot_yaw_deg)))
-            # )
             self.driveSub.target_field_heading = Rotation2d.fromDegrees(
                 current_robot_yaw_deg - (angle_deg + 180.0)
             )
-
             self.driveSub.changeAng = True
             
 

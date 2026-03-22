@@ -65,7 +65,7 @@ class RobotContainer:
         self.spindex = None
         self.feeder = None
 
-        from subsystems import Shooter, Turret, Intake, Spindex, Feeder
+        from subsystems import Vision, Shooter, Turret, Intake, Spindex, Feeder
 
         if RobotFeatures.HAS_VISION:
             self.vision = Vision(drive_sub=self.drivetrain)
