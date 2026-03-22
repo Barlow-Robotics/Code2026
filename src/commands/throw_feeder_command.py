@@ -20,8 +20,8 @@ class ThrowFeederCommand(Command):
     def execute(self):
         if self._feeding:
             return
-        self.feeder.move(invert=True)
-        self.spindex.move()
+        self.feeder.move(9, invert=True)
+        self.spindex.move(9)
         self._feeding = True
 
     def isFinished(self):

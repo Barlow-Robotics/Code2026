@@ -13,3 +13,6 @@ from .throw_feeder_command import (
 from .auto_aim_command import (
     AutoAimCommand as AutoAimCommand,   
 )
+from .reverse_command import (
+    ReverseCommand as ReverseCommand,
+)
