@@ -236,10 +236,6 @@ class Controller:
             for controller in [self._operator]:
                 controller.x().whileTrue( # reverse intake
                     ReverseCommand(container.drivetrain, container.shooter, container.feeder, container.spindex, container.turret, container.intake)
-                ).onFalse(
-                    cmd.run(
-                        lambda: container.intake.set_velocity(0)
-                    )
                 )
         if RobotFeatures.HAS_TURRET:
             for controller in [self._driver, self._operator]:

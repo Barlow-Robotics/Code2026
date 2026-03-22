@@ -55,8 +55,8 @@ class RobotFeatures:
             cls.HAS_CPROFILE = False
             cls.TESTING = False
             cls.HAS_TURRET_ANGLE = False
-            cls.LOGGING = False
-            cls.LOGGING_ROBOT = False
+            cls.LOGGING = True
+            cls.LOGGING_ROBOT = True
             cls.LOGGING_DRIVETRAIN = False
             cls.LOGGING_VISION = False
             cls.LOGGING_SHOOTER = False
@@ -70,8 +70,8 @@ class MotorIDs:
     foc_active = True
 
     # INTAKE
-    motor_id_arm_leader = 51
-    motor_id_arm_follower = 52
+    motor_id_arm_leader_left = 51
+    motor_id_arm_follower_right = 52
     motor_id_roller = 53
 
     # SPINDEX
@@ -102,7 +102,7 @@ class IntakeConstants:
     ARM_MOTOR = DCMotor.krakenX44(1)
     ARM_GEARING = 14 / 58
     ARM_MOI = 0.01
-    ARM_HOME_ROTATIONS = 0
+    ARM_HOME_ROTATIONS = 20.59
     ARM_DEPLOYED_LENGTH_IN = 12.191
     ARM_DEPLOYED_ROTATIONS = 20.59
 
