@@ -49,7 +49,7 @@ class RobotFeatures:
             cls.HAS_VISION = False
             cls.HAS_SHOOTER = True
             cls.HAS_TURRET = False
-            cls.HAS_INTAKE = False
+            cls.HAS_INTAKE = True
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
             cls.HAS_CPROFILE = False

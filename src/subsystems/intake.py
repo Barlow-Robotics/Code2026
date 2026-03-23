@@ -28,7 +28,7 @@ class IntakeCommandTelemetry:
 @dataclass
 class IntakeTelemetry:
     arm_position: float
-    arm_position_follower: float
+    # arm_position_follower: float
     arm_target_position: float
     # follower_voltage: float
     # leader_voltage: float
@@ -68,7 +68,7 @@ class Intake(commands2.Subsystem):
 
         self.motor_roller: TalonFX = TalonFX(MotorIDs.motor_id_roller, "*")
         self.motor_arm_leader: TalonFX = TalonFX(MotorIDs.motor_id_arm_leader_left, "*")
-        self.motor_arm_follower: TalonFX = TalonFX(MotorIDs.motor_id_arm_follower_right, "*")
+        # self.motor_arm_follower: TalonFX = TalonFX(MotorIDs.motor_id_arm_follower_right, "*")
         SmartDashboard.putNumber("kP_Roller", 0.0)
         SmartDashboard.putNumber("kI_Roller", 0.0)
         SmartDashboard.putNumber("kD_Roller", 0.0)
@@ -82,16 +82,6 @@ class Intake(commands2.Subsystem):
             brake_mode=False,
             gear_ratio=IntakeConstants.ROLLER_GEARING,
         )
-        INTAKE_CONFIG_ARM_LEFT = TalonConfigFX(
-            kP=0.4,
-            kI=0,
-            kD=0,
-            kV=0.03,
-            kG=-0.29,
-            kS=0.3,
-            brake_mode=True,
-            gear_ratio=IntakeConstants.ARM_GEARING,
-        )
 
         INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
             kP=0.4,
@@ -103,10 +93,20 @@ class Intake(commands2.Subsystem):
             brake_mode=True,
             gear_ratio=IntakeConstants.ARM_GEARING,
         )
+        INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
+            kP=0.0,
+            kI=0,
+            kD=0,
+            kV=0.03,
+            kG=0.0,
+            kS=0.0,
+            brake_mode=True,
+            gear_ratio=IntakeConstants.ARM_GEARING,
+        )
 
         INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=False)
-        INTAKE_CONFIG_ARM_LEFT._apply_settings(self.motor_arm_leader, inverted=False)
-        INTAKE_CONFIG_ARM_RIGHT._apply_settings(self.motor_arm_follower, inverted=True)
+        # INTAKE_CONFIG_ARM_LEFT._apply_settings(self.motor_arm_leader, inverted=False)
+        INTAKE_CONFIG_ARM_RIGHT._apply_settings(self.motor_arm_leader, inverted=True)
 
         self._motion_magic_velocity_voltage_roller = (
             controls.MotionMagicVelocityVoltage(0, enable_foc=MotorIDs.foc_active)
@@ -189,9 +189,9 @@ class Intake(commands2.Subsystem):
         self.motor_arm_leader.set_control(
             self._motion_magic_position_voltage_arm_leader.with_position(arm_rot)
         )
-        self.motor_arm_follower.set_control(
-            self._motion_magic_position_voltage_arm_follower.with_position(arm_rot)
-        )
+        # self.motor_arm_follower.set_control(
+        #     self._motion_magic_position_voltage_arm_follower.with_position(arm_rot)
+        # )
 
         if position == IntakePositions.DEPLOYED:
             print("SET VELOCITY")
@@ -222,9 +222,9 @@ class Intake(commands2.Subsystem):
                 "Intake/Telemetry",
                 IntakeTelemetry(
                     arm_position=float(self.motor_arm_leader.get_position().value),
-                    arm_position_follower=float(
-                        self.motor_arm_follower.get_position().value
-                    ),
+                    # arm_position_follower=float(
+                    #     self.motor_arm_follower.get_position().value
+                    # ),
                     arm_target_position=float(self.target_rot),
                     # arm_supply_current=float(self.motor_arm.get_supply_current().value),
                     # arm_stator_current=float(self.motor_arm.get_stator_current().value),
