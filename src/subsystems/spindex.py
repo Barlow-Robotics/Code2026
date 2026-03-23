@@ -16,7 +16,7 @@ class Spindex(commands2.Subsystem):
         super().__init__()
         self._loop_timer = LoopTimer("Spindex")
         SPINDEX_CONFIG = TalonConfigFX(
-            kP=0,
+            kP=0.16,
             kI=0,
             kD=0,
             kV=0.16,

@@ -104,7 +104,7 @@ class Controller:
 
         # Subsystem button bindings
         if RobotFeatures.HAS_INTAKE:
-            for controller in [self._operator, self._operator]:
+            for controller in [self._operator]:
                 # Y → Deploy intake
                 controller.y().onTrue(
                     IntakePositionCommand(
@@ -113,7 +113,6 @@ class Controller:
                         position=IntakePositions.DEPLOYED,
                     )
                 )
-                # A → Retract intake
                 controller.a().onTrue(
                     IntakePositionCommand(
                         drive_sub=container.drivetrain,
@@ -121,6 +120,14 @@ class Controller:
                         position=IntakePositions.HOME,
                     )
                 )
+                # A → Retract intake
+                controller.povLeft().whileTrue(
+                    cmd.runOnce(lambda: container.intake.stop())
+                )
+                controller.povRight().whileTrue(
+                    cmd.runOnce(lambda: container.intake.set_velocity(1))
+                )
+
                 # B → Throw out feeder
                 controller.leftBumper().onTrue(
                     cmd.either(
@@ -242,10 +249,6 @@ class Controller:
             for controller in [self._operator]:
                 controller.x().whileTrue( # reverse intake
                     ReverseCommand(container.drivetrain, container.shooter, container.feeder, container.spindex, container.turret, container.intake)
-                ).onFalse(
-                    cmd.run(
-                        lambda: container.intake.set_velocity(0)
-                    )
                 )
         if RobotFeatures.HAS_TURRET:
             for controller in [self._driver, self._operator]:
