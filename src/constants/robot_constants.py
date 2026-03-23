@@ -57,11 +57,11 @@ class RobotFeatures:
             cls.HAS_TURRET_ANGLE = False
             cls.LOGGING = True
             cls.LOGGING_ROBOT = True
-            cls.LOGGING_DRIVETRAIN = False
+            cls.LOGGING_DRIVETRAIN = True
             cls.LOGGING_VISION = False
             cls.LOGGING_SHOOTER = False
             cls.LOGGING_TURRET = False
-            cls.LOGGING_INTAKE = False
+            cls.LOGGING_INTAKE = True
             cls.LOGGING_SPINDEX = False
             cls.LOGGING_FEEDER = False
 
