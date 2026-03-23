@@ -38,18 +38,18 @@ class ReverseCommand(Command):
         )
         
     def execute(self):
-        self.shooter.set_velocity(-self.target_velocity)
+        # self.shooter.set_velocity(-self.target_velocity)
         self.feeder.move(-9*3)
         self.spindex.move(-9)
-        current_speeds = self.driveSub.get_speeds()
-        overall_velocity = (current_speeds.vx**2 + current_speeds.vy**2) ** 0.5
-        self.intake.reverse_velocity(overall_velocity)
+        # current_speeds = self.driveSub.get_speeds()
+        # overall_velocity = (current_speeds.vx**2 + current_speeds.vy**2) ** 0.5
+        # self.intake.reverse_velocity(overall_velocity)
 
     def isFinished(self):
         return False
 
     def end(self, interrupted):
-        self.shooter.stop_flywheel()
+        # self.shooter.stop_flywheel()
         self.feeder.stop()
         self.spindex.stop()
-        self.intake.stop()
+        # self.intake.stop()

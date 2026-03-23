@@ -15,6 +15,7 @@ from commands import IntakePositionCommand, ShootCommand, ReverseCommand
 from commands.throw_feeder_command import ThrowFeederCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
+from pykit.logger import Logger as PyKitLogger
 
 if TYPE_CHECKING:
     from core import RobotContainer
@@ -121,35 +122,16 @@ class Controller:
                     )
                 )
                 # A → Retract intake
-                controller.povLeft().whileTrue(
+                controller.rightTrigger().whileTrue(
+                    cmd.runOnce(lambda: container.intake.set_velocity(1))
+                ).whileFalse(cmd.runOnce(lambda: container.intake.stop()))
+
+                controller.leftTrigger().whileTrue(
+                    cmd.runOnce(lambda: container.intake.set_velocity(-1))
+                ).whileFalse(
                     cmd.runOnce(lambda: container.intake.stop())
                 )
-                controller.povRight().whileTrue(
-                    cmd.runOnce(lambda: container.intake.set_velocity(1))
-                )
-
-                # B → Throw out feeder
-                controller.leftBumper().onTrue(
-                    cmd.either(
-                        # If intake is deployed/active → retract home
-                        IntakePositionCommand(
-                            drive_sub=container.drivetrain,
-                            intake_sub=container.intake,
-                            position=IntakePositions.HOME,
-                        ),
-                        # If intake is home/disabled → deploy and enable
-                        IntakePositionCommand(
-                            drive_sub=container.drivetrain,
-                            intake_sub=container.intake,
-                            position=IntakePositions.DEPLOYED,
-                        ),
-                        # Condition: is it currently deployed?
-                        lambda: (
-                            container.intake.get_target_position()
-                            == IntakePositions.DEPLOYED
-                        ),
-                    )
-                )
+            
 
                 self._test_controller.leftBumper().onTrue(
                     cmd.runOnce(lambda: container.intake.set_velocity(0))
@@ -234,38 +216,39 @@ class Controller:
             and RobotFeatures.HAS_INTAKE
         ):
             for controller in [self._operator]:
-                controller.x().whileTrue( # reverse intake
+                controller.leftBumper().whileTrue( # reverse intake
                     ReverseCommand(container.drivetrain, container.shooter, container.feeder, container.spindex, container.turret, container.intake)
                 )
         if RobotFeatures.HAS_TURRET:
             for controller in [self._driver, self._operator]:
                 # Left trigger → Aim
-                controller.povDown().onTrue(
-                    cmd.runOnce(
-                        lambda: (
-                            container.turret.set_angle_hood(
-                                container.turret.hood_cancoder.get_position() - 10
-                            )
-                            if container.vision.disabled_vision
-                            else container.turret.set_angle_hood(
-                                container.turret.hood_cancoder.get_position()
-                            )
-                        )
-                    )
-                )
-                controller.povUp().onTrue(
-                    cmd.runOnce(
-                        lambda: (
-                            container.turret.set_angle_hood(
-                                container.turret.hood_cancoder.get_position() + 10
-                            )
-                            if container.vision.disabled_vision
-                            else container.turret.set_angle_hood(
-                                container.turret.hood_cancoder.get_position()
-                            )
-                        )
-                    )
-                )
+                pass
+                # controller.povDown().onTrue(
+                #     cmd.runOnce(
+                #         lambda: (
+                #             container.turret.set_angle_hood(
+                #                 container.turret.hood_cancoder.get_position() - 10
+                #             )
+                #             if container.vision.disabled_vision
+                #             else container.turret.set_angle_hood(
+                #                 container.turret.hood_cancoder.get_position()
+                #             )
+                #         )
+                #     )
+                # )
+                # controller.povUp().onTrue(
+                #     cmd.runOnce(
+                #         lambda: (
+                #             container.turret.set_angle_hood(
+                #                 container.turret.hood_cancoder.get_position() + 10
+                #             )
+                #             if container.vision.disabled_vision
+                #             else container.turret.set_angle_hood(
+                #                 container.turret.hood_cancoder.get_position()
+                #             )
+                #         )
+                #     )
+                # )
         # Periodically warn about missing controllers during teleop
         Trigger(DriverStation.isTeleopEnabled).whileTrue(
             cmd.sequence(
@@ -274,13 +257,11 @@ class Controller:
             ).repeatedly()
         )
 
-    def update_state(self, sub=False):
-        print(self._current_state)
-        
+    def update_state(self, sub=False):        
         if sub:
-            self._current_state -= 0.1
+            self._current_state -= 0.5
         else:
-            self._current_state += 0.1
+            self._current_state += 0.5
 
 
     def update_driver(self, sub: bool):
