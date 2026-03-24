@@ -331,7 +331,7 @@ class Turret(Subsystem):
             print(distance)
         if distance > 2.5 and distance < 3:
             v_fixed = SmartDashboard.getNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", v_fixed)
-            
+
 
         dz = hub_pose.Z() - TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M
         if RobotFeatures.LOGGING_TURRET:
@@ -454,7 +454,7 @@ class Turret(Subsystem):
         # print("shooter height:", TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M)
         # print("dz:", hub_pose.Z() - TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M)
 
-        return v_fixed, -hood_motor_deg, -turret_yaw_deg, actual_velocity_to_go
+        return v_fixed, -hood_motor_deg, -turret_yaw_deg
 
     @staticmethod
     def find_v_fixed():
