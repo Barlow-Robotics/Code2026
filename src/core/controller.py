@@ -174,6 +174,16 @@ class Controller:
                 self._test_controller.b().onTrue(
                     cmd.runOnce(lambda: container.intake.reset_zero())
                 )
+                self._test_controller.button(1).whileTrue(
+                    cmd.run(
+                        lambda: container.turret.enableAutoAim(True)
+                    )
+                ).onFalse(
+                    cmd.runOnce(
+                        lambda: container.turret.enableAutoAim(False)
+                    )
+                )
+
 
         for controller in [self._driver]:
             controller.button(8).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))

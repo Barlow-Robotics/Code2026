@@ -172,12 +172,16 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         )
 
         # Tune the heading PID (adjust kP to taste)
-        self.heading_lock_movement.heading_controller.setPID(10.0, 0.0, 0.0)
+        self.heading_lock_movement.heading_controller.setPID(10.0, 0.0, 0.00)
         self.heading_lock_movement.heading_controller.enableContinuousInput(
             -math.pi, math.pi
         )
 
-        self.facing_angle.heading_controller.setPID(10.0, 0.0, 0.0)
+
+        self.facing_angle.heading_controller.enableContinuousInput(-math.pi, math.pi)
+
+        self.facing_angle.heading_controller.setPID(35.0*0.55, 0.0, 0.00)
+        
 
         self.robot_centric_facing_angle = (
             swerve.requests.RobotCentricFacingAngle()
