@@ -113,16 +113,16 @@ class RobotContainer:
         self.configure_autos()
 
     def reinitialize_subsystems(self):
-        # from subsystems import Turret, Intake
+        from subsystems import Turret
 
         # if RobotFeatures.HAS_VISION:
         #     self.vision = Vision(drive_sub=self.drivetrain)
         # if RobotFeatures.HAS_SHOOTER:
         #     self.shooter = Shooter()
         pass
-        # if RobotFeatures.HAS_TURRET:
-        #     self.turret = Turret(driveSub=self.drivetrain, init2=True)
-        # self.controller = Controller(self)
+        if RobotFeatures.HAS_TURRET:
+            self.turret = Turret(driveSub=self.drivetrain, init2=True)
+        self.controller = Controller(self)
         # if RobotFeatures.HAS_INTAKE:
         #     self.intake = Intake()
         # if RobotFeatures.HAS_SPINDEX:

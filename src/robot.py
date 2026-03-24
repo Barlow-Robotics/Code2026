@@ -25,7 +25,7 @@ if typing.TYPE_CHECKING:
 
 from phoenix6 import SignalLogger
 from pykit.loggedrobot import LoggedRobot
-LoggedRobot.default_period = 0.02  # seconds slowed down to from 0.02 -> 0.04 to reduce 
+LoggedRobot.default_period = 0.04  # seconds slowed down to from 0.02 -> 0.04 to reduce 
 
 class Robot(
     LoggedRobot
@@ -85,7 +85,8 @@ class Robot(
     def disabledInit(self) -> None:
         self.container.turret.hood_cancoder.set_position(0, 0.2)
         """This function is called once each time the robot enters Disabled mode."""
-        self.container.reinitialize_subsystems()
+        if RobotFeatures.TESTING:
+            self.container.reinitialize_subsystems()
         if self._cprofile:
             self._cprofile.disable()
 

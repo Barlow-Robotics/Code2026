@@ -40,6 +40,9 @@ class Turret(Subsystem):
             SmartDashboard.putNumber("kI", 0.0)
             SmartDashboard.putNumber("kP", 2.0)
             SmartDashboard.putNumber("kS", 0.6)
+            SmartDashboard.putNumber("kG", 0.0)
+
+            SmartDashboard.putNumber("motion_magic_cruise_velocity", 0.0)
 
         HOOD_MOTOR_CONFIG = TalonConfigFXS(
             kP=SmartDashboard.getNumber("kP", 0.0),
@@ -47,6 +50,7 @@ class Turret(Subsystem):
             kD=SmartDashboard.getNumber("kD", 0.0),
             kV=SmartDashboard.getNumber("kV", 1.95),
             kS=SmartDashboard.getNumber("kS", 0.4),
+            kG=SmartDashboard.getNumber("kG", 0.0),
             brake_mode=True,
             # gear_ratio=TurretConstants.HOOD_GEARING,
         )
@@ -57,7 +61,7 @@ class Turret(Subsystem):
                 kD=6,
                 kV=0,
                 brake_mode=True,
-                gear_ratio=TurretConstants.HOOD_GEARING,
+                # gear_ratio=TurretConstants.HOOD_GEARING,
                 motion_magic_cruise_velocity=0.1,
             )
 
@@ -236,7 +240,7 @@ class Turret(Subsystem):
         )
 
         # Update Mechanism2d
-        if RobotFeatures.LOGGING_TURRET:
+        if RobotFeatures.LOGGING_ROBOT:
             robot_pose = self.driveSub.get_pose()
             if robot_pose is not None:
                 self.base_ligament.setAngle(robot_pose.rotation().degrees())

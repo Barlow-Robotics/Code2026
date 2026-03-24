@@ -32,14 +32,14 @@ class RobotFeatures:
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
             cls.HAS_CPROFILE = False
-            cls.TESTING = False
+            cls.TESTING = True
             cls.HAS_TURRET_ANGLE = False
             cls.LOGGING = False
-            cls.LOGGING_ROBOT = True
+            cls.LOGGING_ROBOT = False
             cls.LOGGING_DRIVETRAIN = False
-            cls.LOGGING_VISION = True
+            cls.LOGGING_VISION = False
             cls.LOGGING_SHOOTER = False
-            cls.LOGGING_TURRET = False
+            cls.LOGGING_TURRET = True
             cls.LOGGING_INTAKE = False
             cls.LOGGING_SPINDEX = False
             cls.LOGGING_FEEDER = False
@@ -248,4 +248,4 @@ class VisionConstants:
 class AutoConstants:
     auto_translation_pid = PIDConstants(4.0, 0.0, 0)  # TB tuned.
     auto_rotation_pid = PIDConstants(5.0, 0.0, 0.0)
-    period = 0.02  # seconds per scheduler run
+    period = 0.04  # seconds per scheduler run
