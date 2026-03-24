@@ -324,7 +324,8 @@ class Turret(Subsystem):
         dx = hub_pose.X() - robot_pose.X()
         dy = hub_pose.Y() - robot_pose.Y()
         distance = math.sqrt(dx * dx + dy * dy) 
-        if distance > 4:
+        PyKitLogger.recordOutput("Turret/initial_distance_to_hub", float(distance))
+        if distance > 3 and distance < 3.5:
             print(distance)
             v_fixed = SmartDashboard.getNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", v_fixed)
         
