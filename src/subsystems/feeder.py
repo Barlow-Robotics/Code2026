@@ -1,6 +1,7 @@
 from phoenix6.hardware import TalonFXS
 from phoenix6 import controls
 import commands2
+from wpilib import SmartDashboard
 from constants.robot_constants import RobotFeatures
 from utils import TalonConfigFXS
 from constants import MotorIDs
@@ -14,8 +15,19 @@ class Feeder(commands2.Subsystem):
     def __init__(self):
         super().__init__()
         self._loop_timer = LoopTimer("Feeder")
+        SmartDashboard.putNumber("kP_Feeder", 0.1)
+        SmartDashboard.putNumber("kI_Feeder", 0.0)
+        SmartDashboard.putNumber("kD_Feeder", 0.0)
+        SmartDashboard.putNumber("kV_Feeder", 0.118)
+        SmartDashboard.putNumber("kS_Feeder", 0.0)
+
         FEEDER_CONFIG_CONSTANT = TalonConfigFXS(
-            kP=0.1, kI=0, kD=0.00, kV=0.118, kS=0, current_limit=40, brake_mode=False
+            kP=SmartDashboard.getNumber("kP_Feeder", 0.1),
+            kI=SmartDashboard.getNumber("kI_Feeder", 0.0),
+            kD=SmartDashboard.getNumber("kD_Feeder", 0.0),
+            kV=SmartDashboard.getNumber("kV_Feeder", 0.118),
+            kS=SmartDashboard.getNumber("kS_Feeder", 0.0),
+            current_limit=40, brake_mode=False
         )
         FEEDER_CONFIG_ALTERNATING = TalonConfigFXS(
             kP=0.1, kI=0, kD=0.00, kV=0.118, kS=0, current_limit=40, brake_mode=False
