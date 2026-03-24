@@ -17,16 +17,15 @@ class ShootCommand(Command):
         shooter: "Shooter",
         feeder: "Feeder",
         spindex: "Spindex",
-        turret: "Turret",
     ):
         super().__init__()
         self.driveSub = driveSub
         self.shooter = shooter
         self.feeder = feeder
         self.spindex = spindex
-        self.turret = turret
+        # self.turret = turret
         self._feeding = False
-        self.addRequirements(self.shooter, self.feeder, self.spindex, self.turret)
+        self.addRequirements(self.shooter, self.feeder, self.spindex)
 
     def initialize(self):
         self._feeding = False
@@ -37,7 +36,7 @@ class ShootCommand(Command):
 
     def execute(self):
         if not self.driveSub.allow_center_auto_align:
-            self.turret.set_target_hood_and_turret()
+            # self.turret.set_target_hood_and_turret()
             pass
         else:
             pose = self.driveSub.get_pose()
@@ -53,7 +52,7 @@ class ShootCommand(Command):
                 ]
             )
             target_pose = Translation3d(target_pose.X(), target_pose.Y(), 0)
-            self.turret.set_target_hood_and_turret(shooting_location=target_pose)
+            # self.turret.set_target_hood_and_turret(shooting_location=target_pose)
 
         if self._feeding:
             return
@@ -73,4 +72,4 @@ class ShootCommand(Command):
         self.shooter.stop_flywheel()
         self.feeder.stop()
         self.spindex.stop()
-        self.turret.reset_target_hood_and_turret()
+        # self.turret.reset_target_hood_and_turret()

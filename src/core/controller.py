@@ -168,7 +168,6 @@ class Controller:
                         container.shooter,
                         container.feeder,
                         container.spindex,
-                        container.turret,
                     )
                 )
 
@@ -188,7 +187,10 @@ class Controller:
                         )
                     )
                 )
-                controller.button(2).whileTrue(
+                
+
+
+                controller.leftTrigger().whileTrue(
                     cmd.run(
                         lambda: container.turret.enableAutoAim(True)
                     )
@@ -215,7 +217,6 @@ class Controller:
                         container.shooter,
                         container.feeder,
                         container.spindex,
-                        container.turret,
                     )
                 )
                 controller.b().whileTrue(
