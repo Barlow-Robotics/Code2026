@@ -125,7 +125,7 @@ class Turret(Subsystem):
         self.target_hood_angle = 0.0
         self.target_turret_yaw = 0.0
         self.turret_yaw_deg = 0.0
-
+        SmartDashboard.putNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", 0)
         # Mechanism2d — top-down view: base = robot heading, turret = yaw, length = hood
         if RobotFeatures.LOGGING_ROBOT:
             self.mechanism = Mechanism2d(3, 3)
@@ -322,6 +322,11 @@ class Turret(Subsystem):
 
         dx = hub_pose.X() - robot_pose.X()
         dy = hub_pose.Y() - robot_pose.Y()
+        distance = math.sqrt(dx * dx + dy * dy) 
+        if distance > 4:
+            print(distance)
+            v_fixed = SmartDashboard.getNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", v_fixed)
+        
         dz = hub_pose.Z() - TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M
         if RobotFeatures.LOGGING_TURRET:
             PyKitLogger.recordOutput("Turret/initial_dx", float(dx))
