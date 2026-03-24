@@ -27,7 +27,7 @@ class RobotFeatures:
             cls.HAS_VISION = True
             cls.vision_camera_count = 3
             cls.HAS_SHOOTER = True
-            cls.HAS_TURRET = False
+            cls.HAS_TURRET = True
             cls.HAS_INTAKE = False
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
@@ -35,9 +35,9 @@ class RobotFeatures:
             cls.TESTING = False
             cls.HAS_TURRET_ANGLE = False
             cls.LOGGING = False
-            cls.LOGGING_ROBOT = False
+            cls.LOGGING_ROBOT = True
             cls.LOGGING_DRIVETRAIN = False
-            cls.LOGGING_VISION = False
+            cls.LOGGING_VISION = True
             cls.LOGGING_SHOOTER = False
             cls.LOGGING_TURRET = False
             cls.LOGGING_INTAKE = False
