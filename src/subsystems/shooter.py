@@ -28,9 +28,9 @@ class Shooter(Subsystem):
         self.flywheel_motor_left_leader = SparkFlex(
             MotorIDs.motor_id_flywheel_right, type=SparkFlex.MotorType.kBrushless
         )
-        # self.flywheel_motor_right_follower = SparkFlex(
-        #     MotorIDs.motor_id_flywheel_left, type=SparkFlex.MotorType.kBrushless
-        # )
+        self.flywheel_motor_right_follower = SparkFlex(
+            MotorIDs.motor_id_flywheel_left, type=SparkFlex.MotorType.kBrushless
+        )
 
         leader_config = SparkFlexConfig()
         leader_config.setIdleMode(
@@ -52,20 +52,20 @@ class Shooter(Subsystem):
             PersistMode.kPersistParameters,
         )
 
-        # follower_config = SparkFlexConfig()
-        # follower_config.setIdleMode(
-        #     follower_config.IdleMode(SparkBaseConfig.IdleMode.kCoast)
-        # )
-        # follower_config.smartCurrentLimit(80, freeLimit=5700)  # set to 5700 for max
+        follower_config = SparkFlexConfig()
+        follower_config.setIdleMode(
+            follower_config.IdleMode(SparkBaseConfig.IdleMode.kCoast)
+        )
+        follower_config.smartCurrentLimit(80, freeLimit=5700)  # set to 5700 for max
 
-        # follower_config.follow(self.flywheel_motor_left_leader, True)
-        # follower_config.inverted(True)
+        follower_config.follow(self.flywheel_motor_left_leader, True)
+        follower_config.inverted(True)
 
-        # self.flywheel_motor_right_follower.configure(
-        #     follower_config,
-        #     ResetMode.kResetSafeParameters,
-        #     PersistMode.kPersistParameters,
-        # )
+        self.flywheel_motor_right_follower.configure(
+            follower_config,
+            ResetMode.kResetSafeParameters,
+            PersistMode.kPersistParameters,
+        )
 
         self.flywheel_target_RPM = 0.0
         self.flywheel_target_velocity = 0.0
@@ -87,8 +87,8 @@ class Shooter(Subsystem):
     def get_current_rpm(self) -> float:
         return self.flywheel_motor_left_leader.getEncoder().getVelocity()
 
-    # def get_current_rpm_follower(self) -> float:
-    #     return self.flywheel_motor_right_follower.getEncoder().getVelocity()
+    def get_current_rpm_follower(self) -> float:
+        return self.flywheel_motor_right_follower.getEncoder().getVelocity()
 
     def get_current_velocity(self) -> float:
         radius = ShooterConstants.FLYWHEEL_RADIUS_INCHES * SI.inches_to_meters  # meters
@@ -111,10 +111,10 @@ class Shooter(Subsystem):
             float(self.flywheel_target_RPM),
         )
         if RobotFeatures.LOGGING_SHOOTER:
-            # PyKitLogger.recordOutput(
-            #     "Shooter/flywheel_motor_right_RPM",
-            #     float(self.get_current_rpm_follower()),
-            # )
+            PyKitLogger.recordOutput(
+                "Shooter/flywheel_motor_right_RPM",
+                float(self.get_current_rpm_follower()),
+            )
 
             PyKitLogger.recordOutput(
                 "Shooter/flywheel_motor_left_current_velocity",
@@ -135,12 +135,3 @@ class Shooter(Subsystem):
             )
 
         self._loop_timer.stop()
-
-    # 1. flywheel motor spins up to speed.
-    # both at same time
-    # 2. spindex runs const
-    # 3. feeder starts only once shooter is at speed.
-
-    # eject comamnd for spindex/feeder
-
-    # shoot to other side of field when -1 -1 -1
