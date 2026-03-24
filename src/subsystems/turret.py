@@ -216,6 +216,7 @@ class Turret(Subsystem):
         v_fixed, hood_angle_deg, self.turret_yaw_deg = self._optimal_angle_calc(
             TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location
         )
+        print(v_fixed, hood_angle_deg, self.turret_yaw_deg)
         if v_fixed < 0:
             return -1, -1, -1
         # if hood_angle_deg > 80:

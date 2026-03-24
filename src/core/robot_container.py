@@ -128,7 +128,7 @@ class RobotContainer:
         # if RobotFeatures.HAS_SPINDEX:
         #     self.spindex = Spindex()
         if RobotFeatures.HAS_FEEDER:
-            self.feeder = Feeder()
+            self.feeder = Feeder(init2=True)
 
     def configure_autos(self):
 
