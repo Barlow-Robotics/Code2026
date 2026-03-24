@@ -12,14 +12,15 @@ from utils.profiler import LoopTimer
 
 
 class Feeder(commands2.Subsystem):
-    def __init__(self):
+    def __init__(self, init2=False):
         super().__init__()
         self._loop_timer = LoopTimer("Feeder")
-        SmartDashboard.putNumber("kP_Feeder", 0.1)
-        SmartDashboard.putNumber("kI_Feeder", 0.0)
-        SmartDashboard.putNumber("kD_Feeder", 0.0)
-        SmartDashboard.putNumber("kV_Feeder", 0.118)
-        SmartDashboard.putNumber("kS_Feeder", 0.0)
+        if not init2:
+            SmartDashboard.putNumber("kP_Feeder", 0.1)
+            SmartDashboard.putNumber("kI_Feeder", 0.0)
+            SmartDashboard.putNumber("kD_Feeder", 0.0)
+            SmartDashboard.putNumber("kV_Feeder", 0.118)
+            SmartDashboard.putNumber("kS_Feeder", 0.0)
 
         FEEDER_CONFIG_CONSTANT = TalonConfigFXS(
             kP=SmartDashboard.getNumber("kP_Feeder", 0.1),
