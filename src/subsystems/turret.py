@@ -326,9 +326,13 @@ class Turret(Subsystem):
         distance = math.sqrt(dx * dx + dy * dy) 
         PyKitLogger.recordOutput("Turret/initial_distance_to_hub", float(distance))
         if distance > 3 and distance < 3.5:
+            v_fixed = 10
+            actual_velocity_to_go = 16.5
             print(distance)
+        if distance > 2.5 and distance < 3:
             v_fixed = SmartDashboard.getNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", v_fixed)
-        
+            
+
         dz = hub_pose.Z() - TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M
         if RobotFeatures.LOGGING_TURRET:
             PyKitLogger.recordOutput("Turret/initial_dx", float(dx))
@@ -450,7 +454,7 @@ class Turret(Subsystem):
         # print("shooter height:", TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M)
         # print("dz:", hub_pose.Z() - TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M)
 
-        return v_fixed, -hood_motor_deg, -turret_yaw_deg
+        return v_fixed, -hood_motor_deg, -turret_yaw_deg, actual_velocity_to_go
 
     @staticmethod
     def find_v_fixed():
