@@ -35,11 +35,11 @@ class Turret(Subsystem):
         self._loop_timer = LoopTimer("Turret")
         self.driveSub = driveSub
         if not init2:
-            SmartDashboard.putNumber("kV", 1.9)
-            SmartDashboard.putNumber("kD", 0.0)
+            SmartDashboard.putNumber("kV", 1.8)
+            SmartDashboard.putNumber("kD", 1.5)
             SmartDashboard.putNumber("kI", 0.0)
-            SmartDashboard.putNumber("kP", 2.0)
-            SmartDashboard.putNumber("kS", 0.6)
+            SmartDashboard.putNumber("kP", 0.0)
+            SmartDashboard.putNumber("kS", 0.43)
             SmartDashboard.putNumber("kG", 0.0)
 
             SmartDashboard.putNumber("motion_magic_cruise_velocity", 0.0)
@@ -47,9 +47,9 @@ class Turret(Subsystem):
         HOOD_MOTOR_CONFIG = TalonConfigFXS(
             kP=SmartDashboard.getNumber("kP", 0.0),
             kI=SmartDashboard.getNumber("kI", 0.0),
-            kD=SmartDashboard.getNumber("kD", 0.0),
-            kV=SmartDashboard.getNumber("kV", 1.95),
-            kS=SmartDashboard.getNumber("kS", 0.4),
+            kD=SmartDashboard.getNumber("kD", 1.5),
+            kV=SmartDashboard.getNumber("kV", 1.8),
+            kS=SmartDashboard.getNumber("kS", 0.43),
             kG=SmartDashboard.getNumber("kG", 0.0),
             brake_mode=True,
             # gear_ratio=TurretConstants.HOOD_GEARING,
