@@ -136,9 +136,9 @@ class Vision(Subsystem):
 
         # Log camera config on init
         for i, cam_cfg in enumerate(self._cameras):
-            Logger.recordOutput(f"Vision/Config/camera_{i}_name", cam_cfg.name)
+            Logger.recordOutput(f"Config/camera_{i}_name", cam_cfg.name)
         Logger.recordOutput(
-            "Vision/Config/camera_count", float(len(self._cameras))
+            "Config/camera_count", float(len(self._cameras))
         )
 
         if not RobotBase.isReal() and VisionConstants.VISION_SIM:
@@ -182,42 +182,42 @@ class Vision(Subsystem):
                 stats = self._camera_stats.get(stat_name)
                 if stats is not None:
                     Logger.recordOutput(
-                        f"Vision/{stat_key}/std_dev", stats.std_dev
+                        f"{stat_key}/std_dev", stats.std_dev
                     )
                     Logger.recordOutput(
-                        f"Vision/{stat_key}/tag_count", stats.tag_count
+                        f"{stat_key}/tag_count", stats.tag_count
                     )
                     Logger.recordOutput(
-                        f"Vision/{stat_key}/distance", stats.distance
+                        f"{stat_key}/distance", stats.distance
                     )
 
         # --- VisionStateTelemetry ---
         if RobotFeatures.LOGGING_VISION:
             Logger.recordOutput(
-                "Vision/State/vision_disabled", self.disabled_vision
+                "State/vision_disabled", self.disabled_vision
             )
             Logger.recordOutput(
-                "Vision/State/observations_per_cycle", self._observations_per_cycle
+                "State/observations_per_cycle", self._observations_per_cycle
             )
             Logger.recordOutput(
-                "Vision/State/auto_align_triggered", self._auto_align_triggered
+                "State/auto_align_triggered", self._auto_align_triggered
             )
 
             if self._auto_align_starting_pose is not None:
                 Logger.recordOutput(
-                    "Vision/State/auto_align_starting_pose",
+                    "State/auto_align_starting_pose",
                     self._auto_align_starting_pose,
                 )
             if self._auto_align_target_pose is not None:
                 Logger.recordOutput(
-                    "Vision/State/auto_align_target_pose", self._auto_align_target_pose
+                    "State/auto_align_target_pose", self._auto_align_target_pose
                 )
 
         # --- Camera connection status ---
         # if RobotFeatures.LOGGING_VISION:
         for cam_cfg in self._cameras:
             Logger.recordOutput(
-                f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
+                f"Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
             )
 
         self._loop_timer.stop()
@@ -250,7 +250,7 @@ class Vision(Subsystem):
         gyro: Rotation2d,
         cam_cfg: _CameraConfig,
     ) -> List[VisionObservation]:
-        prefix = f"Vision/{cam_cfg.name}"
+        prefix = f"{cam_cfg.name}"
 
         if not cam_cfg.camera.isConnected():
             return []
@@ -714,11 +714,11 @@ class Vision(Subsystem):
 
         desired_angle = Rotation2d(math.atan2(dy, dx))
         Logger.recordOutput(
-            "Vision/alignment_desired_angle", desired_angle.degrees()
+            "alignment_desired_angle", desired_angle.degrees()
         )
         current_angle = current_pose.rotation()
         Logger.recordOutput(
-            "Vision/alignment_current_angle", current_angle.degrees()
+            "alignment_current_angle", current_angle.degrees()
         )
 
         error_degrees = abs((desired_angle - current_angle).degrees())

@@ -59,7 +59,7 @@ class Spindex(commands2.Subsystem):
 
     def periodic(self):
         self._loop_timer.start()
-        self.log_motor(self.motor_spindex, "Spindex", self.target_velocity_spindex)
+        self.log_motor(self.motor_spindex, "", self.target_velocity_spindex)
         self._loop_timer.stop()
 
     def log_motor(self, motor: TalonFX, prefix: str, target_velocity: float):

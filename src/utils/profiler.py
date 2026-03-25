@@ -36,7 +36,7 @@ class LoopTimer:
     )
 
     def __init__(self, name: str):
-        self._prefix = f"Profiling/{name}"
+        self._prefix = f"{name}"
         self._t0: float = 0.0
         self._sum_us: float = 0.0
         self._max_us: float = 0.0

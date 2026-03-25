@@ -105,33 +105,33 @@ class Shooter(Subsystem):
         self._loop_timer.start()
 
         Logger.recordOutput(
-            "Shooter/flywheel_motor_left_RPM", float(self.get_current_rpm())
+            "flywheel_motor_left_RPM", float(self.get_current_rpm())
         )
         Logger.recordOutput(
-            "Shooter/flywheel_motor_left_target_RPM",
+            "flywheel_motor_left_target_RPM",
             float(self.flywheel_target_RPM),
         )
         if RobotFeatures.LOGGING_SHOOTER:
             Logger.recordOutput(
-                "Shooter/flywheel_motor_right_RPM",
+                "flywheel_motor_right_RPM",
                 float(self.get_current_rpm_follower()),
             )
 
             Logger.recordOutput(
-                "Shooter/flywheel_motor_left_current_velocity",
+                "flywheel_motor_left_current_velocity",
                 float(self.get_current_velocity()),
             )
             Logger.recordOutput(
-                "Shooter/flywheel_motor_left_target_velocity",
+                "flywheel_motor_left_target_velocity",
                 float(self.flywheel_target_velocity),
             )
 
             Logger.recordOutput(
-                "Shooter/flywheel_motor_current_limit",
+                "flywheel_motor_current_limit",
                 float(self.flywheel_motor_left_leader.getOutputCurrent()),
             )
             Logger.recordOutput(
-                "Shooter/flywheel_motor_current_volts",
+                "flywheel_motor_current_volts",
                 float(self.flywheel_motor_left_leader.getAppliedOutput()),
             )
 
