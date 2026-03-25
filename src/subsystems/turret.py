@@ -326,18 +326,24 @@ class Turret(Subsystem):
         dy = hub_pose.Y() - robot_pose.Y()
         distance = math.sqrt(dx * dx + dy * dy) 
         PyKitLogger.recordOutput("Turret/initial_distance_to_hub", float(distance))
-        if distance > 3 and distance < 3.5:
-            v_fixed = 10
-            self.actual_velocity_to_go = 16.5
-        elif distance > 2.5 and distance < 3:
-            v_fixed = 10
-            self.actual_velocity_to_go = 15.5
-        elif distance > 2 and distance < 2.5:
-            v_fixed = 10
-            self.actual_velocity_to_go = 14.5
-        else:
-            v_fixed = SmartDashboard.getNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", v_fixed)
-            self.actual_velocity_to_go = SmartDashboard.getNumber("CustomFloatVelocity", v_fixed)
+        bin_low = math.floor(distance / 0.5) * 0.5
+        midpoint = bin_low + 0.25
+
+        v_fixed = 10
+        self.actual_velocity_to_go = 2 * midpoint + 10
+
+        # if distance > 3 and distance < 3.5:
+        #     v_fixed = 10
+        #     self.actual_velocity_to_go = 16.5
+        # elif distance > 2.5 and distance < 3:
+        #     v_fixed = 10
+        #     self.actual_velocity_to_go = 15.5
+        # elif distance > 2 and distance < 2.5:
+        #     v_fixed = 10
+        #     self.actual_velocity_to_go = 14.5
+        # else:
+        #     v_fixed = SmartDashboard.getNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", v_fixed)
+        #     self.actual_velocity_to_go = SmartDashboard.getNumber("CustomFloatVelocity", v_fixed)
 
         dz = hub_pose.Z() - TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M
         if RobotFeatures.LOGGING_TURRET:
