@@ -38,12 +38,12 @@ class Robot(
     def __init__(self):
 
         super().__init__()
-        if RobotBase.isReal():
-            SignalLogger.set_path("/home/lvuser/logs")
-        else:
-            SignalLogger.set_path("logs")
+        # if RobotBase.isReal():
+        #     SignalLogger.set_path("/home/lvuser/logs")
+        # else:
+        #     SignalLogger.set_path("logs")
         self.useTiming = configure_pykit(type(self).__name__)
-        SignalLogger.start()
+        # SignalLogger.start()
 
     def robotInit(self) -> None:
         """Robot initialization function"""
