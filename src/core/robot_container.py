@@ -109,7 +109,7 @@ class RobotContainer:
 
         # Controller bindings
         self.create_commands()
-        # self.controller = Controller(self)
+        self.controller = Controller(self)
         self.configure_autos()
 
     def reinitialize_subsystems(self):
