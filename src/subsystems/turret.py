@@ -330,6 +330,9 @@ class Turret(Subsystem):
             actual_velocity_to_go = 16.5
             print(distance)
         if distance > 2.5 and distance < 3:
+            v_fixed = 10
+            actual_velocity_to_go = 15.5
+        if distance > 2 and distance < 2.5:
             v_fixed = SmartDashboard.getNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", v_fixed)
 
 
