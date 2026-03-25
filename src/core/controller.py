@@ -139,6 +139,7 @@ class Controller:
                     container.shooter,
                     container.feeder,
                     container.spindex,
+                    container.turret
                 )
             )
 
