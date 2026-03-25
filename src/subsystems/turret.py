@@ -326,11 +326,10 @@ class Turret(Subsystem):
         dy = hub_pose.Y() - robot_pose.Y()
         distance = math.sqrt(dx * dx + dy * dy) 
         PyKitLogger.recordOutput("Turret/initial_distance_to_hub", float(distance))
-        bin_low = math.floor(distance / 0.5) * 0.5
-        midpoint = bin_low + 0.25
 
         v_fixed = 10
-        self.actual_velocity_to_go = 2 * midpoint + 10
+        self.actual_velocity_to_go = 2 * distance + 10
+
 
         # if distance > 3 and distance < 3.5:
         #     v_fixed = 10
