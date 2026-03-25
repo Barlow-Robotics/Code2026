@@ -32,28 +32,8 @@ _WPI_STRUCT_TYPES = (
     Translation3d,
     
 )
-from wpiutil.log import (
-    DoubleLogEntry,
-    StringLogEntry,
-    BooleanLogEntry,
-    DoubleArrayLogEntry,
-    StructLogEntry,
-    StructArrayLogEntry,
-)
-
-from wpilib import DataLogManager
-
 
 from utils.advantagekit import ddatetime_obj
-_shared_wpilog_backend = None
-
-def _get_shared_wpilog():
-    return _shared_wpilog_backend  # may be None until start_logging() is called
-def start_logging(log_dir: str = "logs") -> None:
-    """Call this from robotInit() ONLY. Initializes the shared wpilog backend."""
-    global _shared_wpilog_backend
-    DataLogManager.start(log_dir)
-    _shared_wpilog_backend = WPILOGBackend._from_started_manager()
 
 
 @runtime_checkable
@@ -120,49 +100,62 @@ class NTBackend:
             self._struct_array_pubs[key] = pub
         pub.set(value)
 
+class FileBackend:
+    def __init__(self, filename: str):
+        self.filename = filename
+        self._buffer = {}
 
-class WPILOGBackend:
-    def __init__(self):
-        # Do NOT call DataLogManager here — use start_logging() from robotInit
-        self._log = DataLogManager.getLog()
-        self._entries: dict[str, object] = {}
+    def _serialize(self, value):
+        import dataclasses
+        from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 
-    @classmethod
-    def _from_started_manager(cls):
-        instance = cls.__new__(cls)
-        instance._log = DataLogManager.getLog()
-        instance._entries = {}
-        return instance
+        # Dataclasses → dict automatically
+        if dataclasses.is_dataclass(value):
+            return {f.name: getattr(value, f.name) for f in dataclasses.fields(value)}
 
-    def _entry(self, key: str, factory):
-        if key not in self._entries:
-            self._entries[key] = factory(self._log, key)
-        return self._entries[key]
+        # WPILib geometry structs → dict manually
+        if isinstance(value, Pose2d):
+            return {"x": value.X(), "y": value.Y(), "rotation_deg": value.rotation().degrees()}
+        if isinstance(value, Rotation2d):
+            return {"radians": value.radians(), "degrees": value.degrees()}
+        if isinstance(value, Translation2d):
+            return {"x": value.X(), "y": value.Y()}
 
-    def put_double(self, key: str, value: float) -> None:
-        self._entry(key, DoubleLogEntry).append(value)
+        # fallback for normal Python objects
+        if hasattr(value, "__dict__"):
+            return value.__dict__
 
-    def put_string(self, key: str, value: str) -> None:
-        self._entry(key, StringLogEntry).append(value)
+        # fallback for unsupported types
+        return str(value)
 
-    def put_boolean(self, key: str, value: bool) -> None:
-        self._entry(key, BooleanLogEntry).append(value)
+    def _write_file(self):
+        with open(self.filename, "w") as f:
+            json.dump(self._buffer, f, indent=2)
 
-    def put_double_array(self, key: str, value: Sequence[float]) -> None:
-        self._entry(key, DoubleArrayLogEntry).append(list(value))
+    def put_double(self, key: str, value: float):
+        self._buffer[key] = value
+        self._write_file()
 
-    def put_struct(self, key: str, value: WPIStruct) -> None:
-        if key not in self._entries:
-            self._entries[key] = StructLogEntry(self._log, key, type(value))
-        self._entries[key].append(value)
+    def put_string(self, key: str, value: str):
+        self._buffer[key] = value
+        self._write_file()
 
-    def put_struct_array(self, key: str, value: Sequence[WPIStruct]) -> None:
-        if key not in self._entries:
-            self._entries[key] = StructArrayLogEntry(self._log, key, type(value[0]))
-        self._entries[key].append(list(value))
+    def put_boolean(self, key: str, value: bool):
+        self._buffer[key] = value
+        self._write_file()
 
-    def flush(self) -> None:
-        self._log.flush()
+    def put_double_array(self, key: str, value: list[float]):
+        self._buffer[key] = value
+        self._write_file()
+
+    def put_struct(self, key: str, value: Any):
+        self._buffer[key] = self._serialize(value)
+        self._write_file()
+
+    def put_struct_array(self, key: str, value: list[Any]):
+        self._buffer[key] = [self._serialize(v) for v in value]
+        self._write_file()
+        
 class DualBackend:
     """Send every log to multiple backends at once."""
     def __init__(self, *backends):
@@ -207,9 +200,9 @@ class Logger:
 
     def __init__(self, name: str, backend: Any | None = None, _prefix: str = ""):
         if backend is None:
-            nt = NTBackend("AdvantageKit/" + name)
-            wpilog = _get_shared_wpilog()
-            backend = DualBackend(nt, wpilog) if wpilog is not None else nt
+            nt = NTBackend(name)
+            file = FileBackend(f"logs/{ddatetime_obj}/{name}_log.json")
+            backend = DualBackend(nt, file)
         self._backend = backend
         self._prefix = _prefix
 
