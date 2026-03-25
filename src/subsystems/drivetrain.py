@@ -138,11 +138,9 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             # Disable CAN warnings in sim
             for module in self.modules:
                 module.drive_motor.sim_state  # just accessing it quiets stale warnings
-        self.last_timestamp = -1
         self.current_pose = Pose2d()
         self._brake_request = swerve.requests.SwerveDriveBrake()
         self.cached_state = self.get_state()
-        self.last_timestamp = -1.0
 
         self._zero_request = swerve.requests.ApplyRobotSpeeds().with_speeds(
             ChassisSpeeds(0, 0, 0)
@@ -337,6 +335,7 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
 
     def periodic(self):
         self._loop_timer.start()
+        self._refresh_state_cache()
         self.determine_turret_state()
         # Periodically try to apply the operator perspective.
         # If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
@@ -400,21 +399,15 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         )
 
     def _refresh_state_cache(self):
-        cur_timestamp = self.get_timestamp()
-        if self.last_timestamp != cur_timestamp:
-            self.cached_state = self.get_state()
-            self.last_timestamp = cur_timestamp
+        self.cached_state = self.get_state()
 
     def get_pose(self) -> Pose2d:
-        self._refresh_state_cache()
         return self.cached_state.pose
 
     def get_speeds(self):
-        self._refresh_state_cache()
         return self.cached_state.speeds
 
     def get_rotation(self):
-        self._refresh_state_cache()
         return self.cached_state.pose.rotation()
 
     @staticmethod
