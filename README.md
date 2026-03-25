@@ -60,17 +60,8 @@ We use L1 motors.
 TODO at comp:
 1. AprilTagField.k2026RebuiltAndyMark or AprilTagField.k2026RebuiltWelded depending on comp. 
 2. Need to update deploy/pathplanner/settings.json
-should these be tuned?
-auto_translation_pid = PIDConstants(4, 0.0, 0)
-auto_rotation_pid = PIDConstants(5.0, 0.0, 0.0)
-7. Add cancoder code (not added yet)
-
-8. I would recommend an actual PID to the stop point’s pose so you can be cleaning up any residual path error during the shooting pause
-
-
-1) Usew command to usb memlory buffer: sudo sh -c 'echo 256 > /sys/module/usbcore/parameters/usbfs_memory_mb'
-
-2) try 512 mb
-2) check active usb, performance
-2) attempt to put each camera into 1 usb port and see if that works
-3) set fps to 15fps
+3. I would recommend an actual PID to the stop point’s pose so you can be cleaning up any residual path error during the shooting pause
+4. Need to set up shooting to other side. 
+5. Need to figure out intake
+6. Need to set up auto
+7. Fix latency. 

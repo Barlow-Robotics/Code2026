@@ -25,7 +25,8 @@ from wpilib import (
 )
 from utils import should_flip
 import wpilib
-from pykit.logger import Logger as PyKitLogger
+from utils.telemetry import Logger
+Logger = Logger("RobotContainer")
 from autos import (
     Leave_Shoot,
     HP_Center_L2,
@@ -184,21 +185,21 @@ class RobotContainer:
         # allow us to choose our auto in Smart Dashboard
         wpilib.SmartDashboard.putData("Auto", self.auto_selection)
         prefix = "Auto"
-        # PyKitLogger.recordOutput(f"{prefix}/option_0", "HP_Intake_Center_Pieces")
-        # PyKitLogger.recordOutput(f"{prefix}/option_1", "kenny path")
-        # PyKitLogger.recordOutput(f"{prefix}/option_2", "Leave")
-        # PyKitLogger.recordOutput(f"{prefix}/default", "HP_Intake_Center_Pieces")
+        # Logger.recordOutput(f"{prefix}/option_0", "HP_Intake_Center_Pieces")
+        # Logger.recordOutput(f"{prefix}/option_1", "kenny path")
+        # Logger.recordOutput(f"{prefix}/option_2", "Leave")
+        # Logger.recordOutput(f"{prefix}/default", "HP_Intake_Center_Pieces")
 
         prefix = prefix + "/PathPlanner"
         PathPlannerLogging.setLogCurrentPoseCallback(
-            lambda pose: PyKitLogger.recordOutput(f"{prefix}/current_pose", pose)
+            lambda pose: Logger.recordOutput(f"{prefix}/current_pose", pose)
         )
         PathPlannerLogging.setLogTargetPoseCallback(
-            lambda pose: PyKitLogger.recordOutput(f"{prefix}/target_pose", pose)
+            lambda pose: Logger.recordOutput(f"{prefix}/target_pose", pose)
         )
-        PathPlannerLogging.setLogActivePathCallback(
-            lambda poses: PyKitLogger.recordOutput(f"{prefix}/active_path", poses)
-        )
+        # PathPlannerLogging.setLogActivePathCallback(
+        #     lambda poses: Logger.recordOutput(f"{prefix}/active_path", poses)
+        # )
 
     def create_commands(self):
         if (

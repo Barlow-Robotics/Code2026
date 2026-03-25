@@ -10,13 +10,11 @@ import wpilib
 import commands2
 import typing
 
-from utils import (
-    configure_pykit,
-)  # DO NOT MOVE IMPORT, it needs to be called before any PyKit loggers are created
+import utils # DO NOT MOVE IMPORT, it needs to be called before any PyKit loggers are created
 
 from core import RobotContainer
 from phoenix6 import HootAutoReplay
-from wpilib import DriverStation, RobotBase, SmartDashboard
+from wpilib import DriverStation, RobotBase, SmartDashboard, TimedRobot
 from constants import RobotFeatures
 from utils.profiler import LoopTimer
 
@@ -24,11 +22,10 @@ if typing.TYPE_CHECKING:
     from autos import AutoRoutine
 
 from phoenix6 import SignalLogger
-from pykit.loggedrobot import LoggedRobot
-LoggedRobot.default_period = 0.04  # seconds slowed down to from 0.02 -> 0.04 to reduce 
-
+#LoggedRobot.default_period = 0.04  # seconds slowed down to from 0.02 -> 0.04 to reduce 
+# TimedRobot.kDefaultPeriod = 40.0 # ms 
 class Robot(
-    LoggedRobot
+    TimedRobot
 ):  # BW: Don't worry LoggedRobot does the same thing as TimedRobot, just with logging.
     """
     Command v2 robots are encouraged to inherit from TimedCommandRobot, which
@@ -36,14 +33,16 @@ class Robot(
     """
 
     def __init__(self):
+        super().__init__(period=0.02)
 
-        super().__init__()
-        if RobotBase.isReal():
-            SignalLogger.set_path("/home/lvuser/logs")
-        else:
-            SignalLogger.set_path("logs")
-        self.useTiming = configure_pykit(type(self).__name__)
-        SignalLogger.start()
+
+        if RobotFeatures.LOGGING_SIGNAL:
+            if RobotBase.isReal():
+                SignalLogger.set_path("/home/lvuser/logs")
+            else:
+                SignalLogger.set_path("logs")
+            # self.useTiming = configure_pykit(type(self).__name__)
+            SignalLogger.start()
 
     def robotInit(self) -> None:
         """Robot initialization function"""
@@ -58,9 +57,10 @@ class Robot(
         self.container = RobotContainer()
 
         # log and replay timestamp and joystick data
-        self._time_and_joystick_replay = (
-            HootAutoReplay().with_timestamp_replay().with_joystick_replay()
-        )
+        if RobotFeatures.LOGGING:
+            self._time_and_joystick_replay = (
+                HootAutoReplay().with_timestamp_replay().with_joystick_replay()
+            )
 
         # --- Profiler setup (sim-only by default) ---
         if RobotFeatures.HAS_CPROFILE:
@@ -74,7 +74,8 @@ class Robot(
         SmartDashboard.putNumber("hood_angle_final", 0)
 
     def robotPeriodic(self) -> None:
-        self._time_and_joystick_replay.update()
+        if RobotFeatures.LOGGING_ROBOT:
+            self._time_and_joystick_replay.update()
 
         self._scheduler_timer.start()
         commands2.CommandScheduler.getInstance().run()
