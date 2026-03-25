@@ -244,15 +244,15 @@ class Vision(Subsystem):
                     )
 
             # --- Camera connection status ---
-            self.i+=1
+        self.i+=1
 
-            if RobotFeatures.LOGGING_VISION and self.i % 10 == 0:
-                for cam_cfg in self._cameras:
-                    PyKitLogger.recordOutput(
-                        f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
-                    )
+        if RobotFeatures.LOGGING_VISION or self.i % 10 == 0:
+            for cam_cfg in self._cameras:
+                PyKitLogger.recordOutput(
+                    f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
+                )
 
-            self._loop_timer.stop()
+        self._loop_timer.stop()
 
 
     def _get_observations_from_camera(
