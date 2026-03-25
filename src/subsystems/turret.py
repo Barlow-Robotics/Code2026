@@ -34,6 +34,7 @@ class Turret(Subsystem):
         super().__init__()
         self._loop_timer = LoopTimer("Turret")
         self.driveSub = driveSub
+        self.actual_velocity_to_go = 15.5
         if not init2:
             SmartDashboard.putNumber("kV", 1.8)
             SmartDashboard.putNumber("kD", 1.5)
@@ -327,14 +328,16 @@ class Turret(Subsystem):
         PyKitLogger.recordOutput("Turret/initial_distance_to_hub", float(distance))
         if distance > 3 and distance < 3.5:
             v_fixed = 10
-            actual_velocity_to_go = 16.5
-            print(distance)
-        if distance > 2.5 and distance < 3:
+            self.actual_velocity_to_go = 16.5
+        elif distance > 2.5 and distance < 3:
             v_fixed = 10
-            actual_velocity_to_go = 15.5
-        if distance > 2 and distance < 2.5:
+            self.actual_velocity_to_go = 15.5
+        elif distance > 2 and distance < 2.5:
+            v_fixed = 10
+            self.actual_velocity_to_go = 14.5
+        else:
             v_fixed = SmartDashboard.getNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", v_fixed)
-
+            self.actual_velocity_to_go = SmartDashboard.getNumber("CustomFloatVelocity", v_fixed)
 
         dz = hub_pose.Z() - TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M
         if RobotFeatures.LOGGING_TURRET:
