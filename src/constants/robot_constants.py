@@ -9,12 +9,6 @@ import math
 
 
 class RobotFeatures:
-    # HAVE TO CHANGE THIS HERE
-    LOGGING_SIGNAL = True
-    # HAVE TO CHANGE THIS HERE
-
-
-
     HAS_DRIVETRAIN = True
     HAS_VISION = True
     HAS_SHOOTER = True
@@ -23,19 +17,6 @@ class RobotFeatures:
     HAS_SPINDEX = True
     HAS_FEEDER = True
     HAS_CPROFILE = False
-    LOGGING = False
-    LOGGING_ROBOT = False
-    LOGGING_DRIVETRAIN = False
-    LOGGING_VISION = False
-    LOGGING_SHOOTER = False
-    LOGGING_TURRET = False
-    LOGGING_INTAKE = False
-    LOGGING_SPINDEX = False
-    LOGGING_FEEDER = False
-    vision_camera_count = 3
-    TESTING = False
-    HAS_TURRET_ANGLE = False
-
 
     @classmethod
     def configure(cls):
@@ -71,18 +52,18 @@ class RobotFeatures:
             cls.HAS_INTAKE = True
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
-            cls.HAS_CPROFILE = True
+            cls.HAS_CPROFILE = False
             cls.TESTING = True
             cls.HAS_TURRET_ANGLE = False
             cls.LOGGING = True
             cls.LOGGING_ROBOT = True
             cls.LOGGING_DRIVETRAIN = True
-            cls.LOGGING_VISION = True
-            cls.LOGGING_SHOOTER = True
-            cls.LOGGING_TURRET = True
+            cls.LOGGING_VISION = False
+            cls.LOGGING_SHOOTER = False
+            cls.LOGGING_TURRET = False
             cls.LOGGING_INTAKE = True
-            cls.LOGGING_SPINDEX = True
-            cls.LOGGING_FEEDER = True
+            cls.LOGGING_SPINDEX = False
+            cls.LOGGING_FEEDER = False
 
 
 class MotorIDs:

@@ -15,9 +15,7 @@ from commands import IntakePositionCommand, ShootCommand, ReverseCommand
 from commands.throw_feeder_command import ThrowFeederCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
-from utils.telemetry import Logger
-
-Logger = Logger("Controller")
+from pykit.logger import Logger as PyKitLogger
 
 if TYPE_CHECKING:
     from core import RobotContainer

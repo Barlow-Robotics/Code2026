@@ -11,11 +11,10 @@ from rev import (
     ResetMode,
     PersistMode,
 )
-from utils.telemetry import Logger
+from pykit.logger import Logger as PyKitLogger
 from commands2 import cmd
 from utils.profiler import LoopTimer
 
-Logger = Logger("Shooter")
 
 class Shooter(Subsystem):
     def __init__(self):
@@ -104,33 +103,33 @@ class Shooter(Subsystem):
     def periodic(self):
         self._loop_timer.start()
 
-        Logger.recordOutput(
+        PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_RPM", float(self.get_current_rpm())
         )
-        Logger.recordOutput(
+        PyKitLogger.recordOutput(
             "Shooter/flywheel_motor_left_target_RPM",
             float(self.flywheel_target_RPM),
         )
         if RobotFeatures.LOGGING_SHOOTER:
-            Logger.recordOutput(
+            PyKitLogger.recordOutput(
                 "Shooter/flywheel_motor_right_RPM",
                 float(self.get_current_rpm_follower()),
             )
 
-            Logger.recordOutput(
+            PyKitLogger.recordOutput(
                 "Shooter/flywheel_motor_left_current_velocity",
                 float(self.get_current_velocity()),
             )
-            Logger.recordOutput(
+            PyKitLogger.recordOutput(
                 "Shooter/flywheel_motor_left_target_velocity",
                 float(self.flywheel_target_velocity),
             )
 
-            Logger.recordOutput(
+            PyKitLogger.recordOutput(
                 "Shooter/flywheel_motor_current_limit",
                 float(self.flywheel_motor_left_leader.getOutputCurrent()),
             )
-            Logger.recordOutput(
+            PyKitLogger.recordOutput(
                 "Shooter/flywheel_motor_current_volts",
                 float(self.flywheel_motor_left_leader.getAppliedOutput()),
             )

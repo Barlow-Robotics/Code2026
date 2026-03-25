@@ -15,9 +15,8 @@ import time
 
 from wpilib import RobotBase
 
-from utils.telemetry import Logger
+from pykit.logger import Logger as PyKitLogger
 
-Logger = Logger("Profiler")
 
 class LoopTimer:
     """Allocation-free statistical timer for one named section.
@@ -64,9 +63,9 @@ class LoopTimer:
                 avg_ms = 0.0
                 max_ms = 0.0
 
-            Logger.recordOutput(f"{self._prefix}/avg_ms", avg_ms)
-            Logger.recordOutput(f"{self._prefix}/max_ms", max_ms)
-            Logger.recordOutput(f"{self._prefix}/count", float(self._count))
+            PyKitLogger.recordOutput(f"{self._prefix}/avg_ms", avg_ms)
+            PyKitLogger.recordOutput(f"{self._prefix}/max_ms", max_ms)
+            PyKitLogger.recordOutput(f"{self._prefix}/count", float(self._count))
 
             self._sum_us = 0.0
             self._max_us = 0.0

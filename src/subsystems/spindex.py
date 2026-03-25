@@ -4,13 +4,12 @@ import commands2
 from constants.robot_constants import RobotFeatures
 from utils import TalonConfigFX
 from constants import MotorIDs
-from utils.telemetry import Logger
+from pykit.logger import Logger as PyKitLogger
 from commands2.sysid import SysIdRoutine
 from utils import generateSysIdProfile
 from utils.profiler import LoopTimer
 from constants import SpindexConstants
 
-Logger = Logger("Spindex")
 
 class Spindex(commands2.Subsystem):
     def __init__(self):
@@ -64,27 +63,27 @@ class Spindex(commands2.Subsystem):
 
     def log_motor(self, motor: TalonFX, prefix: str, target_velocity: float):
         if RobotFeatures.LOGGING_SPINDEX:
-            Logger.recordOutput(f"{prefix}/target_velocity", target_velocity)
-            Logger.recordOutput(
+            PyKitLogger.recordOutput(f"{prefix}/target_velocity", target_velocity)
+            PyKitLogger.recordOutput(
                 f"{prefix}/current_velocity", float(motor.get_velocity().value)
             )
-            Logger.recordOutput(
+            PyKitLogger.recordOutput(
                 f"{prefix}/current_supply_current",
                 float(motor.get_supply_current().value),
             )
-            Logger.recordOutput(
+            PyKitLogger.recordOutput(
                 f"{prefix}/current_stator_current",
                 float(motor.get_stator_current().value),
             )
-            Logger.recordOutput(
+            PyKitLogger.recordOutput(
                 f"{prefix}/current_supply_voltage",
                 float(motor.get_supply_voltage().value),
             )
-            Logger.recordOutput(
+            PyKitLogger.recordOutput(
                 f"{prefix}/current_motor_voltage",
                 float(motor.get_motor_voltage().value),
             )
-            Logger.recordOutput(
+            PyKitLogger.recordOutput(
                 f"{prefix}/current_device_temp",
                 float(motor.get_device_temp().value),
             )

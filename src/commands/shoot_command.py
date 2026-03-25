@@ -8,8 +8,8 @@ from subsystems.drivetrain import Drivetrain
 if TYPE_CHECKING:
     from subsystems import Spindex, Turret, Feeder, Shooter
 from wpimath.geometry import Pose2d, Rotation2d, Translation3d
-from utils.telemetry import Logger as Logger
-Logger = Logger("ShootCommand")  
+from pykit.logger import Logger as PyKitLogger
+
 
 class ShootCommand(Command):
     def __init__(
@@ -32,7 +32,7 @@ class ShootCommand(Command):
     def initialize(self):
         self._feeding = False
         self.static_actual_velocity_to_go = self.turret.actual_velocity_to_go
-        Logger.recordOutput("velocity_to_go", self.static_actual_velocity_to_go)  
+        PyKitLogger.recordOutput("ShootCommand/velocity_to_go", self.static_actual_velocity_to_go)  
         self.shooter.set_velocity(self.static_actual_velocity_to_go)
 
     def execute(self):
@@ -40,7 +40,7 @@ class ShootCommand(Command):
             self.turret.set_target_hood_and_turret()
         if self.static_actual_velocity_to_go != self.turret.actual_velocity_to_go:
             self.static_actual_velocity_to_go = self.turret.actual_velocity_to_go
-            Logger.recordOutput("velocity_to_go", self.static_actual_velocity_to_go)  
+            PyKitLogger.recordOutput("ShootCommand/velocity_to_go", self.static_actual_velocity_to_go)  
             self.shooter.set_velocity(self.static_actual_velocity_to_go)
 
         if self._feeding:

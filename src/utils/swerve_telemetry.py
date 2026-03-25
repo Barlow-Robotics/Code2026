@@ -11,8 +11,7 @@ from wpilib import (
 from wpimath.geometry import Pose2d
 from wpimath.kinematics import ChassisSpeeds, SwerveModulePosition, SwerveModuleState
 
-from utils.telemetry import Logger
-Logger = Logger("SwerveTelemetry")
+from pykit.logger import Logger as PyKitLogger
 
 from constants.robot_constants import RobotFeatures
 
@@ -66,20 +65,20 @@ class SwerveTelemetry:
         # PyKit logging
         self._field.setRobotPose(state.pose)
 
-        Logger.recordOutput("Pose/robotPose", state.pose)
+        PyKitLogger.recordOutput("Pose/robotPose", state.pose)
 
         # Write pose only to .hoot log file
         SignalLogger.write_struct("DriveState/Pose", Pose2d, state.pose)
         if RobotFeatures.LOGGING_DRIVETRAIN:
-            Logger.recordOutput("DriveState/Pose", state.pose)
-            Logger.recordOutput("DriveState/Speeds", state.speeds)
-            Logger.recordOutput("DriveState/ModuleStates", state.module_states)
-            Logger.recordOutput("DriveState/ModuleTargets", state.module_targets)
-            Logger.recordOutput(
+            PyKitLogger.recordOutput("DriveState/Pose", state.pose)
+            PyKitLogger.recordOutput("DriveState/Speeds", state.speeds)
+            PyKitLogger.recordOutput("DriveState/ModuleStates", state.module_states)
+            PyKitLogger.recordOutput("DriveState/ModuleTargets", state.module_targets)
+            PyKitLogger.recordOutput(
                 "DriveState/ModulePositions", state.module_positions
             )
-            Logger.recordOutput("DriveState/Timestamp", state.timestamp)
-            Logger.recordOutput(
+            PyKitLogger.recordOutput("DriveState/Timestamp", state.timestamp)
+            PyKitLogger.recordOutput(
                 "DriveState/OdometryFrequency", 1.0 / state.odometry_period
             )
             SignalLogger.write_struct("DriveState/Speeds", ChassisSpeeds, state.speeds)

@@ -8,13 +8,13 @@ from phoenix6 import controls
 from phoenix6.hardware import TalonFX
 import wpilib
 from wpilib import RobotBase, Mechanism2d, Color8Bit, SmartDashboard
-from utils.telemetry import Logger
+from pykit.logger import Logger as PyKitLogger
+
 from constants.robot_constants import RobotFeatures
 from utils.profiler import LoopTimer
 from constants import IntakeConstants, MotorIDs
 from utils import TalonConfigFX, generateSysIdProfile, IntakePositions
 
-Logger = Logger("Intake")
 
 @dataclass
 class IntakeCommandTelemetry:
@@ -209,7 +209,7 @@ class Intake(commands2.Subsystem):
             if dataclasses.is_dataclass(value):
                 self._log_dataclass(key, value)
             else:
-                Logger.recordOutput(key, value)
+                PyKitLogger.recordOutput(key, value)
 
     def periodic(self):
         self._loop_timer.start()
@@ -246,10 +246,10 @@ class Intake(commands2.Subsystem):
                     stop_requested=self._stop_requested,
                 ),
             )
-            Logger.recordOutput(
+            PyKitLogger.recordOutput(
                 "Intake/Volt/Leader", self.motor_arm_leader.get_motor_voltage().value
             )
-            # Logger.recordOutput(
+            # PyKitLogger.recordOutput(
             #     "Intake/Volt/Follower",
             #     self.motor_arm_follower.get_motor_voltage().value,
             # )
