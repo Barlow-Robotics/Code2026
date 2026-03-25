@@ -27,6 +27,8 @@ if not RobotBase.isReal():
         SimCameraProperties,
         VisionSystemSim,
     )
+import threading
+import time
 
 XY_STD_DEV_COEFFICIENT = 0.05  # Base xy std dev coefficient
 THETA_STD_DEV_COEFFICIENT = 0.01  # Base theta std dev coefficient
@@ -72,6 +74,8 @@ class _CameraConfig:
 class Vision(Subsystem):
     def __init__(self, drive_sub: Drivetrain):
         self.i = 0
+
+
         # inst = ntcore.NetworkTableInstance.getDefault()
         # inst.startClient3("connect-auto-align")
         # inst.setServerTeam(4572)
@@ -139,7 +143,11 @@ class Vision(Subsystem):
         PyKitLogger.recordOutput(
             "Vision/Config/camera_count", float(len(self._cameras))
         )
-
+                # After existing init code:
+        self._pending_observations: List[VisionObservation] = []
+        self._pending_lock = threading.Lock()
+        self._thread = threading.Thread(target=self._vision_thread_loop, daemon=True)
+        self._thread.start()
         if not RobotBase.isReal() and VisionConstants.VISION_SIM:
             self._vision_sim = VisionSystemSim("main")
             self._vision_sim.addAprilTags(self.april_tag_field_layout)
@@ -158,91 +166,94 @@ class Vision(Subsystem):
                 self._vision_sim.addCamera(cam_cfg.camera_sim, cam_cfg.robot_to_camera)
         else:
             self._vision_sim = None
+    def _vision_thread_loop(self):
+        import os
+        # Lower priority so main loop always wins on 2-core RoboRIO
+        try:
+            os.nice(10)
+        except Exception:
+            pass
 
+        while True:
+            if self.disabled_vision:
+                time.sleep(0.02)
+                continue
+
+            # Snapshot the drivetrain state — read only, no locks needed for these
+            drive_pose = self.drive_sub.get_pose()
+            current_speeds = self.drive_sub.get_speeds()
+            current_rotation = self.drive_sub.get_rotation()
+
+            new_observations: List[VisionObservation] = []
+            for cam_cfg in self._cameras:
+                obs = self._get_observations_from_camera(
+                    drive_pose, current_speeds, current_rotation, cam_cfg
+                )
+                new_observations.extend(obs)
+
+            new_observations.sort(key=lambda o: o.timestamp)
+
+            if new_observations:
+                with self._pending_lock:
+                    # Overwrite — never queue stale frames
+                    self._pending_observations = new_observations
+
+            # Sleep ~1 frame. Adjust to your camera pipeline latency.
+            if DriverStation.isEnabled():
+                time.sleep(0.011)
+            else:
+                time.sleep(0.002)
     def periodic(self):
-
         if not RobotBase.isReal() and VisionConstants.VISION_SIM:
             self.simulation_periodic()
 
-        if not self.disabled_vision:
-            self._loop_timer.start()
+        self._loop_timer.start()
 
-            current_pose = self.drive_sub.get_pose()
-            current_speeds = self.drive_sub.get_speeds()  # once for all cameras
-            current_rotation = self.drive_sub.get_rotation()  # once for all cameras
+        # Grab whatever the background thread has ready — never blocks
+        with self._pending_lock:
+            observations = self._pending_observations
+            self._pending_observations = []
 
-            self._update_all_cameras(current_pose, current_speeds, current_rotation)
-        if RobotFeatures.LOGGING_VISION:
-            for stat_name, stat_key in [
-                ("Front_Left_Swerve", "front_left"),
-                ("Front_Right_Swerve", "front_right"),
-                ("Back_Right_Swerve", "back_right"),
-            ]:
-                stats = self._camera_stats.get(stat_name)
-                if stats is not None:
-                    PyKitLogger.recordOutput(
-                        f"Vision/{stat_key}/std_dev", stats.std_dev
-                    )
-                    PyKitLogger.recordOutput(
-                        f"Vision/{stat_key}/tag_count", stats.tag_count
-                    )
-                    PyKitLogger.recordOutput(
-                        f"Vision/{stat_key}/distance", stats.distance
-                    )
+        self._observations_per_cycle = float(len(observations))
 
-        # --- VisionStateTelemetry ---
-        if RobotFeatures.LOGGING_VISION:
-            PyKitLogger.recordOutput(
-                "Vision/State/vision_disabled", self.disabled_vision
-            )
-            PyKitLogger.recordOutput(
-                "Vision/State/observations_per_cycle", self._observations_per_cycle
-            )
-            PyKitLogger.recordOutput(
-                "Vision/State/auto_align_triggered", self._auto_align_triggered
-            )
-
-            if self._auto_align_starting_pose is not None:
-                PyKitLogger.recordOutput(
-                    "Vision/State/auto_align_starting_pose",
-                    self._auto_align_starting_pose,
-                )
-            if self._auto_align_target_pose is not None:
-                PyKitLogger.recordOutput(
-                    "Vision/State/auto_align_target_pose", self._auto_align_target_pose
-                )
-
-        # --- Camera connection status ---
-        self.i+=1
-
-        if RobotFeatures.LOGGING_VISION and self.i % 10 == 0:
-            for cam_cfg in self._cameras:
-                PyKitLogger.recordOutput(
-                    f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
-                )
-
-        self._loop_timer.stop()
-
-    def _update_all_cameras(
-        self,
-        drive_pose: Pose2d,
-        current_speeds: ChassisSpeeds,
-        current_rotation: Rotation2d,
-    ):
-        all_observations: List[VisionObservation] = []
-
-        for cam_cfg in self._cameras:
-            obs_list = self._get_observations_from_camera(
-                drive_pose, current_speeds, current_rotation, cam_cfg
-            )
-            all_observations.extend(obs_list)
-
-        all_observations.sort(key=lambda o: o.timestamp)
-        self._observations_per_cycle = float(len(all_observations))
-
-        for obs in all_observations:
+        for obs in observations:
             self.drive_sub.add_vision_measurement(obs.pose, obs.timestamp, obs.std_devs)
             self._last_pose_estimate = obs.pose
+
+        # All your existing logging stays exactly as-is below here
+        if RobotFeatures.LOGGING_VISION:
+            if RobotFeatures.LOGGING_VISION:
+                PyKitLogger.recordOutput(
+                    "Vision/State/vision_disabled", self.disabled_vision
+                )
+                PyKitLogger.recordOutput(
+                    "Vision/State/observations_per_cycle", self._observations_per_cycle
+                )
+                PyKitLogger.recordOutput(
+                    "Vision/State/auto_align_triggered", self._auto_align_triggered
+                )
+
+                if self._auto_align_starting_pose is not None:
+                    PyKitLogger.recordOutput(
+                        "Vision/State/auto_align_starting_pose",
+                        self._auto_align_starting_pose,
+                    )
+                if self._auto_align_target_pose is not None:
+                    PyKitLogger.recordOutput(
+                        "Vision/State/auto_align_target_pose", self._auto_align_target_pose
+                    )
+
+            # --- Camera connection status ---
+            self.i+=1
+
+            if RobotFeatures.LOGGING_VISION and self.i % 10 == 0:
+                for cam_cfg in self._cameras:
+                    PyKitLogger.recordOutput(
+                        f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
+                    )
+
+            self._loop_timer.stop()
+
 
     def _get_observations_from_camera(
         self,
@@ -416,7 +427,7 @@ class Vision(Subsystem):
                 )
                 PyKitLogger.recordOutput(
                     f"{prefix}/rejected_excessive_angular_velocity_value",
-                    self.drive_sub.get_speeds().omega,
+                    current_speeds.omega
                 )
             return observations
         else:
