@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 from commands2 import Command
-from wpilib import SmartDashboard
+from wpilib import RobotState, SmartDashboard
 from constants import ShooterConstants
 from constants.field_constants import CustomPoints
 from subsystems.drivetrain import Drivetrain
@@ -36,6 +36,8 @@ class ShootCommand(Command):
         self.shooter.set_velocity(self.static_actual_velocity_to_go)
 
     def execute(self):
+        if RobotState.isAutonomous():
+            self.turret.set_target_hood_and_turret()
         if self.static_actual_velocity_to_go != self.turret.actual_velocity_to_go:
             self.static_actual_velocity_to_go = self.turret.actual_velocity_to_go
             PyKitLogger.recordOutput("ShootCommand/velocity_to_go", self.static_actual_velocity_to_go)  
