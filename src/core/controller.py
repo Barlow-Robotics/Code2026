@@ -276,12 +276,12 @@ class Controller:
                 #     )
                 # )
         # Periodically warn about missing controllers during teleop
-        Trigger(DriverStation.isTeleopEnabled).whileTrue(
-            cmd.sequence(
-                cmd.waitSeconds(5),
-                cmd.runOnce(self._log_missing_connections),
-            ).repeatedly()
-        )
+        # Trigger(DriverStation.isTeleopEnabled).whileTrue(
+        #     cmd.sequence(
+        #         cmd.waitSeconds(5),
+        #         cmd.runOnce(self._log_missing_connections),
+        #     ).repeatedly()
+        # )
 
     def update_state(self, sub=False):        
         if sub:
@@ -298,15 +298,15 @@ class Controller:
             if round(self._current_state, 2) < 1.0:
                 self.update_state(sub=sub)
 
-    def _log_missing_connections(self):
-        if not DriverStation.isJoystickConnected(self._OPERATOR_PORT):
-            wpilib.reportWarning(
-                f"Xbox controller not connected on port {self._OPERATOR_PORT}"
-            )
-        if not DriverStation.isJoystickConnected(self._DRIVER_PORT):
-            wpilib.reportWarning(
-                f"Driver joystick not connected on port {self._DRIVER_PORT}"
-            )
+    # def _log_missing_connections(self):
+    #     if not DriverStation.isJoystickConnected(self._OPERATOR_PORT):
+    #         wpilib.reportWarning(
+    #             f"Xbox controller not connected on port {self._OPERATOR_PORT}"
+    #         )
+    #     if not DriverStation.isJoystickConnected(self._DRIVER_PORT):
+    #         wpilib.reportWarning(
+    #             f"Driver joystick not connected on port {self._DRIVER_PORT}"
+    #         )
 
     def _joystick_to_rotation(self) -> Rotation2d | None:
         x = -self._operator.getLeftX()

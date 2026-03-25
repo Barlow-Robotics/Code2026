@@ -50,7 +50,7 @@ class RobotFeatures:
             cls.HAS_INTAKE = False
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
-            cls.HAS_CPROFILE = False
+            cls.HAS_CPROFILE = True
             cls.TESTING = True
             cls.HAS_TURRET_ANGLE = False
             cls.LOGGING = False
@@ -58,7 +58,7 @@ class RobotFeatures:
             cls.LOGGING_DRIVETRAIN = False
             cls.LOGGING_VISION = False
             cls.LOGGING_SHOOTER = False
-            cls.LOGGING_TURRET = True
+            cls.LOGGING_TURRET = False
             cls.LOGGING_INTAKE = False
             cls.LOGGING_SPINDEX = False
             cls.LOGGING_FEEDER = False
