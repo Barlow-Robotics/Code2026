@@ -64,7 +64,7 @@ class Intake(commands2.Subsystem):
             self.head_ligament = self.arm_ligament.appendLigament(
                 "Head", 0.4, -90, 10, Color8Bit(0, 150, 0)
             )
-            wpilib.SmartDashboard.putData("Mechanism2d", self.mechanism)
+            wpilib.SmartDashboard.putData("Intake/Mechanism2d", self.mechanism)
 
         self.motor_roller: TalonFX = TalonFX(MotorIDs.motor_id_roller, "*")
         self.motor_arm_leader: TalonFX = TalonFX(MotorIDs.motor_id_arm_leader_left, "*")
@@ -219,7 +219,7 @@ class Intake(commands2.Subsystem):
             self.arm_ligament.setAngle(75 + arm_degrees)
         if RobotFeatures.LOGGING_INTAKE:
             self._log_dataclass(
-                "Telemetry",
+                "Intake/Telemetry",
                 IntakeTelemetry(
                     arm_position=float(self.motor_arm_leader.get_position().value),
                     # arm_position_follower=float(
@@ -238,7 +238,7 @@ class Intake(commands2.Subsystem):
             )
 
             self._log_dataclass(
-                "Command",
+                "Intake/Command",
                 IntakeCommandTelemetry(
                     target_position=self._target_position_name,
                     commanded_velocity_ft_per_sec=self._commanded_velocity_ft_per_sec,
@@ -247,10 +247,10 @@ class Intake(commands2.Subsystem):
                 ),
             )
             Logger.recordOutput(
-                "Volt/Leader", self.motor_arm_leader.get_motor_voltage().value
+                "Intake/Volt/Leader", self.motor_arm_leader.get_motor_voltage().value
             )
             # Logger.recordOutput(
-            #     "Volt/Follower",
+            #     "Intake/Volt/Follower",
             #     self.motor_arm_follower.get_motor_voltage().value,
             # )
 

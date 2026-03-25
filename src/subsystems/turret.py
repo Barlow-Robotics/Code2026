@@ -128,7 +128,7 @@ class Turret(Subsystem):
         self.target_hood_angle = 0.0
         self.target_turret_yaw = 0.0
         self.turret_yaw_deg = Rotation2d(0)
-        SmartDashboard.putNumber("SHOOTER_SET_VELOCITY_CONSTANT", 0)
+        SmartDashboard.putNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", 0)
         # Mechanism2d — top-down view: base = robot heading, turret = yaw, length = hood
         if RobotFeatures.LOGGING_ROBOT:
             self.mechanism = Mechanism2d(3, 3)
@@ -144,7 +144,7 @@ class Turret(Subsystem):
                 "Turret", 1.0, 0, 8, Color8Bit(0, 150, 255)
             )
 
-            SmartDashboard.putData("Mechanism2d", self.mechanism)
+            SmartDashboard.putData("Turret/Mechanism2d", self.mechanism)
 
         self.sys_id_routine_hood = generateSysIdProfile(
             self, self.hood_motor, name="Hood_Motor"
@@ -259,24 +259,24 @@ class Turret(Subsystem):
             self.turret_ligament.setLength(0.3 + hood_fraction * 0.9)
 
         Logger.recordOutput(
-            "target_hood_angle", float(self.target_hood_angle)
+            "Turret/target_hood_angle", float(self.target_hood_angle)
         )
         Logger.recordOutput(
-            "actual_hood_angle_motor",
+            "Turret/actual_hood_angle_motor",
             float(self.hood_motor.get_position().value) * SI.rotations_to_degrees,
         )
         Logger.recordOutput(
-            "actual_hood_angle_cancoder",
+            "Turret/actual_hood_angle_cancoder",
             self.get_actual_hood_angle_cancoder(),
         )
         if self.turret_yaw_deg != Rotation2d(0):
             Logger.recordOutput(
-                "turret_yaw_deg", float(self.turret_yaw_deg)
+                "Turret/turret_yaw_deg", float(self.turret_yaw_deg)
             )
             self.turret_yaw_deg = Rotation2d(0)
         if RobotFeatures.LOGGING_TURRET:
             Logger.recordOutput(
-                "hood_motor_voltage",
+                "Turret/hood_motor_voltage",
                 float(self.hood_motor.get_motor_voltage().value_as_double),
             )
 
@@ -313,8 +313,8 @@ class Turret(Subsystem):
         robot_speeds = self.driveSub.get_speeds()
 
         if robot_pose is None and RobotFeatures.LOGGING_TURRET:
-            Logger.recordOutput("calc_valid", False)
-            Logger.recordOutput("calc_failure_reason", "robot_pose_is_none")
+            Logger.recordOutput("Turret/calc_valid", False)
+            Logger.recordOutput("Turret/calc_failure_reason", "robot_pose_is_none")
             return -1, -1, 0
 
         G = 9.81
@@ -325,14 +325,14 @@ class Turret(Subsystem):
             hub_pose = shooting_location
 
         if hub_pose is None and RobotFeatures.LOGGING_TURRET:
-            Logger.recordOutput("calc_valid", False)
-            Logger.recordOutput("calc_failure_reason", "hub_pose_is_none")
+            Logger.recordOutput("Turret/calc_valid", False)
+            Logger.recordOutput("Turret/calc_failure_reason", "hub_pose_is_none")
             return -1, -1, 0
 
         dx = hub_pose.X() - robot_pose.X()
         dy = hub_pose.Y() - robot_pose.Y()
         distance = math.sqrt(dx * dx + dy * dy) 
-        Logger.recordOutput("initial_distance_to_hub", float(distance))
+        Logger.recordOutput("Turret/initial_distance_to_hub", float(distance))
 
         v_fixed = 10
         self.actual_velocity_to_go = 2 * distance + 10
@@ -348,15 +348,15 @@ class Turret(Subsystem):
         #     v_fixed = 10
         #     self.actual_velocity_to_go = 14.5
         # else:
-        #     v_fixed = SmartDashboard.getNumber("SHOOTER_SET_VELOCITY_CONSTANT", v_fixed)
+        #     v_fixed = SmartDashboard.getNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", v_fixed)
         #     self.actual_velocity_to_go = SmartDashboard.getNumber("CustomFloatVelocity", v_fixed)
 
         dz = hub_pose.Z() - TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M
         if RobotFeatures.LOGGING_TURRET:
-            Logger.recordOutput("initial_dx", float(dx))
-            Logger.recordOutput("initial_dy", float(dy))
-            Logger.recordOutput("initial_dz", float(dz))
-            Logger.recordOutput("v_fixed", float(v_fixed))
+            Logger.recordOutput("Turret/initial_dx", float(dx))
+            Logger.recordOutput("Turret/initial_dy", float(dy))
+            Logger.recordOutput("Turret/initial_dz", float(dz))
+            Logger.recordOutput("Turret/v_fixed", float(v_fixed))
 
         discriminant = 0.0
         hood_angle = 0.0
@@ -372,24 +372,24 @@ class Turret(Subsystem):
 
             discriminant = B**2 - 4 * A * C
             if RobotFeatures.LOGGING_TURRET:
-                Logger.recordOutput(f"Iterations/iter_{i}_r", float(r))
+                Logger.recordOutput(f"Turret/Iterations/iter_{i}_r", float(r))
                 Logger.recordOutput(
-                    f"Iterations/iter_{i}_discriminant", float(discriminant)
+                    f"Turret/Iterations/iter_{i}_discriminant", float(discriminant)
                 )
 
             if discriminant < 0:
                 if RobotFeatures.LOGGING_TURRET:
-                    Logger.recordOutput("calc_valid", False)
+                    Logger.recordOutput("Turret/calc_valid", False)
                     Logger.recordOutput(
-                        "calc_failure_reason",
+                        "Turret/calc_failure_reason",
                         "target_unreachable_discriminant_negative",
                     )
-                    Logger.recordOutput("discriminant", float(discriminant))
-                    Logger.recordOutput("horizontal_distance", float(r))
+                    Logger.recordOutput("Turret/discriminant", float(discriminant))
+                    Logger.recordOutput("Turret/horizontal_distance", float(r))
                     Logger.recordOutput(
-                        f"Iterations/iter_{i}_hood_angle_deg", 0.0
+                        f"Turret/Iterations/iter_{i}_hood_angle_deg", 0.0
                     )
-                    Logger.recordOutput(f"Iterations/iter_{i}_tof", 0.0)
+                    Logger.recordOutput(f"Turret/Iterations/iter_{i}_tof", 0.0)
                 return -1, -1, 0
 
             tan_theta = (-B - math.sqrt(discriminant)) / (2 * A)
@@ -397,10 +397,10 @@ class Turret(Subsystem):
             tof = r / (math.cos(hood_angle) * v_fixed)
             if RobotFeatures.LOGGING_TURRET:
                 Logger.recordOutput(
-                    f"Iterations/iter_{i}_hood_angle_deg",
+                    f"Turret/Iterations/iter_{i}_hood_angle_deg",
                     float(hood_angle * SI.radians_to_degrees),
                 )
-                Logger.recordOutput(f"Iterations/iter_{i}_tof", float(tof))
+                Logger.recordOutput(f"Turret/Iterations/iter_{i}_tof", float(tof))
 
             dx = hub_pose.X() - robot_pose.X() - robot_speeds.vx * tof
             dy = hub_pose.Y() - robot_pose.Y() - robot_speeds.vy * tof
@@ -419,13 +419,13 @@ class Turret(Subsystem):
         # Hard fail if yaw is unreachable
         if not (YAW_MIN_DEG <= turret_yaw_deg <= YAW_MAX_DEG):
             if RobotFeatures.LOGGING_TURRET:
-                Logger.recordOutput("calc_valid", False)
+                Logger.recordOutput("Turret/calc_valid", False)
                 Logger.recordOutput(
-                    "calc_failure_reason",
+                    "Turret/calc_failure_reason",
                     f"turret_yaw_out_of_range: {turret_yaw_deg:.1f} deg",
                 )
                 Logger.recordOutput(
-                    "target_turret_yaw", float(turret_yaw_deg)
+                    "Turret/target_turret_yaw", float(turret_yaw_deg)
                 )
             return -1, -1, 0
 
@@ -436,7 +436,7 @@ class Turret(Subsystem):
         if hood_elev_clamped != hood_elev_deg:
             if RobotFeatures.LOGGING_TURRET:
                 Logger.recordOutput(
-                    "calc_warning",
+                    "Turret/calc_warning",
                     f"hood_elevation_clamped from {hood_elev_deg:.1f} to {hood_elev_clamped:.1f} deg",
                 )
         # Convert clamped elevation back to unit circle convention for output
@@ -444,29 +444,29 @@ class Turret(Subsystem):
         hood_unit_circle_deg = hood_elev_clamped + 90.0
         hood_motor_deg = hood_unit_circle_deg - 140.0  # [-30, 0]
         if RobotFeatures.LOGGING_TURRET:
-            Logger.recordOutput("calc_valid", True)
-            Logger.recordOutput("calc_failure_reason", "")
+            Logger.recordOutput("Turret/calc_valid", True)
+            Logger.recordOutput("Turret/calc_failure_reason", "")
             Logger.recordOutput(
-                "hub_dx", float(hub_pose.X() - robot_pose.X())
+                "Turret/hub_dx", float(hub_pose.X() - robot_pose.X())
             )
             Logger.recordOutput(
-                "hub_dy", float(hub_pose.Y() - robot_pose.Y())
+                "Turret/hub_dy", float(hub_pose.Y() - robot_pose.Y())
             )
             Logger.recordOutput(
-                "hub_dz",
+                "Turret/hub_dz",
                 float(hub_pose.Z() - TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M),
             )
-            Logger.recordOutput("horizontal_distance", float(r))
-            Logger.recordOutput("time_of_flight", float(tof))
-            Logger.recordOutput("discriminant", float(discriminant))
+            Logger.recordOutput("Turret/horizontal_distance", float(r))
+            Logger.recordOutput("Turret/time_of_flight", float(tof))
+            Logger.recordOutput("Turret/discriminant", float(discriminant))
             Logger.recordOutput(
-                "target_hood_angle_elevation_deg", float(hood_elev_clamped)
+                "Turret/target_hood_angle_elevation_deg", float(hood_elev_clamped)
             )
             Logger.recordOutput(
-                "target_hood_angle_unit_circle_deg", float(hood_unit_circle_deg)
+                "Turret/target_hood_angle_unit_circle_deg", float(hood_unit_circle_deg)
             )
             Logger.recordOutput(
-                "target_hood_angle_motor_deg", float(hood_motor_deg)
+                "Turret/target_hood_angle_motor_deg", float(hood_motor_deg)
             )
         # print("hub Z:", hub_pose.Z())
         # print("shooter height:", TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M)
@@ -535,7 +535,7 @@ class Turret(Subsystem):
             if self.turret_yaw_deg == Rotation2d(0):
                 self.driveSub.changeAngTelop = False
             self.driveSub.changeAngTelop = enable
-            Logger.recordOutput("target_pose", target_pose)
+            Logger.recordOutput("Turret/target_pose", target_pose)
         else:
             self.reset_target_hood_and_turret()
             self.driveSub.changeAngTelop = enable
