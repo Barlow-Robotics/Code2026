@@ -332,8 +332,20 @@ class Turret(Subsystem):
         distance = math.sqrt(dx * dx + dy * dy) 
         PyKitLogger.recordOutput("Turret/initial_distance_to_hub", float(distance))
 
+        VELOCITY_SLOPE = 2.0
+        VELOCITY_INTERCEPT = 10.0
+        VELOCITY_MIN = 12.0
+        VELOCITY_DISTANCE_THRESHOLD = 2.6
+
         v_fixed = 10
-        self.actual_velocity_to_go = 2 * distance + 10
+        if distance >= VELOCITY_DISTANCE_THRESHOLD:
+            # Far: standard linear ramp (e.g. 2*d + 10)
+            self.actual_velocity_to_go = VELOCITY_SLOPE * distance + VELOCITY_INTERCEPT
+        else:
+            # Near: gentler linear slew from VELOCITY_MIN at d=0 up to the
+            # far-equation value at the threshold, keeping the function continuous
+            v_at_threshold = VELOCITY_SLOPE * VELOCITY_DISTANCE_THRESHOLD + VELOCITY_INTERCEPT
+            self.actual_velocity_to_go = VELOCITY_MIN + (v_at_threshold - VELOCITY_MIN) / VELOCITY_DISTANCE_THRESHOLD * distance
 
 
         # if distance > 3 and distance < 3.5:
