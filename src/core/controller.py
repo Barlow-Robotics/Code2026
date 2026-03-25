@@ -200,8 +200,6 @@ class Controller:
                         )
                     )
                 )
-                
-
 
                 controller.leftTrigger().whileTrue(
                     cmd.run(
@@ -212,9 +210,7 @@ class Controller:
                         lambda: container.turret.enableAutoAim(False)
                     )
                 )
-                # controller.button(2).whileTrue(
-                #     AutoAimCommand(container.drivetrain, container.vision)
-                # )
+
 
         if (
             RobotFeatures.HAS_SHOOTER

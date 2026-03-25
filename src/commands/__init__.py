@@ -10,9 +10,6 @@ from .go_to_position_command import (
 from .throw_feeder_command import (
     ThrowFeederCommand as ThrowFeederCommand,
 )
-from .auto_aim_command import (
-    AutoAimCommand as AutoAimCommand,   
-)
 from .reverse_command import (
     ReverseCommand as ReverseCommand,
 )
