@@ -23,7 +23,7 @@ dependencies = [
     # This list should match the requires in src/pyproject.toml
     "numpy",
     "phoenix6",
-    "photonlibpy",
+    "photonlibpy==2026.3.2",
     "robotpy-pykit==1.0.3",
     "robotpy-pykit-watch==1.0.0",
     "robotpy-halsim-gui>=2026.2.2",

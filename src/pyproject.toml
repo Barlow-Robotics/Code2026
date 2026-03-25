@@ -27,7 +27,7 @@ components = [
 requires = [
     "numpy",
     "phoenix6",
-    "photonlibpy",
+    "photonlibpy==2026.3.2",
     "pyinstrument",
     "robotpy-pykit==1.0.3",
     "robotpy-pathplannerlib>=2026.1.1",

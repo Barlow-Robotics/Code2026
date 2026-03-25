@@ -43,7 +43,7 @@ requires-dist = [
     { name = "debugpy" },
     { name = "numpy" },
     { name = "phoenix6" },
-    { name = "photonlibpy" },
+    { name = "photonlibpy", specifier = "==2026.3.2" },
     { name = "pyinstrument" },
     { name = "pylint", specifier = ">=4.0.2" },
     { name = "robotpy", extras = ["apriltag", "commands2", "sim"], specifier = "==2026.2.2" },
@@ -593,7 +593,7 @@ wheels = [
 
 [[package]]
 name = "photonlibpy"
-version = "2026.2.2"
+version = "2026.3.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
@@ -604,9 +604,9 @@ dependencies = [
     { name = "robotpy-wpimath" },
     { name = "wpilib" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/91/1f/5457ba92a2c0d683e7be8669b04918ed59a52f0a4ecc4a14d2596e2c11b4/photonlibpy-2026.2.2.tar.gz", hash = "sha256:7c1d5dbcbc04d1f024c493683d0e8ab2251d4786fc8ac3dad76588430e3b81f1", size = 40100, upload-time = "2026-02-09T06:58:42.683Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/06/33/954512d4482ef46495aa0598f49b697134ba8bbfc42982ddca4b6330636c/photonlibpy-2026.3.2.tar.gz", hash = "sha256:2f6b50831b99cc495547c6e8aace652badd130b9fa8b8629ef2d1cbe59633394", size = 40158, upload-time = "2026-03-16T02:12:11.114Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c4/7d/be7604ee71b30a4368d5426f53e5b80ce53f3b7d877c94e4febd3d6544c0/photonlibpy-2026.2.2-py3-none-any.whl", hash = "sha256:565e7fa150ea74ff693d38f8d608fba81913370be548349e7dad7c7d00a67031", size = 54053, upload-time = "2026-02-09T06:58:41.447Z" },
+    { url = "https://files.pythonhosted.org/packages/9e/05/9a3a03069f87a90aefadf0193901926d4f282bc7db92fe7ef3d18a5fd279/photonlibpy-2026.3.2-py3-none-any.whl", hash = "sha256:4668c33f46a47d33f8cb30f7ec6cc3a867dccb09aef6cf3e3987a8dcd8747042", size = 54058, upload-time = "2026-03-16T02:12:09.753Z" },
 ]
 
 [[package]]

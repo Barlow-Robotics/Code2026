@@ -109,11 +109,11 @@ class RobotContainer:
 
         # Controller bindings
         self.create_commands()
-        self.controller = Controller(self)
+        # self.controller = Controller(self)
         self.configure_autos()
 
     def reinitialize_subsystems(self):
-        from subsystems import Feeder
+        # from subsystems import Feeder
 
         # if RobotFeatures.HAS_VISION:
         #     self.vision = Vision(drive_sub=self.drivetrain)
@@ -122,13 +122,13 @@ class RobotContainer:
         pass
         # if RobotFeatures.HAS_TURRET:
         #     self.turret = Turret(driveSub=self.drivetrain, init2=True)
-        self.controller = Controller(self)
+        # self.controller = Controller(self)
         # if RobotFeatures.HAS_INTAKE:
         #     self.intake = Intake()
         # if RobotFeatures.HAS_SPINDEX:
         #     self.spindex = Spindex()
-        if RobotFeatures.HAS_FEEDER:
-            self.feeder = Feeder(init2=True)
+        # if RobotFeatures.HAS_FEEDER:
+        #     self.feeder = Feeder(init2=True)
 
     def configure_autos(self):
 

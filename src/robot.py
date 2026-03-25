@@ -58,10 +58,10 @@ class Robot(
         self.container = RobotContainer()
 
         # log and replay timestamp and joystick data
-        if RobotFeatures.TESTING:
-            self._time_and_joystick_replay = (
-                HootAutoReplay().with_timestamp_replay().with_joystick_replay()
-            )
+        # if RobotFeatures.TESTING:
+        #     self._time_and_joystick_replay = (
+        #         HootAutoReplay().with_timestamp_replay().with_joystick_replay()
+        #     )
 
         # --- Profiler setup (sim-only by default) ---
         if RobotFeatures.HAS_CPROFILE:
@@ -75,7 +75,7 @@ class Robot(
         SmartDashboard.putNumber("hood_angle_final", 0)
 
     def robotPeriodic(self) -> None:
-        self._time_and_joystick_replay.update()
+        # self._time_and_joystick_replay.update()
 
         self._scheduler_timer.start()
         commands2.CommandScheduler.getInstance().run()
