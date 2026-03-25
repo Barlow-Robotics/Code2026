@@ -412,8 +412,8 @@ class Turret(Subsystem):
                 )
                 PyKitLogger.recordOutput(f"Turret/Iterations/iter_{i}_tof", float(tof))
 
-            dx = hub_pose.X() - robot_pose.X() - robot_speeds.vx * tof
-            dy = hub_pose.Y() - robot_pose.Y() - robot_speeds.vy * tof
+            dx = hub_pose.X() - robot_pose.X() #- robot_speeds.vx * tof
+            dy = hub_pose.Y() - robot_pose.Y() #- robot_speeds.vy * tof
 
         # --- Yaw ---
         field_angle = math.atan2(dy, dx)
