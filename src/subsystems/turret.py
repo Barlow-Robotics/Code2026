@@ -256,28 +256,27 @@ class Turret(Subsystem):
             # Hood angle controls turret length — 0° = min length, 90° = max length
             hood_fraction = max(0, min(actual_hood_angle, 90)) / 90.0
             self.turret_ligament.setLength(0.3 + hood_fraction * 0.9)
-
-        PyKitLogger.recordOutput(
-            "Turret/target_hood_angle", float(self.target_hood_angle)
-        )
-        PyKitLogger.recordOutput(
-            "Turret/actual_hood_angle_motor",
-            float(self.hood_motor.get_position().value) * SI.rotations_to_degrees,
-        )
-        PyKitLogger.recordOutput(
-            "Turret/actual_hood_angle_cancoder",
-            self.get_actual_hood_angle_cancoder(),
-        )
-        if self.turret_yaw_deg != Rotation2d(0):
-            PyKitLogger.recordOutput(
-                "Turret/turret_yaw_deg", float(self.turret_yaw_deg)
-            )
-            self.turret_yaw_deg = Rotation2d(0)
         if RobotFeatures.LOGGING_TURRET:
             PyKitLogger.recordOutput(
                 "Turret/hood_motor_voltage",
                 float(self.hood_motor.get_motor_voltage().value_as_double),
             )
+            PyKitLogger.recordOutput(
+                "Turret/target_hood_angle", float(self.target_hood_angle)
+            )
+            PyKitLogger.recordOutput(
+                "Turret/actual_hood_angle_motor",
+                float(self.hood_motor.get_position().value) * SI.rotations_to_degrees,
+            )
+            PyKitLogger.recordOutput(
+                "Turret/actual_hood_angle_cancoder",
+                self.get_actual_hood_angle_cancoder(),
+            )
+            if self.turret_yaw_deg != Rotation2d(0):
+                PyKitLogger.recordOutput(
+                    "Turret/turret_yaw_deg", float(self.turret_yaw_deg)
+                )
+                self.turret_yaw_deg = Rotation2d(0)
 
         self._loop_timer.stop()
 

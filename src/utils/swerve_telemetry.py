@@ -68,7 +68,7 @@ class SwerveTelemetry:
         PyKitLogger.recordOutput("Pose/robotPose", state.pose)
 
         # Write pose only to .hoot log file
-        SignalLogger.write_struct("DriveState/Pose", Pose2d, state.pose)
+        # SignalLogger.write_struct("DriveState/Pose", Pose2d, state.pose)
         if RobotFeatures.LOGGING_DRIVETRAIN:
             PyKitLogger.recordOutput("DriveState/Pose", state.pose)
             PyKitLogger.recordOutput("DriveState/Speeds", state.speeds)

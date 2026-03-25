@@ -141,6 +141,8 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
         self.last_timestamp = -1
         self.current_pose = Pose2d()
         self._brake_request = swerve.requests.SwerveDriveBrake()
+        self.cached_state = self.get_state()
+        self.last_timestamp = -1.0
 
         self._zero_request = swerve.requests.ApplyRobotSpeeds().with_speeds(
             ChassisSpeeds(0, 0, 0)
@@ -397,22 +399,28 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             self, utils.fpga_to_current_time(timestamp)
         )
 
-    def get_pose(self) -> Pose2d:
+    def _refresh_state_cache(self):
         cur_timestamp = self.get_timestamp()
-        if self.last_timestamp == cur_timestamp:
-            return self.current_pose
-        else:
-            self.current_pose = self.get_state().pose
+        if self.last_timestamp != cur_timestamp:
+            self.cached_state = self.get_state()
             self.last_timestamp = cur_timestamp
-            return self.current_pose
+
+    def get_pose(self) -> Pose2d:
+        self._refresh_state_cache()
+        return self.cached_state.pose
 
     def get_speeds(self):
-        return self.get_state().speeds
+        self._refresh_state_cache()
+        return self.cached_state.speeds
+
+    def get_rotation(self):
+        self._refresh_state_cache()
+        return self.cached_state.pose.rotation()
 
     @staticmethod
     def get_timestamp():
         return utils.get_current_time_seconds()
-
+    
     def drive_based_velocity(self, vx: float, vy: float, omega: float):
         """
         Drive the robot with the given velocities.
@@ -429,9 +437,6 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
 
     def stop(self):
         self.set_control(swerve.requests.SwerveDriveBrake())
-
-    def get_rotation(self):
-        return self.get_state().pose.rotation()
 
     def get_gyro_rotation(
         self,

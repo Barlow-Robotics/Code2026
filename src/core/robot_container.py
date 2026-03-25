@@ -190,15 +190,15 @@ class RobotContainer:
         # PyKitLogger.recordOutput(f"{prefix}/default", "HP_Intake_Center_Pieces")
 
         prefix = prefix + "/PathPlanner"
-        PathPlannerLogging.setLogCurrentPoseCallback(
-            lambda pose: PyKitLogger.recordOutput(f"{prefix}/current_pose", pose)
-        )
-        PathPlannerLogging.setLogTargetPoseCallback(
-            lambda pose: PyKitLogger.recordOutput(f"{prefix}/target_pose", pose)
-        )
-        PathPlannerLogging.setLogActivePathCallback(
-            lambda poses: PyKitLogger.recordOutput(f"{prefix}/active_path", poses)
-        )
+        # PathPlannerLogging.setLogCurrentPoseCallback(
+        #     lambda pose: PyKitLogger.recordOutput(f"{prefix}/current_pose", pose)
+        # )
+        # PathPlannerLogging.setLogTargetPoseCallback(
+        #     lambda pose: PyKitLogger.recordOutput(f"{prefix}/target_pose", pose)
+        # )
+        # PathPlannerLogging.setLogActivePathCallback(
+        #     lambda poses: PyKitLogger.recordOutput(f"{prefix}/active_path", poses)
+        # )
 
     def create_commands(self):
         if (

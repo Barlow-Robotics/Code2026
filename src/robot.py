@@ -58,9 +58,10 @@ class Robot(
         self.container = RobotContainer()
 
         # log and replay timestamp and joystick data
-        self._time_and_joystick_replay = (
-            HootAutoReplay().with_timestamp_replay().with_joystick_replay()
-        )
+        if RobotFeatures.TESTING:
+            self._time_and_joystick_replay = (
+                HootAutoReplay().with_timestamp_replay().with_joystick_replay()
+            )
 
         # --- Profiler setup (sim-only by default) ---
         if RobotFeatures.HAS_CPROFILE:

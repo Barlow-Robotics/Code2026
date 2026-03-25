@@ -32,7 +32,7 @@ class ShootCommand(Command):
     def initialize(self):
         self._feeding = False
         self.static_actual_velocity_to_go = self.turret.actual_velocity_to_go
-        PyKitLogger.recordOutput("ShootCommand/velocity_to_go", self.static_actual_velocity_to_go)  
+        # PyKitLogger.recordOutput("ShootCommand/velocity_to_go", self.static_actual_velocity_to_go)  
         self.shooter.set_velocity(self.static_actual_velocity_to_go)
 
     def execute(self):
@@ -40,7 +40,7 @@ class ShootCommand(Command):
             self.turret.set_target_hood_and_turret()
         if self.static_actual_velocity_to_go != self.turret.actual_velocity_to_go:
             self.static_actual_velocity_to_go = self.turret.actual_velocity_to_go
-            PyKitLogger.recordOutput("ShootCommand/velocity_to_go", self.static_actual_velocity_to_go)  
+            # PyKitLogger.recordOutput("ShootCommand/velocity_to_go", self.static_actual_velocity_to_go)  
             self.shooter.set_velocity(self.static_actual_velocity_to_go)
 
         if self._feeding:

@@ -71,6 +71,7 @@ class _CameraConfig:
 
 class Vision(Subsystem):
     def __init__(self, drive_sub: Drivetrain):
+        self.i = 0
         # inst = ntcore.NetworkTableInstance.getDefault()
         # inst.startClient3("connect-auto-align")
         # inst.setServerTeam(4572)
@@ -212,11 +213,13 @@ class Vision(Subsystem):
                 )
 
         # --- Camera connection status ---
-        # if RobotFeatures.LOGGING_VISION:
-        for cam_cfg in self._cameras:
-            PyKitLogger.recordOutput(
-                f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
-            )
+        self.i+=1
+
+        if RobotFeatures.LOGGING_VISION and self.i % 10 == 0:
+            for cam_cfg in self._cameras:
+                PyKitLogger.recordOutput(
+                    f"Vision/Connection/{cam_cfg.name}", cam_cfg.camera.isConnected()
+                )
 
         self._loop_timer.stop()
 
@@ -711,13 +714,15 @@ class Vision(Subsystem):
         dy = target_pose.Y() - current_pose.Y()
 
         desired_angle = Rotation2d(math.atan2(dy, dx))
-        PyKitLogger.recordOutput(
-            "Vision/alignment_desired_angle", desired_angle.degrees()
-        )
+        if self.i % 10 == 0:
+            PyKitLogger.recordOutput(
+                "Vision/alignment_desired_angle", desired_angle.degrees()
+            )
         current_angle = current_pose.rotation()
-        PyKitLogger.recordOutput(
-            "Vision/alignment_current_angle", current_angle.degrees()
-        )
+        if self.i % 10 == 0:
+            PyKitLogger.recordOutput(
+                "Vision/alignment_current_angle", current_angle.degrees()
+            )
 
         error_degrees = abs((desired_angle - current_angle).degrees())
         return error_degrees < tolerance_degrees
