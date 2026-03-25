@@ -17,13 +17,15 @@ from phoenix6 import HootAutoReplay
 from wpilib import DriverStation, RobotBase, SmartDashboard, TimedRobot
 from constants import RobotFeatures
 from utils.profiler import LoopTimer
-
+from utils.advantagekit import ddatetime_obj
 if typing.TYPE_CHECKING:
     from autos import AutoRoutine
 
 from phoenix6 import SignalLogger
 #LoggedRobot.default_period = 0.04  # seconds slowed down to from 0.02 -> 0.04 to reduce 
 # TimedRobot.kDefaultPeriod = 40.0 # ms 
+from utils.telemetry import start_logging
+
 class Robot(
     TimedRobot
 ):  # BW: Don't worry LoggedRobot does the same thing as TimedRobot, just with logging.
@@ -50,6 +52,10 @@ class Robot(
         This function is run when the robot is first started up and should be used for any
         initialization code.
         """
+        if RobotBase.isReal():
+            start_logging(f"/home/lvuser/logs/{ddatetime_obj}")   
+        else:
+            start_logging(f"logs/{ddatetime_obj}")   
         self.autonomousCommand: typing.Optional[commands2.Command] = None
 
         # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
