@@ -125,7 +125,7 @@ class Turret(Subsystem):
 
         self.target_hood_angle = 0.0
         self.target_turret_yaw = 0.0
-        self.turret_yaw_deg = 0.0
+        self.turret_yaw_deg = Rotation2d(0)
         SmartDashboard.putNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", 0)
         # Mechanism2d — top-down view: base = robot heading, turret = yaw, length = hood
         if RobotFeatures.LOGGING_ROBOT:
@@ -198,7 +198,7 @@ class Turret(Subsystem):
 
     def clear_robot_heading_lock(self):
         self.driveSub.changeAng = False
-        self.driveSub.target_field_heading = 0
+        self.driveSub.target_field_heading = Rotation2d(0)
 
     def reset_target_hood_and_turret(self):
         self.set_angle_hood(0)
@@ -214,12 +214,17 @@ class Turret(Subsystem):
         )
 
     def set_target_hood_and_turret(self, shooting_location=Hub.TOP_CENTER_POINT):
-        v_fixed, hood_angle_deg, self.turret_yaw_deg = self._optimal_angle_calc(
+        self.turret_yaw_deg = Rotation2d(0)
+        v_fixed, hood_angle_deg, turret_yaw_deg = self._optimal_angle_calc(
             TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location
         )
-        print(v_fixed, hood_angle_deg, self.turret_yaw_deg)
+        # print(v_fixed, hood_angle_deg, self.turret_yaw_deg)
         if v_fixed < 0:
-            return -1, -1, -1
+            return -1, -1, 0
+        else:
+            pass
+        self.turret_yaw_deg = turret_yaw_deg
+        print(v_fixed, hood_angle_deg, self.turret_yaw_deg)
         # if hood_angle_deg > 80:
         #     hood_angle_deg = 80
         # elif hood_angle_deg < -80:
@@ -262,11 +267,11 @@ class Turret(Subsystem):
             "Turret/actual_hood_angle_cancoder",
             self.get_actual_hood_angle_cancoder(),
         )
-        if self.turret_yaw_deg != 0:
+        if self.turret_yaw_deg != Rotation2d(0):
             PyKitLogger.recordOutput(
                 "Turret/turret_yaw_deg", float(self.turret_yaw_deg)
             )
-            self.turret_yaw_deg = 0.0
+            self.turret_yaw_deg = Rotation2d(0)
         if RobotFeatures.LOGGING_TURRET:
             PyKitLogger.recordOutput(
                 "Turret/hood_motor_voltage",
@@ -308,7 +313,7 @@ class Turret(Subsystem):
         if robot_pose is None and RobotFeatures.LOGGING_TURRET:
             PyKitLogger.recordOutput("Turret/calc_valid", False)
             PyKitLogger.recordOutput("Turret/calc_failure_reason", "robot_pose_is_none")
-            return -1, -1, -1
+            return -1, -1, 0
 
         G = 9.81
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
@@ -320,7 +325,7 @@ class Turret(Subsystem):
         if hub_pose is None and RobotFeatures.LOGGING_TURRET:
             PyKitLogger.recordOutput("Turret/calc_valid", False)
             PyKitLogger.recordOutput("Turret/calc_failure_reason", "hub_pose_is_none")
-            return -1, -1, -1
+            return -1, -1, 0
 
         dx = hub_pose.X() - robot_pose.X()
         dy = hub_pose.Y() - robot_pose.Y()
@@ -383,7 +388,7 @@ class Turret(Subsystem):
                         f"Turret/Iterations/iter_{i}_hood_angle_deg", 0.0
                     )
                     PyKitLogger.recordOutput(f"Turret/Iterations/iter_{i}_tof", 0.0)
-                return -1, -1, -1
+                return -1, -1, 0
 
             tan_theta = (-B - math.sqrt(discriminant)) / (2 * A)
             hood_angle = math.atan(tan_theta)  # elevation from horizontal, radians
@@ -420,7 +425,7 @@ class Turret(Subsystem):
                 PyKitLogger.recordOutput(
                     "Turret/target_turret_yaw", float(turret_yaw_deg)
                 )
-            return -1, -1, -1
+            return -1, -1, 0
 
         # Clamp hood elevation to physical travel range [20°, 50°]
         hood_elev_clamped = max(
@@ -506,6 +511,8 @@ class Turret(Subsystem):
     def enableAutoAim(self, enable: bool):
         if enable:
             self.set_target_hood_and_turret()
+            if self.turret_yaw_deg == Rotation2d(0):
+                self.driveSub.changeAngTelop = False
             self.driveSub.changeAngTelop = enable
         else:
             self.reset_target_hood_and_turret()
