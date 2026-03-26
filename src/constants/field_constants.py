@@ -15,22 +15,9 @@ NOTE: All constants are defined relative to the field coordinate system, and fro
 perspective of the blue alliance station
 """
 
-from wpimath.geometry import Translation2d, Translation3d
+from wpimath.geometry import Translation2d, Translation3d, Pose2d, Rotation2d
 from wpimath.units import inchesToMeters
-from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
-
-
-# Load the AprilTag layout (equivalent to AprilTagLayoutType.OFFICIAL.getLayout())
-_layout = AprilTagFieldLayout.loadField(AprilTagField.k2026RebuiltAndyMark)
-
-# AprilTag related constants
-APRILTAG_COUNT = len(_layout.getTags())
-APRILTAG_WIDTH = inchesToMeters(6.5)
-
-# Field dimensions
-FIELD_LENGTH = _layout.getFieldLength()
-FIELD_WIDTH = _layout.getFieldWidth()
-
+from constants.config_constants import FIELD_LENGTH, FIELD_WIDTH, _layout
 
 class Hub:
     """Hub related constants"""
@@ -314,5 +301,7 @@ class Outpost:
 
 
 class CustomPoints:
-    TARGET_POSE_SHOOT = Translation3d(FIELD_LENGTH - 1, 7.460, 0.0)
-    TARGET_POSE_SHOOT_OTHER_SIDE = Translation3d(FIELD_LENGTH - 1, FIELD_WIDTH - 7.460, 0.0)
+    TARGET_POSE_SHOOT = (Pose2d(Translation3d(1, 7.460, 0.0).toTranslation2d(), Rotation2d(180)))
+    TARGET_POSE_SHOOT_OTHER_SIDE = (Pose2d(Translation3d(1, FIELD_WIDTH - 7.460, 0.0).toTranslation2d(), Rotation2d(180)))
+    BLUE_DISABLED_VISION_POSE = Pose2d(1.7926054000854492, 4.008056640625, Rotation2d(0))
+    RED_DISABLED_VISION_POSE = Pose2d(FIELD_LENGTH - BLUE_DISABLED_VISION_POSE.X(), BLUE_DISABLED_VISION_POSE.Y(), BLUE_DISABLED_VISION_POSE.rotateBy(Rotation2d(0)).rotation())

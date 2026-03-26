@@ -33,9 +33,9 @@ class ReverseCommand(Command):
 
     def initialize(self):
         self._feeding = False
-        self.target_velocity = SmartDashboard.getNumber(
-            "CustomFloatVelocity", ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT
-        )
+        # self.target_velocity = SmartDashboard.getNumber(
+        #     "CustomFloatVelocity", ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT
+        # )
         
     def execute(self):
         # self.shooter.set_velocity(-self.target_velocity)

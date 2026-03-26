@@ -63,11 +63,14 @@ TODO at comp:
 should these be tuned?
 auto_translation_pid = PIDConstants(4, 0.0, 0)
 auto_rotation_pid = PIDConstants(5.0, 0.0, 0.0)
-7. Add cancoder code (not added yet)
-
 8. I would recommend an actual PID to the stop point’s pose so you can be cleaning up any residual path error during the shooting pause
+9. TEST shooting back to our side of the field. 
+11. Intake 
 
 
+
+
+VISION
 1) Usew command to usb memlory buffer: sudo sh -c 'echo 256 > /sys/module/usbcore/parameters/usbfs_memory_mb'
 
 2) try 512 mb

@@ -148,14 +148,20 @@ class Controller:
             )
             self._test_controller.button(1).whileTrue(
                 cmd.run(
-                    lambda: container.turret.enableAutoAim(True)
+                    lambda: container.turret.enableAutoAim(True, vision_on=not container.vision.disabled_vision)
                 )
             ).onFalse(
                 cmd.runOnce(
-                    lambda: container.turret.enableAutoAim(False)
+                    lambda: container.turret.enableAutoAim(False, vision_on=not container.vision.disabled_vision)
                 )
             )
-
+            self._test_controller.button(2).onTrue(
+                cmd.runOnce(
+                    lambda: container.vision.disable_the_vision(
+                        not container.vision.disabled_vision
+                    )
+                )
+            )
         # Subsystem button bindings
         if RobotFeatures.HAS_INTAKE:
             for controller in [self._operator]:
@@ -203,11 +209,11 @@ class Controller:
 
                 controller.leftTrigger().whileTrue(
                     cmd.run(
-                        lambda: container.turret.enableAutoAim(True)
+                        lambda: container.turret.enableAutoAim(True, vision_on=not container.vision.disabled_vision)
                     )
                 ).onFalse(
                     cmd.runOnce(
-                        lambda: container.turret.enableAutoAim(False)
+                        lambda: container.turret.enableAutoAim(False, vision_on=not container.vision.disabled_vision)
                     )
                 )
 

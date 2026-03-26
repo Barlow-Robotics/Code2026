@@ -178,8 +178,6 @@ class Turret(Subsystem):
             )
             self.driveSub.changeAng = True
             self.driveSub.changeAngTelop = False
-            
-
             # print("SET_ANGLE_TURRET")
         else:
             self.target_turret_yaw = angle_deg
@@ -214,10 +212,10 @@ class Turret(Subsystem):
             * SI.rotations_to_degrees
         )
 
-    def set_target_hood_and_turret(self, shooting_location=Hub.TOP_CENTER_POINT):
+    def set_target_hood_and_turret(self, shooting_location=Hub.TOP_CENTER_POINT, vision_on=True):
         self.turret_yaw_deg = Rotation2d(0)
-        v_fixed, hood_angle_deg, turret_yaw_deg = self._optimal_angle_calc(
-            TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location
+        v_fixed, hood_angle_deg, turret_yaw_deg, changeState = self._optimal_angle_calc(
+            TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location, vision_on
         )
         # print(v_fixed, hood_angle_deg, self.turret_yaw_deg)
         if v_fixed < 0:
@@ -284,11 +282,12 @@ class Turret(Subsystem):
         self,
         v_fixed: float = TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT,
         shooting_location=Hub.TOP_CENTER_POINT,
+        vision_on=True
     ):
         """
         Args:
             v_fixed: Should be ~10m/s this season, but can be tuned for optimal performance
-
+            shooting_location: Should be position of the target hub in 3D space. Z is used for elevation calculations.
         Returns:
             v_fixed (m/s): the fixed velocity input, returned for convenience.
             hood_angle (degree): in UNIT CIRCLE convention. Rest = 140°, full travel = 110°.
@@ -306,8 +305,15 @@ class Turret(Subsystem):
 
         YAW_MIN_DEG = -180.0
         YAW_MAX_DEG = 180.0
-
-        robot_pose = self.driveSub.get_pose()
+        if vision_on:
+            robot_pose = self.driveSub.get_pose()
+            changeState = False
+        else:
+            changeState = True
+            if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                robot_pose = CustomPoints.BLUE_DISABLED_VISION_POSE
+            else:
+                robot_pose = CustomPoints.RED_DISABLED_VISION_POSE
         robot_speeds = self.driveSub.get_speeds()
 
         if robot_pose is None and RobotFeatures.LOGGING_TURRET:
@@ -400,7 +406,7 @@ class Turret(Subsystem):
                         f"Turret/Iterations/iter_{i}_hood_angle_deg", 0.0
                     )
                     PyKitLogger.recordOutput(f"Turret/Iterations/iter_{i}_tof", 0.0)
-                return -1, -1, 0
+                return -1, -1, 0, -1
 
             tan_theta = (-B - math.sqrt(discriminant)) / (2 * A)
             hood_angle = math.atan(tan_theta)  # elevation from horizontal, radians
@@ -437,7 +443,7 @@ class Turret(Subsystem):
                 PyKitLogger.recordOutput(
                     "Turret/target_turret_yaw", float(turret_yaw_deg)
                 )
-            return -1, -1, 0
+            return -1, -1, 0, -1
 
         # Clamp hood elevation to physical travel range [20°, 50°]
         hood_elev_clamped = max(
@@ -481,8 +487,9 @@ class Turret(Subsystem):
         # print("hub Z:", hub_pose.Z())
         # print("shooter height:", TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M)
         # print("dz:", hub_pose.Z() - TurretConstants.SHOOTER_HEIGHT_FOR_FUEL_M)
-
-        return v_fixed, -hood_motor_deg, -turret_yaw_deg
+        if changeState:
+            turret_yaw_deg = 0
+        return v_fixed, -hood_motor_deg, -turret_yaw_deg, changeState
 
     @staticmethod
     def find_v_fixed():
@@ -520,32 +527,27 @@ class Turret(Subsystem):
 
     def sysIdDynamicHood(self, direction: SysIdRoutine.Direction):
         return self.sys_id_routine_hood.dynamic(direction)
-    def enableAutoAim(self, enable: bool):
+    def enableAutoAim(self, enable: bool, vision_on: bool=True):
         if enable:
             if not self.driveSub.allow_center_auto_align:
-                self.set_target_hood_and_turret()
+                self.set_target_hood_and_turret(vision_on=vision_on)
                 target_pose = Hub.TOP_CENTER_POINT
             else:
                 pose = self.driveSub.get_pose()
                 target_pose = pose.nearest(
                     [
-                        Pose2d(
-                            CustomPoints.TARGET_POSE_SHOOT.toTranslation2d(), Rotation2d(0)
-                        ),
-                        Pose2d(
-                            CustomPoints.TARGET_POSE_SHOOT_OTHER_SIDE.toTranslation2d(),
-                            Rotation2d(0),
-                        ),
+                        CustomPoints.TARGET_POSE_SHOOT,
+                        CustomPoints.TARGET_POSE_SHOOT_OTHER_SIDE,
                     ]
                 )
                 target_pose = Translation3d(target_pose.X(), target_pose.Y(), 0)
-                self.set_target_hood_and_turret(shooting_location=target_pose)
+                self.set_target_hood_and_turret(shooting_location=target_pose, vision_on=vision_on)
 
 
             if self.turret_yaw_deg == Rotation2d(0):
                 self.driveSub.changeAngTelop = False
             self.driveSub.changeAngTelop = enable
-            PyKitLogger.recordOutput("Turret/target_pose", target_pose)
+            PyKitLogger.recordOutput("Turret/target_pose", Pose2d(target_pose.toTranslation2d(), Rotation2d(0)))
         else:
             self.reset_target_hood_and_turret()
             self.driveSub.changeAngTelop = enable

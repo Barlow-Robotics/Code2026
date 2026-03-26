@@ -1,4 +1,4 @@
-from constants.field_constants import FIELD_WIDTH, FIELD_LENGTH
+from constants.config_constants import FIELD_WIDTH, FIELD_LENGTH
 from wpimath.geometry import (
     Rotation3d,
     Translation2d,
