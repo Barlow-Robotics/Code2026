@@ -314,5 +314,5 @@ class Outpost:
 
 
 class CustomPoints:
-    TARGET_POSE_SHOOT = Translation3d(15.6, 7.477, 0.0)
-    TARGET_POSE_SHOOT_OTHER_SIDE = Translation3d(15.6, FIELD_WIDTH - 7.477, 0.0)
+    TARGET_POSE_SHOOT = Translation3d(FIELD_LENGTH - 1, 7.460, 0.0)
+    TARGET_POSE_SHOOT_OTHER_SIDE = Translation3d(FIELD_LENGTH - 1, FIELD_WIDTH - 7.460, 0.0)

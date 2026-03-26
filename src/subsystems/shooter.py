@@ -102,15 +102,15 @@ class Shooter(Subsystem):
 
     def periodic(self):
         self._loop_timer.start()
+        PyKitLogger.recordOutput(
+            "Shooter/flywheel_motor_left_RPM", float(self.get_current_rpm())
+        )
+        PyKitLogger.recordOutput(
+            "Shooter/flywheel_motor_left_target_RPM",
+            float(self.flywheel_target_RPM),
+        )
 
         if RobotFeatures.LOGGING_SHOOTER:
-            PyKitLogger.recordOutput(
-                "Shooter/flywheel_motor_left_RPM", float(self.get_current_rpm())
-            )
-            PyKitLogger.recordOutput(
-                "Shooter/flywheel_motor_left_target_RPM",
-                float(self.flywheel_target_RPM),
-            )
 
             PyKitLogger.recordOutput(
                 "Shooter/flywheel_motor_right_RPM",

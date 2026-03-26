@@ -91,10 +91,8 @@ class Feeder(commands2.Subsystem):
     def stop(self):
         self.target_velocity_feeder_constant = 0.0
         self.target_velocity_feeder_alternating = 0.0
-        self.motor_feeder_constant.set_control(self._velocity_voltage.with_velocity(0))
-        self.motor_feeder_alternating.set_control(
-            self._velocity_voltage.with_velocity(0)
-        )
+        self.motor_feeder_alternating.set_control(controls.NeutralOut())
+        self.motor_feeder_constant.set_control(controls.NeutralOut())
 
     def periodic(self):
         self._loop_timer.start()

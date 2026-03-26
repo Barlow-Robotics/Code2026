@@ -84,7 +84,8 @@ class Robot(
         self._scheduler_timer.stop()
 
     def disabledInit(self) -> None:
-        self.container.turret.hood_cancoder.set_position(0, 0.2)
+        # self.container.turret.
+        # .set_position(0, 0.2)
         """This function is called once each time the robot enters Disabled mode."""
         if RobotFeatures.TESTING:
             self.container.reinitialize_subsystems()
@@ -118,6 +119,9 @@ class Robot(
     def teleopInit(self) -> None:
         if self._cprofile:
             self._cprofile.enable()
+
+
+        self.container.turret.set_angle_hood(0)
         # This makes sure that the autonomous stops running when
         # teleop starts running. If you want the autonomous to
         # continue until interrupted by another command, remove

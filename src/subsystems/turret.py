@@ -246,6 +246,14 @@ class Turret(Subsystem):
         actual_hood_angle = (
             float(self.hood_motor.get_position().value) * SI.rotations_to_degrees
         )
+        PyKitLogger.recordOutput(
+            "Turret/actual_hood_angle_cancoder",
+            self.get_actual_hood_angle_cancoder(),
+        )
+        if self.turret_yaw_deg != Rotation2d(0):
+            PyKitLogger.recordOutput(
+                "Turret/turret_yaw_deg", float(self.turret_yaw_deg)
+        )
 
         # Update Mechanism2d
         if RobotFeatures.LOGGING_ROBOT:
@@ -268,15 +276,7 @@ class Turret(Subsystem):
                 "Turret/actual_hood_angle_motor",
                 float(self.hood_motor.get_position().value) * SI.rotations_to_degrees,
             )
-            PyKitLogger.recordOutput(
-                "Turret/actual_hood_angle_cancoder",
-                self.get_actual_hood_angle_cancoder(),
-            )
-            if self.turret_yaw_deg != Rotation2d(0):
-                PyKitLogger.recordOutput(
-                    "Turret/turret_yaw_deg", float(self.turret_yaw_deg)
-                )
-                self.turret_yaw_deg = Rotation2d(0)
+
 
         self._loop_timer.stop()
 

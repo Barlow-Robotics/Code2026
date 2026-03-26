@@ -32,7 +32,7 @@ class Spindex(commands2.Subsystem):
 
         SPINDEX_CONFIG._apply_settings(self.motor_spindex, inverted=True)
 
-        self.target_velocity_spindex = -1
+        self.target_velocity_spindex = -1.0
 
         self.sys_id_routine_spindex = generateSysIdProfile(
             self, self.motor_spindex, name="Spindex"
