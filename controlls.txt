@@ -1,0 +1,30 @@
+DRIVER
+
+left stick = field centric
+right stick = spin
+left bumper / right bumper = speed down / speed up
+
+left trigger = ALIGN
+right trigger = SHOOT
+
+left center bottom (7) = disable vision
+right center button (8) = reset odometry
+
+
+OPERATOR
+
+y = deploy
+a = retract
+
+right-trigger = forward intake
+left-trigger = reverse intake
+
+POV up / down = step hood
+
+left-bumper = reverse feeder
+
+
+
+
+
+
