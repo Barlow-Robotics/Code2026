@@ -72,40 +72,52 @@ class Intake(commands2.Subsystem):
         SmartDashboard.putNumber("kP_Roller", 0.0)
         SmartDashboard.putNumber("kI_Roller", 0.0)
         SmartDashboard.putNumber("kD_Roller", 0.0)
-        SmartDashboard.putNumber("kV_Roller", 0.16)
+        SmartDashboard.putNumber("kV_Roller", 0.01)
+        SmartDashboard.putNumber("kG_Roller", 0.00)
+        SmartDashboard.putNumber("kS_Roller", 0.00)
+
+        SmartDashboard.putNumber("kP_IntakeArm", 0.0)
+        SmartDashboard.putNumber("kI_IntakeArm", 0.0)
+        SmartDashboard.putNumber("kD_IntakeArm", 0.0)
+        SmartDashboard.putNumber("kV_IntakeArm", 0.00)
+        SmartDashboard.putNumber("kG_IntakeArm", 0.00)
+        SmartDashboard.putNumber("kS_IntakeArm", 0.00)
+        SmartDashboard.putNumber("arm_rot", 4.0)
+        SmartDashboard.putNumber("roller_speed", 4.0)
 
         INTAKE_ROLLER = TalonConfigFX(
             kP=SmartDashboard.getNumber("kP_Roller", 0.0),
             kI=SmartDashboard.getNumber("kI_Roller", 0.0),
             kD=SmartDashboard.getNumber("kD_Roller", 0.0),
-            kV=SmartDashboard.getNumber("kV_Roller", 0.16),
+            kV=SmartDashboard.getNumber("kV_Roller", 0.00),
+            kG=SmartDashboard.getNumber("kG_Roller", 0.00),
+            kS=SmartDashboard.getNumber("kS_Roller", 0.00),
             brake_mode=False,
             gear_ratio=IntakeConstants.ROLLER_GEARING,
         )
 
+        # INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
+        #     kP=0.4,
+        #     kI=0,
+        #     kD=0,
+        #     kV=0.03,
+        #     kG=-0.29,
+        #     kS=0.3,
+        #     brake_mode=True,
+        #     gear_ratio=IntakeConstants.ARM_GEARING,
+        # )
         INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
-            kP=0.4,
-            kI=0,
-            kD=0,
-            kV=0.03,
-            kG=-0.29,
-            kS=0.3,
-            brake_mode=True,
-            gear_ratio=IntakeConstants.ARM_GEARING,
-        )
-        INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
-            kP=0.0,
-            kI=0,
-            kD=0,
-            kV=0.03,
-            kG=0.0,
-            kS=0.0,
+            kP=SmartDashboard.getNumber("kP_Roller", 0.0),
+            kI=SmartDashboard.getNumber("kI_Roller", 0.0),
+            kD=SmartDashboard.getNumber("kD_Roller", 0.0),
+            kV=SmartDashboard.getNumber("kV_Roller", 0.00),
+            kG=SmartDashboard.getNumber("kG_Roller", 0.00),
+            kS=SmartDashboard.getNumber("kS_Roller", 0.00),
             brake_mode=True,
             gear_ratio=IntakeConstants.ARM_GEARING,
         )
 
         INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=False)
-        # INTAKE_CONFIG_ARM_LEFT._apply_settings(self.motor_arm_leader, inverted=False)
         INTAKE_CONFIG_ARM_RIGHT._apply_settings(self.motor_arm_leader, inverted=True)
 
         self._motion_magic_velocity_voltage_roller = (
@@ -152,7 +164,7 @@ class Intake(commands2.Subsystem):
     def reverse_velocity(self, current_velocity: float):
         if current_velocity < 1:
             current_velocity = 1
-        commanded_velocity = IntakeConstants.INTAKE_VELOCITY_CONSTANT
+        commanded_velocity = SmartDashboard.getNumber("roller_speed", 4.0)
         self._commanded_velocity_ft_per_sec = float(commanded_velocity)
         self._stop_requested = False
 
@@ -187,7 +199,7 @@ class Intake(commands2.Subsystem):
         arm_rot = self._POSITION_MAP[position]
 
         self.motor_arm_leader.set_control(
-            self._motion_magic_position_voltage_arm_leader.with_position(arm_rot)
+            self._motion_magic_position_voltage_arm_leader.with_position(SmartDashboard.getNumber("arm_rot", 4.0), arm_rot)
         )
         # self.motor_arm_follower.set_control(
         #     self._motion_magic_position_voltage_arm_follower.with_position(arm_rot)

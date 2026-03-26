@@ -102,9 +102,9 @@ class IntakeConstants:
     ARM_MOTOR = DCMotor.krakenX44(1)
     ARM_GEARING = 14 / 58
     ARM_MOI = 0.01
-    ARM_HOME_ROTATIONS = 20.59
-    ARM_DEPLOYED_LENGTH_IN = 12.191
-    ARM_DEPLOYED_ROTATIONS = 20.59
+    ARM_HOME_ROTATIONS = 0
+    ARM_DEPLOYED_LENGTH_IN = 4 
+    ARM_DEPLOYED_ROTATIONS = 4
 
     INTAKE_VELOCITY_CONSTANT = 2.6 * 6
     # Amplified from robot speed
