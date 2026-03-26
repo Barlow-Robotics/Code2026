@@ -107,61 +107,68 @@ class Controller:
             self._test_controller.leftBumper().onTrue(
                 cmd.runOnce(lambda: container.intake.set_velocity(0))
             ).onFalse(cmd.runOnce(lambda: container.intake.stop()))
-            self._test_controller.rightBumper().onTrue(
+
+            self._test_controller.rightTrigger().onTrue(
+                cmd.runOnce(
+                    lambda: container.intake.go_to_position(IntakePositions.DEPLOYED)
+                )
+            )
+            self._test_controller.leftTrigger().onTrue(
                 cmd.runOnce(
                     lambda: container.intake.go_to_position(IntakePositions.HOME)
                 )
             )
 
-            self._test_controller.y().onTrue(
-                cmd.runOnce(lambda: container.feeder.move(9))
-            ).onFalse(cmd.runOnce(lambda: container.feeder.stop()))
 
-            self._test_controller.a().onTrue(
-                cmd.runOnce(lambda: container.spindex.move(9))
-            ).onFalse(cmd.runOnce(lambda: container.spindex.stop()))
+            # self._test_controller.y().onTrue(
+            #     cmd.runOnce(lambda: container.feeder.move(9))
+            # ).onFalse(cmd.runOnce(lambda: container.feeder.stop()))
 
-            self._test_controller.rightTrigger().onTrue(
-                cmd.runOnce(lambda: container.shooter.set_velocity(11))
-            ).onFalse(cmd.runOnce(lambda: container.shooter.set_velocity(0)))
+            # self._test_controller.a().onTrue(
+            #     cmd.runOnce(lambda: container.spindex.move(9))
+            # ).onFalse(cmd.runOnce(lambda: container.spindex.stop()))
 
-            self._test_controller.leftTrigger().onTrue(
-                cmd.runOnce(
-                    lambda: container.turret.set_angle_hood(
-                        SmartDashboard.getNumber("hood_angle", 10)
-                    )
-                )
-            ).onFalse(cmd.runOnce(lambda: container.turret.set_angle_hood(0)))
+            # self._test_controller.rightTrigger().onTrue(
+            #     cmd.runOnce(lambda: container.shooter.set_velocity(11))
+            # ).onFalse(cmd.runOnce(lambda: container.shooter.set_velocity(0)))
 
-            self._test_controller.x().whileTrue(
-                ShootCommand(
-                    container.drivetrain,
-                    container.shooter,
-                    container.feeder,
-                    container.spindex,
-                    container.turret
-                )
-            )
+            # self._test_controller.leftTrigger().onTrue(
+            #     cmd.runOnce(
+            #         lambda: container.turret.set_angle_hood(
+            #             SmartDashboard.getNumber("hood_angle", 10)
+            #         )
+            #     )
+            # ).onFalse(cmd.runOnce(lambda: container.turret.set_angle_hood(0)))
 
-            self._test_controller.b().onTrue(
-                cmd.runOnce(lambda: container.intake.reset_zero())
-            )
-            self._test_controller.button(1).whileTrue(
-                cmd.run(
-                    lambda: container.turret.enableAutoAim(True, vision_on=not container.vision.disabled_vision)
-                )
-            ).onFalse(
-                cmd.runOnce(
-                    lambda: container.turret.enableAutoAim(False, vision_on=not container.vision.disabled_vision)
-                )
-            )
-            self._test_controller.button(2).onTrue(
-                cmd.runOnce(
-                    lambda: container.vision.disable_the_vision(
-                        not container.vision.disabled_vision
-                    )
-                )
-            )
+            # self._test_controller.x().whileTrue(
+            #     ShootCommand(
+            #         container.drivetrain,
+            #         container.shooter,
+            #         container.feeder,
+            #         container.spindex,
+            #         container.turret
+            #     )
+            # )
+
+            # self._test_controller.b().onTrue(
+            #     cmd.runOnce(lambda: container.intake.reset_zero())
+            # )
+            # self._test_controller.button(1).whileTrue(
+            #     cmd.run(
+            #         lambda: container.turret.enableAutoAim(True, vision_on=not container.vision.disabled_vision)
+            #     )
+            # ).onFalse(
+            #     cmd.runOnce(
+            #         lambda: container.turret.enableAutoAim(False, vision_on=not container.vision.disabled_vision)
+            #     )
+            # )
+            # self._test_controller.button(2).onTrue(
+            #     cmd.runOnce(
+            #         lambda: container.vision.disable_the_vision(
+            #             not container.vision.disabled_vision
+            #         )
+            #     )
+            # )
         # Subsystem button bindings
         if RobotFeatures.HAS_INTAKE:
             for controller in [self._operator]:
@@ -193,7 +200,7 @@ class Controller:
             
 
 
-
+        
         for controller in [self._driver]:
             controller.button(8).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
 
