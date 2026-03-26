@@ -28,7 +28,7 @@ class RobotFeatures:
             cls.vision_camera_count = 3
             cls.HAS_SHOOTER = True
             cls.HAS_TURRET = True
-            cls.HAS_INTAKE = False
+            cls.HAS_INTAKE = True
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
             cls.HAS_CPROFILE = False
@@ -40,7 +40,7 @@ class RobotFeatures:
             cls.LOGGING_VISION = False
             cls.LOGGING_SHOOTER = False
             cls.LOGGING_TURRET = False
-            cls.LOGGING_INTAKE = False
+            cls.LOGGING_INTAKE = True
             cls.LOGGING_SPINDEX = False
             cls.LOGGING_FEEDER = False
         else:
@@ -159,7 +159,7 @@ class DriveConstants:
     TOTAL_HEIGHT_METERS_FROM_FLOOR = (
         SI.inches_to_meters * TOTAL_HEIGHT_INCHES_FROM_FLOOR
     )
-    TOTAL_WIDTH_INCHES = 27.0 + 0.5  # IN
+    TOTAL_WIDTH_INCHES = 27.0 + 3/16  # IN
     TOTAL_WIDTH_INCHES_BUMPERS = 34.5 + 0.5  # IN
     CENTER_WHEEL_TO_CENTER_WHEEL = 21.75  # IN
     CENTER_WHEEL_TO_CENTER_WHEEL_METERS = (
@@ -197,20 +197,20 @@ class VisionConstants:
 
     FRONT_LEFT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
-            HALF_LENGTH - (2.0 * SI.inches_to_meters),
+            HALF_LENGTH - ((1 + 3/8) * SI.inches_to_meters),
             HALF_WIDTH - (4.25 * SI.inches_to_meters),  # LEFT
             DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR
-            + (SI.inches_to_meters * 16.375),
+            + (SI.inches_to_meters * (16 + 1/8)),
         ),
         Rotation3d(0, 0, units.degreesToRadians(0)),
     )
 
     FRONT_RIGHT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
-            HALF_LENGTH - (2.0 * SI.inches_to_meters),
-            -HALF_WIDTH + (3.75 * SI.inches_to_meters),  # RIGHT
+            HALF_LENGTH - ((1 + 3/8) * SI.inches_to_meters),
+            -HALF_WIDTH + ((4 + 13/16) * SI.inches_to_meters),  # RIGHT
             DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR
-            + (SI.inches_to_meters * 16.375),
+            + (SI.inches_to_meters * (16 + 1/8)),
         ),
         Rotation3d(0, 0, units.degreesToRadians(0)),
     )

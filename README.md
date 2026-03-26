@@ -58,7 +58,7 @@ SSH into RoboRIO: admin@roboRIO-4572-frc.local
 We use L1 motors. 
 
 TODO at comp:
-1. AprilTagField.k2026RebuiltAndyMark or AprilTagField.k2026RebuiltWelded depending on comp. 
+1. AprilTagField.k2026RebuiltAndyMark or AprilTagField.k2026RebuiltWelded depending on comp.  (should be good)
 2. Need to update deploy/pathplanner/settings.json
 should these be tuned?
 auto_translation_pid = PIDConstants(4, 0.0, 0)
