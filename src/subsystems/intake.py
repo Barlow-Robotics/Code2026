@@ -197,19 +197,24 @@ class Intake(commands2.Subsystem):
         self._target_position_name = position.name
         self._target_position = position
         arm_rot = self._POSITION_MAP[position]
-
-        self.motor_arm_leader.set_control(
-            self._motion_magic_position_voltage_arm_leader.with_position(SmartDashboard.getNumber("arm_rot", 4.0), arm_rot)
-        )
+        if position == IntakePositions.HOME:
+            self.motor_arm_leader.set_control(
+                self._motion_magic_position_voltage_arm_leader.with_position(0)
+            )   
+        else:        
+            self.motor_arm_leader.set_control(
+                self._motion_magic_position_voltage_arm_leader.with_position(SmartDashboard.getNumber("arm_rot", 4.0))
+            )
+        
         # self.motor_arm_follower.set_control(
         #     self._motion_magic_position_voltage_arm_follower.with_position(arm_rot)
         # )
 
-        if position == IntakePositions.DEPLOYED:
-            print("SET VELOCITY")
-            self.set_velocity(current_velocity)
-        else:
-            self.stop()
+        # if position == IntakePositions.DEPLOYED:
+        #     print("SET VELOCITY")
+        #     self.set_velocity(current_velocity)
+        # else:
+        #     self.stop()
         self.target_rot: float = arm_rot
 
     def _log_dataclass(self, prefix: str, data: object):
@@ -226,45 +231,18 @@ class Intake(commands2.Subsystem):
     def periodic(self):
         self._loop_timer.start()
 
-        if not RobotBase.isReal() and RobotFeatures.LOGGING_INTAKE:
+        if not RobotBase.isReal() and RobotFeatures.LOGGING_ROBOT:
             arm_degrees = self.motor_arm_leader.get_position().value * 360
             self.arm_ligament.setAngle(75 + arm_degrees)
         if RobotFeatures.LOGGING_INTAKE:
-            self._log_dataclass(
-                "Intake/Telemetry",
-                IntakeTelemetry(
-                    arm_position=float(self.motor_arm_leader.get_position().value),
-                    # arm_position_follower=float(
-                    #     self.motor_arm_follower.get_position().value
-                    # ),
-                    arm_target_position=float(self.target_rot),
-                    # arm_supply_current=float(self.motor_arm.get_supply_current().value),
-                    # arm_stator_current=float(self.motor_arm.get_stator_current().value),
-                    roller_velocity=float(self.motor_roller.get_velocity().value),
-                    # roller_supply_current=float(self.motor_roller.get_supply_current().value),
-                    # roller_stator_current=float(self.motor_roller.get_stator_current().value),
-                    # roller_motor_voltage=float(self.motor_roller.get_motor_voltage().value),
-                    # roller_device_temp=float(self.motor_roller.get_device_temp().value),
-                    target_velocity=float(self.target_velocity),
-                ),
-            )
 
-            self._log_dataclass(
-                "Intake/Command",
-                IntakeCommandTelemetry(
-                    target_position=self._target_position_name,
-                    commanded_velocity_ft_per_sec=self._commanded_velocity_ft_per_sec,
-                    converted_velocity_rps=self._converted_velocity_rps,
-                    stop_requested=self._stop_requested,
-                ),
-            )
-            PyKitLogger.recordOutput(
-                "Intake/Volt/Leader", self.motor_arm_leader.get_motor_voltage().value
-            )
-            # PyKitLogger.recordOutput(
-            #     "Intake/Volt/Follower",
-            #     self.motor_arm_follower.get_motor_voltage().value,
-            # )
+            PyKitLogger.recordOutput("Intake/Actual_Arm_Position", float(self.motor_arm_leader.get_position().value))
+            PyKitLogger.recordOutput("Intake/Target_Arm_Position", float(self.target_rot))
+            PyKitLogger.recordOutput("Intake/Actual_Roller_Velocity", float(self.motor_roller.get_velocity().value))
+            PyKitLogger.recordOutput("Intake/Target_Roller_Velocity", float(self.target_velocity))
+            PyKitLogger.recordOutput("Intake/Actual_Arm_Position", float(self.motor_arm_leader.get_position().value))
+            PyKitLogger.recordOutput("Intake/Target_Arm_State", self._target_position_name)
+            PyKitLogger.recordOutput("Intake/Arm_Volt", float(self.motor_arm_leader.get_motor_voltage().value))
 
         self._loop_timer.stop()
 
