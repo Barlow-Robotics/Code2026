@@ -73,27 +73,27 @@ class Intake(commands2.Subsystem):
             SmartDashboard.putNumber("kP_Roller", 0.0)
             SmartDashboard.putNumber("kI_Roller", 0.0)
             SmartDashboard.putNumber("kD_Roller", 0.0)
-            SmartDashboard.putNumber("kV_Roller", 0.01)
+            SmartDashboard.putNumber("kV_Roller", 0.06)
             SmartDashboard.putNumber("kG_Roller", 0.00)
             SmartDashboard.putNumber("kS_Roller", 0.00)
 
-            SmartDashboard.putNumber("kP_IntakeArm", 0.0)
+            SmartDashboard.putNumber("kP_IntakeArm", 0.01)
             SmartDashboard.putNumber("kI_IntakeArm", 0.0)
             SmartDashboard.putNumber("kD_IntakeArm", 0.0)
-            SmartDashboard.putNumber("kV_IntakeArm", 0.00)
-            SmartDashboard.putNumber("kG_IntakeArm", 0.00)
+            SmartDashboard.putNumber("kV_IntakeArm", 0.59)
+            SmartDashboard.putNumber("kG_IntakeArm", -0.11)
             SmartDashboard.putNumber("kS_IntakeArm", 0.00)
-            SmartDashboard.putNumber("arm_rot", 4.0)
-            SmartDashboard.putNumber("roller_speed", 4.0)
-            SmartDashboard.putNumber("cruise_velocity_arm", 1)
-            SmartDashboard.putNumber("cruise_accl_arm", 2)
+            SmartDashboard.putNumber("arm_rot", 3.2)
+            SmartDashboard.putNumber("roller_speed", 22.0)
+            SmartDashboard.putNumber("cruise_velocity_arm", 10)
+            SmartDashboard.putNumber("cruise_accl_arm", 20)
             SmartDashboard.putNumber("cruise_velocity_roller", 20)
             SmartDashboard.putNumber("cruise_accl_roller", 600)
 
 
 
         self.reinitMotors()
-        
+
         self._motion_magic_velocity_voltage_roller = (
             controls.MotionMagicVelocityVoltage(0, enable_foc=MotorIDs.foc_active)
         )
@@ -200,15 +200,16 @@ class Intake(commands2.Subsystem):
     def go_to_position(self, position: IntakePositions, current_velocity: float = 0.0):
         self._target_position_name = position.name
         self._target_position = position
-        arm_rot = self._POSITION_MAP[position]
         if position == IntakePositions.HOME:
+            target_position = 0
             self.motor_arm_leader.set_control(
-                self._motion_magic_position_voltage_arm_leader.with_position(0)
+                self._motion_magic_position_voltage_arm_leader.with_position(target_position)
             )
         else:
+            target_position = SmartDashboard.getNumber("arm_rot", 4.0)
             self.motor_arm_leader.set_control(
                 self._motion_magic_position_voltage_arm_leader.with_position(
-                    SmartDashboard.getNumber("arm_rot", 4.0)
+                    target_position
                 )
             )
 
@@ -221,7 +222,7 @@ class Intake(commands2.Subsystem):
         #     self.set_velocity(current_velocity)
         # else:
         #     self.stop()
-        self.target_rot: float = arm_rot
+        self.target_rot: float = target_position
 
     def _log_dataclass(self, prefix: str, data: object):
         for field in dataclasses.fields(data):
