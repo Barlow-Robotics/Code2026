@@ -85,32 +85,15 @@ class Intake(commands2.Subsystem):
             SmartDashboard.putNumber("kS_IntakeArm", 0.00)
             SmartDashboard.putNumber("arm_rot", 4.0)
             SmartDashboard.putNumber("roller_speed", 4.0)
+            SmartDashboard.putNumber("cruise_velocity_arm", 1)
+            SmartDashboard.putNumber("cruise_accl_arm", 2)
+            SmartDashboard.putNumber("cruise_velocity_roller", 20)
+            SmartDashboard.putNumber("cruise_accl_roller", 600)
 
-        INTAKE_ROLLER = TalonConfigFX(
-            kP=SmartDashboard.getNumber("kP_Roller", 0.0),
-            kI=SmartDashboard.getNumber("kI_Roller", 0.0),
-            kD=SmartDashboard.getNumber("kD_Roller", 0.0),
-            kV=SmartDashboard.getNumber("kV_Roller", 0.00),
-            kG=SmartDashboard.getNumber("kG_Roller", 0.00),
-            kS=SmartDashboard.getNumber("kS_Roller", 0.00),
-            brake_mode=False,
-            gear_ratio=IntakeConstants.ROLLER_GEARING,
-        )
 
-        INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
-            kP=SmartDashboard.getNumber("kP_IntakeArm", 0.0),
-            kI=SmartDashboard.getNumber("kI_IntakeArm", 0.0),
-            kD=SmartDashboard.getNumber("kD_IntakeArm", 0.0),
-            kV=SmartDashboard.getNumber("kV_IntakeArm", 0.00),
-            kG=SmartDashboard.getNumber("kG_IntakeArm", 0.00),
-            kS=SmartDashboard.getNumber("kS_IntakeArm", 0.00),
-            brake_mode=True,
-            gear_ratio=IntakeConstants.ARM_GEARING,
-        )
 
-        INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=False)
-        INTAKE_CONFIG_ARM_RIGHT._apply_settings(self.motor_arm_leader, inverted=False)
-
+        self.reinitMotors()
+        
         self._motion_magic_velocity_voltage_roller = (
             controls.MotionMagicVelocityVoltage(0, enable_foc=MotorIDs.foc_active)
         )
@@ -145,6 +128,8 @@ class Intake(commands2.Subsystem):
             kS=SmartDashboard.getNumber("kS_Roller", 0.00),
             brake_mode=False,
             gear_ratio=IntakeConstants.ROLLER_GEARING,
+            motion_magic_cruise_velocity=SmartDashboard.getNumber("cruise_velocity_roller", 20),
+            motion_magic_acceleration=SmartDashboard.getNumber("cruise_accl_roller", 600),
         )
 
         INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
@@ -156,6 +141,8 @@ class Intake(commands2.Subsystem):
             kS=SmartDashboard.getNumber("kS_IntakeArm", 0.00),
             brake_mode=True,
             gear_ratio=IntakeConstants.ARM_GEARING,
+            motion_magic_cruise_velocity=SmartDashboard.getNumber("cruise_velocity_arm", 1),
+            motion_magic_acceleration=SmartDashboard.getNumber("cruise_accl_arm", 2),
         )
 
         INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=False)
