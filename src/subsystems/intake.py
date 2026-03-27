@@ -97,16 +97,6 @@ class Intake(commands2.Subsystem):
             gear_ratio=IntakeConstants.ROLLER_GEARING,
         )
 
-        # INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
-        #     kP=0.4,
-        #     kI=0,
-        #     kD=0,
-        #     kV=0.03,
-        #     kG=-0.29,
-        #     kS=0.3,
-        #     brake_mode=True,
-        #     gear_ratio=IntakeConstants.ARM_GEARING,
-        # )
         INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
             kP=SmartDashboard.getNumber("kP_IntakeArm", 0.0),
             kI=SmartDashboard.getNumber("kI_IntakeArm", 0.0),
@@ -144,6 +134,33 @@ class Intake(commands2.Subsystem):
         self.go_to_velocity_command_factory = lambda velocity: cmd.runOnce(
             lambda: self.set_velocity(velocity)
         )
+
+    def reinitMotors(self):
+        INTAKE_ROLLER = TalonConfigFX(
+            kP=SmartDashboard.getNumber("kP_Roller", 0.0),
+            kI=SmartDashboard.getNumber("kI_Roller", 0.0),
+            kD=SmartDashboard.getNumber("kD_Roller", 0.0),
+            kV=SmartDashboard.getNumber("kV_Roller", 0.00),
+            kG=SmartDashboard.getNumber("kG_Roller", 0.00),
+            kS=SmartDashboard.getNumber("kS_Roller", 0.00),
+            brake_mode=False,
+            gear_ratio=IntakeConstants.ROLLER_GEARING,
+        )
+
+        INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
+            kP=SmartDashboard.getNumber("kP_IntakeArm", 0.0),
+            kI=SmartDashboard.getNumber("kI_IntakeArm", 0.0),
+            kD=SmartDashboard.getNumber("kD_IntakeArm", 0.0),
+            kV=SmartDashboard.getNumber("kV_IntakeArm", 0.00),
+            kG=SmartDashboard.getNumber("kG_IntakeArm", 0.00),
+            kS=SmartDashboard.getNumber("kS_IntakeArm", 0.00),
+            brake_mode=True,
+            gear_ratio=IntakeConstants.ARM_GEARING,
+        )
+
+        INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=False)
+        INTAKE_CONFIG_ARM_RIGHT._apply_settings(self.motor_arm_leader, inverted=False)
+
 
     def set_velocity(self, current_velocity: float):
         if current_velocity < 1:
