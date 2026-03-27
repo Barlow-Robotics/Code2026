@@ -49,30 +49,37 @@ LOG_PATH=/path/to/log/file.wpilog uv run -- robotpy --main src watch
 
 
 Notes:
+We use L1 swerve. 
 USB: 172.22.11.2
 Radio: 10.45.72.1
 RoboRIO: 10.45.72.2
 Vision: 10.45.72.201
 SSH into RoboRIO: admin@roboRIO-4572-frc.local
-
-We use L1 motors. 
+AndyMark field at districts and regionals. 
 
 TODO at comp:
-1. AprilTagField.k2026RebuiltAndyMark or AprilTagField.k2026RebuiltWelded depending on comp.  (should be good)
-2. Need to update deploy/pathplanner/settings.json
+1. Need to update deploy/pathplanner/settings.json
 should these be tuned?
 auto_translation_pid = PIDConstants(4, 0.0, 0)
 auto_rotation_pid = PIDConstants(5.0, 0.0, 0.0)
 8. I would recommend an actual PID to the stop point’s pose so you can be cleaning up any residual path error during the shooting pause
 9. TEST shooting back to our side of the field. 
-11. Intake 
+10. Hood gittering at 0 
+11. Cut polycarbinate in front of cameras. 
+12. Fix camera out of focus. (need to bring other camera to comp.)
+13. Add vision onto other orin nano. 
+14. Figure out uv run frc deploypy/deploy.
+
+
+
+
+
 
 
 
 
 VISION
 1) Usew command to usb memlory buffer: sudo sh -c 'echo 256 > /sys/module/usbcore/parameters/usbfs_memory_mb'
-
 2) try 512 mb
 2) check active usb, performance
 2) attempt to put each camera into 1 usb port and see if that works
