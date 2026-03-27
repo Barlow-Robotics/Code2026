@@ -7,15 +7,13 @@ from typing import TYPE_CHECKING
 from commands2 import cmd
 from commands2.button import CommandXboxController, CommandJoystick, Trigger
 
-import wpilib
 from phoenix6 import swerve
-from wpilib import DriverStation, SmartDashboard
+from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
 from commands import IntakePositionCommand, ShootCommand, ReverseCommand
 from commands.throw_feeder_command import ThrowFeederCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
-from pykit.logger import Logger as PyKitLogger
 
 if TYPE_CHECKING:
     from core import RobotContainer
@@ -77,23 +75,15 @@ class Controller:
                     )
                 )
             )
-        )   
+        )
 
         for controller in [self._driver]:
             controller.rightBumper().onTrue(
-                cmd.runOnce(
-                    lambda: (
-                        self.update_driver(sub=False)
-                    )
-                )
+                cmd.runOnce(lambda: self.update_driver(sub=False))
             )
 
             controller.leftBumper().onTrue(
-                cmd.runOnce(
-                    lambda: (
-                        self.update_driver(sub=True)
-                    )
-                )
+                cmd.runOnce(lambda: self.update_driver(sub=True))
             )
 
         # Idle while the robot is disabled. This ensures the configured
@@ -118,7 +108,6 @@ class Controller:
                     lambda: container.intake.go_to_position(IntakePositions.HOME)
                 )
             )
-
 
             # self._test_controller.y().onTrue(
             #     cmd.runOnce(lambda: container.feeder.move(9))
@@ -155,11 +144,15 @@ class Controller:
             # )
             self._test_controller.button(1).whileTrue(
                 cmd.run(
-                    lambda: container.turret.enableAutoAim(True, vision_on=not container.vision.disabled_vision)
+                    lambda: container.turret.enableAutoAim(
+                        True, vision_on=not container.vision.disabled_vision
+                    )
                 )
             ).onFalse(
                 cmd.runOnce(
-                    lambda: container.turret.enableAutoAim(False, vision_on=not container.vision.disabled_vision)
+                    lambda: container.turret.enableAutoAim(
+                        False, vision_on=not container.vision.disabled_vision
+                    )
                 )
             )
             self._test_controller.button(2).onTrue(
@@ -194,13 +187,8 @@ class Controller:
 
                 controller.leftTrigger().whileTrue(
                     cmd.runOnce(lambda: container.intake.set_velocity(-1))
-                ).whileFalse(
-                    cmd.runOnce(lambda: container.intake.stop())
-                )
-            
+                ).whileFalse(cmd.runOnce(lambda: container.intake.stop()))
 
-
-        
         for controller in [self._driver]:
             controller.button(8).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))
 
@@ -216,14 +204,17 @@ class Controller:
 
                 controller.leftTrigger().whileTrue(
                     cmd.run(
-                        lambda: container.turret.enableAutoAim(True, vision_on=not container.vision.disabled_vision)
+                        lambda: container.turret.enableAutoAim(
+                            True, vision_on=not container.vision.disabled_vision
+                        )
                     )
                 ).onFalse(
                     cmd.runOnce(
-                        lambda: container.turret.enableAutoAim(False, vision_on=not container.vision.disabled_vision)
+                        lambda: container.turret.enableAutoAim(
+                            False, vision_on=not container.vision.disabled_vision
+                        )
                     )
                 )
-
 
         if (
             RobotFeatures.HAS_SHOOTER
@@ -239,7 +230,7 @@ class Controller:
                         container.shooter,
                         container.feeder,
                         container.spindex,
-                        container.turret
+                        container.turret,
                     )
                 )
                 controller.b().whileTrue(
@@ -253,8 +244,15 @@ class Controller:
             and RobotFeatures.HAS_INTAKE
         ):
             for controller in [self._operator]:
-                controller.leftBumper().whileTrue( # reverse intake
-                    ReverseCommand(container.drivetrain, container.shooter, container.feeder, container.spindex, container.turret, container.intake)
+                controller.leftBumper().whileTrue(  # reverse intake
+                    ReverseCommand(
+                        container.drivetrain,
+                        container.shooter,
+                        container.feeder,
+                        container.spindex,
+                        container.turret,
+                        container.intake,
+                    )
                 )
         if RobotFeatures.HAS_TURRET:
             for controller in [self._driver, self._operator]:
@@ -294,12 +292,11 @@ class Controller:
         #     ).repeatedly()
         # )
 
-    def update_state(self, sub=False):        
+    def update_state(self, sub=False):
         if sub:
             self._current_state -= 0.5
         else:
             self._current_state += 0.5
-
 
     def update_driver(self, sub: bool):
         if sub:

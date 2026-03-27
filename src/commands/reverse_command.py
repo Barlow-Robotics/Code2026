@@ -1,14 +1,9 @@
 from typing import TYPE_CHECKING
 from commands2 import Command
-from wpilib import SmartDashboard
-from constants import ShooterConstants
-from constants.field_constants import CustomPoints
-from constants.robot_constants import RobotFeatures
 from subsystems.drivetrain import Drivetrain
 
 if TYPE_CHECKING:
     from subsystems import Spindex, Turret, Feeder, Shooter, Intake
-from wpimath.geometry import Pose2d, Rotation2d, Translation3d
 
 
 class ReverseCommand(Command):
@@ -29,17 +24,19 @@ class ReverseCommand(Command):
         self.turret = turret
         self.intake = intake
         self._feeding = False
-        self.addRequirements(self.shooter, self.feeder, self.spindex, self.turret, self.intake)
+        self.addRequirements(
+            self.shooter, self.feeder, self.spindex, self.turret, self.intake
+        )
 
     def initialize(self):
         self._feeding = False
         # self.target_velocity = SmartDashboard.getNumber(
         #     "CustomFloatVelocity", ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT
         # )
-        
+
     def execute(self):
         # self.shooter.set_velocity(-self.target_velocity)
-        self.feeder.move(-9*3)
+        self.feeder.move(-9 * 3)
         self.spindex.move(-9)
         # current_speeds = self.driveSub.get_speeds()
         # overall_velocity = (current_speeds.vx**2 + current_speeds.vy**2) ** 0.5

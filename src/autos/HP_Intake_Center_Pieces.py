@@ -6,7 +6,12 @@ from autos import AutoRoutine
 from commands import IntakePositionCommand
 from constants import RobotFeatures
 
-from commands2 import SequentialCommandGroup, ParallelCommandGroup, ParallelDeadlineGroup, cmd
+from commands2 import (
+    SequentialCommandGroup,
+    ParallelCommandGroup,
+    ParallelDeadlineGroup,
+    cmd,
+)
 
 if typing.TYPE_CHECKING:
     from core import RobotContainer

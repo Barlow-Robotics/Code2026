@@ -161,7 +161,6 @@ class Intake(commands2.Subsystem):
         INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=False)
         INTAKE_CONFIG_ARM_RIGHT._apply_settings(self.motor_arm_leader, inverted=False)
 
-
     def set_velocity(self, current_velocity: float):
         if current_velocity < 1:
             current_velocity = 1
@@ -218,12 +217,14 @@ class Intake(commands2.Subsystem):
         if position == IntakePositions.HOME:
             self.motor_arm_leader.set_control(
                 self._motion_magic_position_voltage_arm_leader.with_position(0)
-            )   
-        else:        
-            self.motor_arm_leader.set_control(
-                self._motion_magic_position_voltage_arm_leader.with_position(SmartDashboard.getNumber("arm_rot", 4.0))
             )
-        
+        else:
+            self.motor_arm_leader.set_control(
+                self._motion_magic_position_voltage_arm_leader.with_position(
+                    SmartDashboard.getNumber("arm_rot", 4.0)
+                )
+            )
+
         # self.motor_arm_follower.set_control(
         #     self._motion_magic_position_voltage_arm_follower.with_position(arm_rot)
         # )
@@ -253,14 +254,31 @@ class Intake(commands2.Subsystem):
             arm_degrees = self.motor_arm_leader.get_position().value * 360
             self.arm_ligament.setAngle(75 + arm_degrees)
         if RobotFeatures.LOGGING_INTAKE:
-
-            PyKitLogger.recordOutput("Intake/Actual_Arm_Position", float(self.motor_arm_leader.get_position().value))
-            PyKitLogger.recordOutput("Intake/Target_Arm_Position", float(self.target_rot))
-            PyKitLogger.recordOutput("Intake/Actual_Roller_Velocity", float(self.motor_roller.get_velocity().value))
-            PyKitLogger.recordOutput("Intake/Target_Roller_Velocity", float(self.target_velocity))
-            PyKitLogger.recordOutput("Intake/Actual_Arm_Position", float(self.motor_arm_leader.get_position().value))
-            PyKitLogger.recordOutput("Intake/Target_Arm_State", self._target_position_name)
-            PyKitLogger.recordOutput("Intake/Arm_Volt", float(self.motor_arm_leader.get_motor_voltage().value))
+            PyKitLogger.recordOutput(
+                "Intake/Actual_Arm_Position",
+                float(self.motor_arm_leader.get_position().value),
+            )
+            PyKitLogger.recordOutput(
+                "Intake/Target_Arm_Position", float(self.target_rot)
+            )
+            PyKitLogger.recordOutput(
+                "Intake/Actual_Roller_Velocity",
+                float(self.motor_roller.get_velocity().value),
+            )
+            PyKitLogger.recordOutput(
+                "Intake/Target_Roller_Velocity", float(self.target_velocity)
+            )
+            PyKitLogger.recordOutput(
+                "Intake/Actual_Arm_Position",
+                float(self.motor_arm_leader.get_position().value),
+            )
+            PyKitLogger.recordOutput(
+                "Intake/Target_Arm_State", self._target_position_name
+            )
+            PyKitLogger.recordOutput(
+                "Intake/Arm_Volt",
+                float(self.motor_arm_leader.get_motor_voltage().value),
+            )
 
         self._loop_timer.stop()
 

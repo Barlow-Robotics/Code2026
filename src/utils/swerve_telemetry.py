@@ -1,4 +1,3 @@
-
 from phoenix6 import SignalLogger, swerve, units
 from wpilib import (
     Color,
@@ -8,7 +7,6 @@ from wpilib import (
     MechanismLigament2d,
     SmartDashboard,
 )
-from wpimath.geometry import Pose2d
 from wpimath.kinematics import ChassisSpeeds, SwerveModulePosition, SwerveModuleState
 
 from pykit.logger import Logger as PyKitLogger

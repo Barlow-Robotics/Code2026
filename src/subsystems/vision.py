@@ -14,12 +14,10 @@ from wpimath.kinematics import ChassisSpeeds
 from constants import SI, VisionConstants, RobotFeatures
 from subsystems import Drivetrain
 from commands2 import Subsystem
-from commands import FollowTrajectoryCommand
 from phoenix6 import swerve
 
 from pykit.logger import Logger as PyKitLogger
 from utils.profiler import LoopTimer
-from utils.trajectory_generator import CreateTrajectory
 
 if not RobotBase.isReal():
     from photonlibpy.simulation import (
@@ -74,7 +72,6 @@ class _CameraConfig:
 class Vision(Subsystem):
     def __init__(self, drive_sub: Drivetrain):
         self.i = 0
-
 
         # inst = ntcore.NetworkTableInstance.getDefault()
         # inst.startClient3("connect-auto-align")
@@ -143,7 +140,7 @@ class Vision(Subsystem):
         PyKitLogger.recordOutput(
             "Vision/Config/camera_count", float(len(self._cameras))
         )
-                # After existing init code:
+        # After existing init code:
         self._pending_observations: List[VisionObservation] = []
         self._pending_lock = threading.Lock()
         self._thread = threading.Thread(target=self._vision_thread_loop, daemon=True)
@@ -166,8 +163,10 @@ class Vision(Subsystem):
                 self._vision_sim.addCamera(cam_cfg.camera_sim, cam_cfg.robot_to_camera)
         else:
             self._vision_sim = None
+
     def _vision_thread_loop(self):
         import os
+
         # Lower priority so main loop always wins on 2-core RoboRIO
         try:
             os.nice(10)
@@ -203,6 +202,7 @@ class Vision(Subsystem):
                 time.sleep(0.011)
             else:
                 time.sleep(0.002)
+
     def periodic(self):
         if not RobotBase.isReal() and VisionConstants.VISION_SIM:
             self.simulation_periodic()
@@ -240,11 +240,12 @@ class Vision(Subsystem):
                     )
                 if self._auto_align_target_pose is not None:
                     PyKitLogger.recordOutput(
-                        "Vision/State/auto_align_target_pose", self._auto_align_target_pose
+                        "Vision/State/auto_align_target_pose",
+                        self._auto_align_target_pose,
                     )
 
             # --- Camera connection status ---
-        self.i+=1
+        self.i += 1
 
         if RobotFeatures.LOGGING_VISION or self.i % 10 == 0:
             for cam_cfg in self._cameras:
@@ -253,7 +254,6 @@ class Vision(Subsystem):
                 )
 
         self._loop_timer.stop()
-
 
     def _get_observations_from_camera(
         self,
@@ -427,7 +427,7 @@ class Vision(Subsystem):
                 )
                 PyKitLogger.recordOutput(
                     f"{prefix}/rejected_excessive_angular_velocity_value",
-                    current_speeds.omega
+                    current_speeds.omega,
                 )
             return observations
         else:
@@ -670,35 +670,35 @@ class Vision(Subsystem):
 
     def auto_align(self):
         return None
-        hasTarget: bool = self.targetSub.get()
-        # hasTarget = False
+        # hasTarget: bool = self.targetSub.get()
+        # # hasTarget = False
 
-        if not hasTarget:
-            print("AUTO ALIGN: No target detected, aborting auto align.")
-            return None
-        # x: float = self.xSub.get()
-        # y: float = self.ySub.get()
-        # angle: float = self.angleSub.get()
+        # if not hasTarget:
+        #     print("AUTO ALIGN: No target detected, aborting auto align.")
+        #     return None
+        # # x: float = self.xSub.get()
+        # # y: float = self.ySub.get()
+        # # angle: float = self.angleSub.get()
 
-        print("AUTO ALIGN")
-        starting_pose = self.drive_sub.get_pose()
-        target_pose = Pose2d(
-            starting_pose.X() + x,
-            starting_pose.Y() + y,
-            starting_pose.rotation() + Rotation2d(angle * SI.degrees_to_radians),
-        )
-        self._auto_align_triggered = True
-        self._auto_align_starting_pose = starting_pose
-        self._auto_align_target_pose = target_pose
+        # print("AUTO ALIGN")
+        # starting_pose = self.drive_sub.get_pose()
+        # target_pose = Pose2d(
+        #     starting_pose.X() + x,
+        #     starting_pose.Y() + y,
+        #     starting_pose.rotation() + Rotation2d(angle * SI.degrees_to_radians),
+        # )
+        # self._auto_align_triggered = True
+        # self._auto_align_starting_pose = starting_pose
+        # self._auto_align_target_pose = target_pose
 
-        trajectory_obj = CreateTrajectory(
-            lambda: self.drive_sub.get_pose(),
-            lambda: self.drive_sub.get_speeds(),
-        ).get_trajectory(
-            target_pose,
-            Rotation2d(target_pose.rotation().radians()),
-        )
-        return FollowTrajectoryCommand(self, trajectory_obj)
+        # trajectory_obj = CreateTrajectory(
+        #     lambda: self.drive_sub.get_pose(),
+        #     lambda: self.drive_sub.get_speeds(),
+        # ).get_trajectory(
+        #     target_pose,
+        #     Rotation2d(target_pose.rotation().radians()),
+        # )
+        # return FollowTrajectoryCommand(self, trajectory_obj)
 
     def position_to_pose_align(self):
         if self.drive_sub.allow_center_auto_align:

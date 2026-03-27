@@ -69,7 +69,6 @@ class TunerConstants:
         # stator current limit to help avoid brownouts without impacting performance.
         .with_stator_current_limit(50.0)
         .with_stator_current_limit_enable(True)
-
     )
     _steer_initial_configs = configs.TalonFXConfiguration().with_current_limits(
         configs.CurrentLimitsConfigs()

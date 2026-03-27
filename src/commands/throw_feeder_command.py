@@ -21,7 +21,7 @@ class ThrowFeederCommand(Command):
         if self._feeding:
             return
         self.feeder.move(9, invert=True)
-        self.spindex.move(9*3)
+        self.spindex.move(9 * 3)
         self._feeding = True
 
     def isFinished(self):

@@ -8,7 +8,6 @@ from commands2 import cmd
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import RobotConfig
 from pathplannerlib.controller import PPHolonomicDriveController
-from pathplannerlib.logging import PathPlannerLogging
 from commands.shoot_command import ShootCommand
 from constants import TunerConstants, DriveConstants, AutoConstants, RobotFeatures
 from utils import SwerveTelemetry
@@ -25,18 +24,16 @@ from wpilib import (
 )
 from utils import should_flip
 import wpilib
-from pykit.logger import Logger as PyKitLogger
 from autos import (
     Leave_Shoot,
     HP_Center_L2,
     HP_Center_L1,
     HP_Center_L1_standalone,
-    Simple,
     Depot_Center_L1,
     Depot_Center_L1_Standalone,
     Depot_Center_L2,
     Depot_Side_Balls,
-    Center_Auto
+    Center_Auto,
 )
 
 
@@ -146,7 +143,9 @@ class RobotContainer:
                 HP_Center_L2(self).get_command(),
             )
             self.auto_selection.addOption("Leave", Leave_Shoot(self).get_command())
-            self.auto_selection.addOption("HP_Center_L1", HP_Center_L1(self).get_command())
+            self.auto_selection.addOption(
+                "HP_Center_L1", HP_Center_L1(self).get_command()
+            )
             self.auto_selection.addOption(
                 "HP_Center_L1_Standalone", HP_Center_L1_standalone(self).get_command()
             )
@@ -154,7 +153,8 @@ class RobotContainer:
                 "Depot_Center_L1", Depot_Center_L1(self).get_command()
             )
             self.auto_selection.addOption(
-                "Depot_Center_L1_Standalone", Depot_Center_L1_Standalone(self).get_command()
+                "Depot_Center_L1_Standalone",
+                Depot_Center_L1_Standalone(self).get_command(),
             )
             self.auto_selection.addOption(
                 "Depot_Center_L2", Depot_Center_L2(self).get_command()
@@ -163,7 +163,8 @@ class RobotContainer:
                 "Center_Auto", Center_Auto(self).get_command()
             )
             # self.auto_selection.addOption("Simple", Simple(self).get_command())
-        elif (RobotFeatures.HAS_INTAKE
+        elif (
+            RobotFeatures.HAS_INTAKE
             and RobotFeatures.HAS_SHOOTER
             and RobotFeatures.HAS_FEEDER
             and RobotFeatures.HAS_SPINDEX
@@ -177,8 +178,6 @@ class RobotContainer:
             self.auto_selection.setDefaultOption(
                 "Center_Auto", Center_Auto(self).get_command()
             )
-
-
 
         # allow us to choose our auto in Smart Dashboard
         wpilib.SmartDashboard.putData("Auto", self.auto_selection)

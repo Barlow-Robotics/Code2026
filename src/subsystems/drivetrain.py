@@ -156,7 +156,8 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             )  # Use open-loop control for drive motors
         )
         self.facing_angle = (
-            FieldCentricFacingAngleAbsolute().with_drive_request_type(
+            FieldCentricFacingAngleAbsolute()
+            .with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )
             .with_max_abs_rotational_rate(DriveConstants.MAX_ANGULAR_VELOCITY)
@@ -177,11 +178,9 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
             -math.pi, math.pi
         )
 
-
         self.facing_angle.heading_controller.enableContinuousInput(-math.pi, math.pi)
 
-        self.facing_angle.heading_controller.setPID(35.0*0.55, 0.0, 0.00)
-        
+        self.facing_angle.heading_controller.setPID(35.0 * 0.55, 0.0, 0.00)
 
         self.robot_centric_facing_angle = (
             swerve.requests.RobotCentricFacingAngle()
@@ -189,7 +188,9 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
             )
             .with_max_abs_rotational_rate(DriveConstants.MAX_ANGULAR_VELOCITY)
-            .with_forward_perspective(swerve.requests.ForwardPerspectiveValue.BLUE_ALLIANCE)
+            .with_forward_perspective(
+                swerve.requests.ForwardPerspectiveValue.BLUE_ALLIANCE
+            )
         )
         self.robot_centric_facing_angle.heading_controller.setPID(10.0, 0.0, 0.0)
         self.robot_centric_facing_angle.heading_controller.enableContinuousInput(
@@ -413,7 +414,7 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     @staticmethod
     def get_timestamp():
         return utils.get_current_time_seconds()
-    
+
     def drive_based_velocity(self, vx: float, vy: float, omega: float):
         """
         Drive the robot with the given velocities.
@@ -444,8 +445,7 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
     ):  # BW needed for AutoBuilder since it only supports robot-centric control, but we want to use field-centric control for teleop
         if self.changeAng:
             self.set_control(
-                self.robot_centric_facing_angle
-                .with_velocity_x(speeds.vx)
+                self.robot_centric_facing_angle.with_velocity_x(speeds.vx)
                 .with_velocity_y(speeds.vy)
                 .with_target_direction(self.target_field_heading)
             )
@@ -495,16 +495,17 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
 
     def hold_position_and_aim_command(self):
         """Hold position; if changeAng is set, rotate toward target heading."""
+
         def _execute():
             if self.changeAng:
                 self.set_control(
-                    self.robot_centric_facing_angle
-                    .with_velocity_x(0)
+                    self.robot_centric_facing_angle.with_velocity_x(0)
                     .with_velocity_y(0)
                     .with_target_direction(self.target_field_heading)
                 )
             else:
                 self.set_control(self._zero_request)
+
         return self.run(_execute)
 
     def lock_wheels_command(self):

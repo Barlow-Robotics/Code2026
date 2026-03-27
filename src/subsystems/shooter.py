@@ -111,7 +111,6 @@ class Shooter(Subsystem):
         )
 
         if RobotFeatures.LOGGING_SHOOTER:
-
             PyKitLogger.recordOutput(
                 "Shooter/flywheel_motor_right_RPM",
                 float(self.get_current_rpm_follower()),

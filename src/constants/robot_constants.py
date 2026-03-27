@@ -103,7 +103,7 @@ class IntakeConstants:
     ARM_GEARING = 14 / 58
     ARM_MOI = 0.01
     ARM_HOME_ROTATIONS = 0
-    ARM_DEPLOYED_LENGTH_IN = 4 
+    ARM_DEPLOYED_LENGTH_IN = 4
     ARM_DEPLOYED_ROTATIONS = 4
 
     INTAKE_VELOCITY_CONSTANT = 2.6 * 6
@@ -159,7 +159,7 @@ class DriveConstants:
     TOTAL_HEIGHT_METERS_FROM_FLOOR = (
         SI.inches_to_meters * TOTAL_HEIGHT_INCHES_FROM_FLOOR
     )
-    TOTAL_WIDTH_INCHES = 27.0 + 3/16  # IN
+    TOTAL_WIDTH_INCHES = 27.0 + 3 / 16  # IN
     TOTAL_WIDTH_INCHES_BUMPERS = 34.5 + 0.5  # IN
     CENTER_WHEEL_TO_CENTER_WHEEL = 21.75  # IN
     CENTER_WHEEL_TO_CENTER_WHEEL_METERS = (
@@ -197,20 +197,20 @@ class VisionConstants:
 
     FRONT_LEFT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
-            HALF_LENGTH - ((1 + 3/8) * SI.inches_to_meters),
+            HALF_LENGTH - ((1 + 3 / 8) * SI.inches_to_meters),
             HALF_WIDTH - (4.25 * SI.inches_to_meters),  # LEFT
             DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR
-            + (SI.inches_to_meters * (16 + 1/8)),
+            + (SI.inches_to_meters * (16 + 1 / 8)),
         ),
         Rotation3d(0, 0, units.degreesToRadians(0)),
     )
 
     FRONT_RIGHT_SWERVE_TO_ROBOT = Transform3d(
         Translation3d(
-            HALF_LENGTH - ((1 + 3/8) * SI.inches_to_meters),
-            -HALF_WIDTH + ((4 + 13/16) * SI.inches_to_meters),  # RIGHT
+            HALF_LENGTH - ((1 + 3 / 8) * SI.inches_to_meters),
+            -HALF_WIDTH + ((4 + 13 / 16) * SI.inches_to_meters),  # RIGHT
             DriveConstants.TOTAL_HEIGHT_METERS_FROM_FLOOR
-            + (SI.inches_to_meters * (16 + 1/8)),
+            + (SI.inches_to_meters * (16 + 1 / 8)),
         ),
         Rotation3d(0, 0, units.degreesToRadians(0)),
     )

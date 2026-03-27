@@ -4,9 +4,7 @@ velocities but always treats target_direction as field-absolute
 (blue-alliance origin).
 """
 
-import math
 from phoenix6 import swerve
-from phoenix6.swerve.requests import ForwardPerspectiveValue
 
 
 class FieldCentricFacingAngleAbsolute(swerve.requests.FieldCentricFacingAngle):
@@ -17,10 +15,13 @@ class FieldCentricFacingAngleAbsolute(swerve.requests.FieldCentricFacingAngle):
         # Target direction is field-absolute — don't rotate by operator perspective
         angle_to_face = self.target_direction
 
-        to_apply_omega = self.target_rate_feedforward + self.heading_controller.calculate(
-            parameters.current_pose.rotation().radians(),
-            angle_to_face.radians(),
-            parameters.timestamp,
+        to_apply_omega = (
+            self.target_rate_feedforward
+            + self.heading_controller.calculate(
+                parameters.current_pose.rotation().radians(),
+                angle_to_face.radians(),
+                parameters.timestamp,
+            )
         )
         if self.max_abs_rotational_rate > 0.0:
             if to_apply_omega > self.max_abs_rotational_rate:
@@ -30,8 +31,9 @@ class FieldCentricFacingAngleAbsolute(swerve.requests.FieldCentricFacingAngle):
 
         # Velocities still use forward_perspective (operator perspective) for joystick
         return (
-            self._FieldCentricFacingAngle__field_centric
-            .with_velocity_x(self.velocity_x)
+            self._FieldCentricFacingAngle__field_centric.with_velocity_x(
+                self.velocity_x
+            )
             .with_velocity_y(self.velocity_y)
             .with_rotational_rate(to_apply_omega)
             .with_deadband(self.deadband)

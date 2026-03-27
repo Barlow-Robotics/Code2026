@@ -15,17 +15,17 @@ from utils import (
 )  # DO NOT MOVE IMPORT, it needs to be called before any PyKit loggers are created
 
 from core import RobotContainer
-from phoenix6 import HootAutoReplay
-from wpilib import DriverStation, RobotBase, SmartDashboard
+from wpilib import DriverStation, SmartDashboard
 from constants import RobotFeatures
 from utils.profiler import LoopTimer
 
 if typing.TYPE_CHECKING:
     from autos import AutoRoutine
 
-from phoenix6 import SignalLogger
 from pykit.loggedrobot import LoggedRobot
-LoggedRobot.default_period = 0.04  # seconds slowed down to from 0.02 -> 0.04 to reduce 
+
+LoggedRobot.default_period = 0.04  # seconds slowed down to from 0.02 -> 0.04 to reduce
+
 
 class Robot(
     LoggedRobot
@@ -120,7 +120,6 @@ class Robot(
 
         if self._cprofile:
             self._cprofile.enable()
-
 
         self.container.turret.set_angle_hood(0)
         # This makes sure that the autonomous stops running when
