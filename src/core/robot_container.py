@@ -123,7 +123,7 @@ class RobotContainer:
         #     self.turret = Turret(driveSub=self.drivetrain, init2=True)
         # self.controller = Controller(self)
         if RobotFeatures.HAS_INTAKE:
-            self.intake = Intake()
+            self.intake = Intake(True)
         # if RobotFeatures.HAS_SPINDEX:
         #     self.spindex = Spindex()
         # if RobotFeatures.HAS_FEEDER:

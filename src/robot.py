@@ -87,8 +87,6 @@ class Robot(
         # self.container.turret.
         # .set_position(0, 0.2)
         """This function is called once each time the robot enters Disabled mode."""
-        if RobotFeatures.TESTING:
-            self.container.reinitialize_subsystems()
         if self._cprofile:
             self._cprofile.disable()
 
@@ -117,6 +115,9 @@ class Robot(
         pass
 
     def teleopInit(self) -> None:
+        if RobotFeatures.TESTING:
+            self.container.reinitialize_subsystems()
+
         if self._cprofile:
             self._cprofile.enable()
 

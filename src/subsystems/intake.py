@@ -43,7 +43,7 @@ class IntakeTelemetry:
 
 
 class Intake(commands2.Subsystem):
-    def __init__(self):
+    def __init__(self, init2=False):
         super().__init__()
         self._loop_timer = LoopTimer("Intake")
         self.target_velocity = 0.0
@@ -69,21 +69,22 @@ class Intake(commands2.Subsystem):
         self.motor_roller: TalonFX = TalonFX(MotorIDs.motor_id_roller, "*")
         self.motor_arm_leader: TalonFX = TalonFX(MotorIDs.motor_id_arm_leader_left, "*")
         # self.motor_arm_follower: TalonFX = TalonFX(MotorIDs.motor_id_arm_follower_right, "*")
-        SmartDashboard.putNumber("kP_Roller", 0.0)
-        SmartDashboard.putNumber("kI_Roller", 0.0)
-        SmartDashboard.putNumber("kD_Roller", 0.0)
-        SmartDashboard.putNumber("kV_Roller", 0.01)
-        SmartDashboard.putNumber("kG_Roller", 0.00)
-        SmartDashboard.putNumber("kS_Roller", 0.00)
+        if not init2:
+            SmartDashboard.putNumber("kP_Roller", 0.0)
+            SmartDashboard.putNumber("kI_Roller", 0.0)
+            SmartDashboard.putNumber("kD_Roller", 0.0)
+            SmartDashboard.putNumber("kV_Roller", 0.01)
+            SmartDashboard.putNumber("kG_Roller", 0.00)
+            SmartDashboard.putNumber("kS_Roller", 0.00)
 
-        SmartDashboard.putNumber("kP_IntakeArm", 0.0)
-        SmartDashboard.putNumber("kI_IntakeArm", 0.0)
-        SmartDashboard.putNumber("kD_IntakeArm", 0.0)
-        SmartDashboard.putNumber("kV_IntakeArm", 0.00)
-        SmartDashboard.putNumber("kG_IntakeArm", 0.00)
-        SmartDashboard.putNumber("kS_IntakeArm", 0.00)
-        SmartDashboard.putNumber("arm_rot", 4.0)
-        SmartDashboard.putNumber("roller_speed", 4.0)
+            SmartDashboard.putNumber("kP_IntakeArm", 0.0)
+            SmartDashboard.putNumber("kI_IntakeArm", 0.0)
+            SmartDashboard.putNumber("kD_IntakeArm", 0.0)
+            SmartDashboard.putNumber("kV_IntakeArm", 0.00)
+            SmartDashboard.putNumber("kG_IntakeArm", 0.00)
+            SmartDashboard.putNumber("kS_IntakeArm", 0.00)
+            SmartDashboard.putNumber("arm_rot", 4.0)
+            SmartDashboard.putNumber("roller_speed", 4.0)
 
         INTAKE_ROLLER = TalonConfigFX(
             kP=SmartDashboard.getNumber("kP_Roller", 0.0),
@@ -107,18 +108,18 @@ class Intake(commands2.Subsystem):
         #     gear_ratio=IntakeConstants.ARM_GEARING,
         # )
         INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
-            kP=SmartDashboard.getNumber("kP_Roller", 0.0),
-            kI=SmartDashboard.getNumber("kI_Roller", 0.0),
-            kD=SmartDashboard.getNumber("kD_Roller", 0.0),
-            kV=SmartDashboard.getNumber("kV_Roller", 0.00),
-            kG=SmartDashboard.getNumber("kG_Roller", 0.00),
-            kS=SmartDashboard.getNumber("kS_Roller", 0.00),
+            kP=SmartDashboard.getNumber("kP_IntakeArm", 0.0),
+            kI=SmartDashboard.getNumber("kI_IntakeArm", 0.0),
+            kD=SmartDashboard.getNumber("kD_IntakeArm", 0.0),
+            kV=SmartDashboard.getNumber("kV_IntakeArm", 0.00),
+            kG=SmartDashboard.getNumber("kG_IntakeArm", 0.00),
+            kS=SmartDashboard.getNumber("kS_IntakeArm", 0.00),
             brake_mode=True,
             gear_ratio=IntakeConstants.ARM_GEARING,
         )
 
         INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=False)
-        INTAKE_CONFIG_ARM_RIGHT._apply_settings(self.motor_arm_leader, inverted=True)
+        INTAKE_CONFIG_ARM_RIGHT._apply_settings(self.motor_arm_leader, inverted=False)
 
         self._motion_magic_velocity_voltage_roller = (
             controls.MotionMagicVelocityVoltage(0, enable_foc=MotorIDs.foc_active)
