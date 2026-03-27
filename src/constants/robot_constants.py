@@ -100,7 +100,7 @@ class IntakeConstants:
     )  # BW: REAL CIRCUMFRENCE IS 2IN * PI
 
     ARM_MOTOR = DCMotor.krakenX44(1)
-    ARM_GEARING = 14 / 58
+    ARM_GEARING = 58 / 14 
     ARM_MOI = 0.01
     ARM_HOME_ROTATIONS = 0
     ARM_DEPLOYED_LENGTH_IN = 4
