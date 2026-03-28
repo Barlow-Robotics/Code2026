@@ -77,17 +77,17 @@ class Intake(commands2.Subsystem):
         self.kS_roller = 0.00
         self.cruise_velocity_roller = 20
         self.cruise_accl_roller = 600
-        self.kP_arm = 0.00
+        self.kP_arm = 0.8
         self.kI_arm = 0.0
         self.kD_arm = 0.0
-        self.kV_arm = 0.59
+        self.kV_arm = 0.592
         self.kG_arm = -0.11
         self.kS_arm = 0.00
         self.cruise_accl_arm = 20
         self.cruise_velocity_arm = 10
 
         self.roller_speed = 22.0
-        self.arm_distance = 3.2
+        self.arm_distance = 3.28
 
 
 
@@ -205,7 +205,10 @@ class Intake(commands2.Subsystem):
     def set_velocity(self, current_velocity: float):
         if current_velocity < 1:
             current_velocity = 1
-        commanded_velocity = SmartDashboard.getNumber("roller_speed", 4.0)
+        if RobotFeatures.SmartDashboardTuning:
+            commanded_velocity = SmartDashboard.getNumber("roller_speed", self.roller_speed)
+        else:
+            commanded_velocity = self.roller_speed
         self._commanded_velocity_ft_per_sec = float(commanded_velocity)
         self._stop_requested = False
 
@@ -222,7 +225,10 @@ class Intake(commands2.Subsystem):
     def reverse_velocity(self, current_velocity: float):
         if current_velocity < 1:
             current_velocity = 1
-        commanded_velocity = SmartDashboard.getNumber("roller_speed", 4.0)
+        if RobotFeatures.SmartDashboardTuning:
+            commanded_velocity = SmartDashboard.getNumber("roller_speed", self.roller_speed)
+        else:
+            commanded_velocity = self.roller_speed
         self._commanded_velocity_ft_per_sec = float(commanded_velocity)
         self._stop_requested = False
 
@@ -262,7 +268,7 @@ class Intake(commands2.Subsystem):
                 )
             )
         else:
-            target_position = SmartDashboard.getNumber("arm_rot", 4.0)
+            target_position = self.arm_distance
             self.motor_arm_leader.set_control(
                 self._motion_magic_position_voltage_arm_leader.with_position(
                     target_position
