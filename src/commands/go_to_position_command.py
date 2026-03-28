@@ -27,8 +27,12 @@ class IntakePositionCommand(Command):
     def initialize(self):
         # current_speeds = self.drive_sub.get_speeds()
         # overall_velocity = (current_speeds.vx**2 + current_speeds.vy**2) ** 0.5
-        # if self.position == IntakePositions.HOME and self.auto:
-        self.intake_sub.go_to_position(self.position, 0)
+        if self.position == IntakePositions.HOME and self.auto:
+            self.intake_sub.go_to_position(self.position, 0)
+            #spin wheels
+            self.intake_sub.set_velocity(0)
+        else:
+            self.intake_sub.go_to_position(self.position, 0)
 
     def execute(self):
         if self.auto:
@@ -39,9 +43,9 @@ class IntakePositionCommand(Command):
                 current_speeds = self.drive_sub.get_speeds()
                 overall_velocity = (current_speeds.vx**2 + current_speeds.vy**2) ** 0.5
                 self.intake_sub.set_velocity(overall_velocity)
-            if self.position == IntakePositions.HOME:
-                self.intake_sub.stop()
-
+            if self.position == IntakePositions.HOME and self.auto:
+                self.intake_sub.set_velocity(0)
+                
     def isFinished(self):
         return False
 
