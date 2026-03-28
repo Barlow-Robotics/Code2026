@@ -35,6 +35,7 @@ class HP_Center_L1_standalone:
                     self.container.drivetrain,
                     self.container.intake,
                     IntakePositions.DEPLOYED,
+                    auto=True,
                 ).withTimeout(3),
             ),
             ParallelDeadlineGroup(
@@ -43,6 +44,7 @@ class HP_Center_L1_standalone:
                     self.container.drivetrain,
                     self.container.intake,
                     IntakePositions.HOME,
+                    auto=True,
                 ).withTimeout(3),
             ),
             ParallelDeadlineGroup(

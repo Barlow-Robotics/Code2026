@@ -39,6 +39,7 @@ class Depot_Side_Balls:
                     self.container.drivetrain,
                     self.container.intake,
                     IntakePositions.DEPLOYED,
+                    auto=True,
                 ).withTimeout(5),
             ),
             ParallelDeadlineGroup(
@@ -47,6 +48,7 @@ class Depot_Side_Balls:
                     self.container.drivetrain,
                     self.container.intake,
                     IntakePositions.HOME,
+                    auto=True,
                 ).withTimeout(3),
             ),
             ParallelDeadlineGroup(

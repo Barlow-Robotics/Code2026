@@ -33,9 +33,10 @@ class HP_Intake_Center_Pieces:
                 self.container.drivetrain,
                 self.container.intake,
                 IntakePositions.DEPLOYED,
+                auto=True,
             ).withTimeout(3)
             home_cmd = IntakePositionCommand(
-                self.container.drivetrain, self.container.intake, IntakePositions.HOME
+                self.container.drivetrain, self.container.intake, IntakePositions.HOME, auto=True
             ).withTimeout(3)
         else:
             deploy_cmd = cmd.none()
