@@ -20,10 +20,12 @@ class Shooter(Subsystem):
     def __init__(self):
         super().__init__()
         self._loop_timer = LoopTimer("Shooter")
-
-        SmartDashboard.putNumber(
-            "CustomFloatVelocity", ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT
-        )
+        if RobotFeatures.SmartDashboardTuning:
+            SmartDashboard.putNumber(
+                "CustomFloatVelocity", ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT
+            )
+        else:
+            self.CustomFloatVelocity = ShooterConstants.FLYWHEEL_VELOCITY_CONSTANT
 
         self.flywheel_motor_left_leader = SparkFlex(
             MotorIDs.motor_id_flywheel_right, type=SparkFlex.MotorType.kBrushless

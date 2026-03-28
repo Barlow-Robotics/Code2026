@@ -15,22 +15,38 @@ class Feeder(commands2.Subsystem):
     def __init__(self, init2=False):
         super().__init__()
         self._loop_timer = LoopTimer("Feeder")
-        if not init2:
+        self.kP_feeder = 0.1
+        self.kI_feeder = 0.0
+        self.kD_feeder = 0.0
+        self.kV_feeder = 0.118
+        self.kS_feeder = 0.0
+
+        if not init2 and RobotFeatures.SmartDashboardTuning:
             SmartDashboard.putNumber("kP_Feeder", 0.1)
             SmartDashboard.putNumber("kI_Feeder", 0.0)
             SmartDashboard.putNumber("kD_Feeder", 0.0)
             SmartDashboard.putNumber("kV_Feeder", 0.118)
             SmartDashboard.putNumber("kS_Feeder", 0.0)
-
-        FEEDER_CONFIG_CONSTANT = TalonConfigFXS(
-            kP=SmartDashboard.getNumber("kP_Feeder", 0.1),
-            kI=SmartDashboard.getNumber("kI_Feeder", 0.0),
-            kD=SmartDashboard.getNumber("kD_Feeder", 0.0),
-            kV=SmartDashboard.getNumber("kV_Feeder", 0.118),
-            kS=SmartDashboard.getNumber("kS_Feeder", 0.0),
-            current_limit=40,
-            brake_mode=False,
-        )
+        if RobotFeatures.SmartDashboardTuning:
+            FEEDER_CONFIG_CONSTANT = TalonConfigFXS(
+                kP=SmartDashboard.getNumber("kP_Feeder", 0.1),
+                kI=SmartDashboard.getNumber("kI_Feeder", 0.0),
+                kD=SmartDashboard.getNumber("kD_Feeder", 0.0),
+                kV=SmartDashboard.getNumber("kV_Feeder", 0.118),
+                kS=SmartDashboard.getNumber("kS_Feeder", 0.0),
+                current_limit=40,
+                brake_mode=False,
+            )
+        else:
+            FEEDER_CONFIG_CONSTANT = TalonConfigFXS(
+                kP=self.kP_feeder,
+                kI=self.kI_feeder,
+                kD=self.kD_feeder,
+                kV=self.kV_feeder,
+                kS=self.kS_feeder,
+                current_limit=40,
+                brake_mode=False,
+            )
         FEEDER_CONFIG_ALTERNATING = TalonConfigFXS(
             kP=0.1, kI=0, kD=0.00, kV=0.118, kS=0, current_limit=40, brake_mode=False
         )

@@ -71,8 +71,9 @@ class Robot(
         else:
             self._cprofile = None
         self._scheduler_timer = LoopTimer("Scheduler")
-        SmartDashboard.putNumber("hood_angle", 25)
-        SmartDashboard.putNumber("hood_angle_final", 0)
+        if RobotFeatures.TESTING and RobotFeatures.SmartDashboardTuning:
+            SmartDashboard.putNumber("hood_angle", 25)
+            SmartDashboard.putNumber("hood_angle_final", 0)
 
     def robotPeriodic(self) -> None:
         # self._time_and_joystick_replay.update()

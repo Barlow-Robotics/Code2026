@@ -18,6 +18,7 @@ class RobotFeatures:
     HAS_FEEDER = True
     HAS_CPROFILE = False
     LOW_LOGGING = False
+    SmartDashboardTuning = False
 
     @classmethod
     def configure(cls):
@@ -45,6 +46,7 @@ class RobotFeatures:
             cls.LOGGING_SPINDEX = False
             cls.LOGGING_FEEDER = False
             cls.LOW_LOGGING = True
+            cls.SmartDashboardTuning = False
         else:
             cls.HAS_DRIVETRAIN = True
             cls.vision_camera_count = 4
@@ -67,6 +69,7 @@ class RobotFeatures:
             cls.LOGGING_SPINDEX = False
             cls.LOGGING_FEEDER = False
             cls.LOW_LOGGING = True
+            cls.SmartDashboardTuning = True
 
 
 

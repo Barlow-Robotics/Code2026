@@ -69,26 +69,50 @@ class Intake(commands2.Subsystem):
         self.motor_roller: TalonFX = TalonFX(MotorIDs.motor_id_roller, "*")
         self.motor_arm_leader: TalonFX = TalonFX(MotorIDs.motor_id_arm_leader_left, "*")
         # self.motor_arm_follower: TalonFX = TalonFX(MotorIDs.motor_id_arm_follower_right, "*")
-        if not init2:
-            SmartDashboard.putNumber("kP_Roller", 0.0)
-            SmartDashboard.putNumber("kI_Roller", 0.0)
-            SmartDashboard.putNumber("kD_Roller", 0.0)
-            SmartDashboard.putNumber("kV_Roller", 0.06)
-            SmartDashboard.putNumber("kG_Roller", 0.00)
-            SmartDashboard.putNumber("kS_Roller", 0.00)
+        self.kP_roller = 0.01
+        self.kI_roller = 0.0
+        self.kD_roller = 0.0
+        self.kV_roller = 0.06
+        self.kG_roller = 0.00
+        self.kS_roller = 0.00
+        self.cruise_velocity_roller = 20
+        self.cruise_accl_roller = 600
+        self.kP_arm = 0.00
+        self.kI_arm = 0.0
+        self.kD_arm = 0.0
+        self.kV_arm = 0.59
+        self.kG_arm = -0.11
+        self.kS_arm = 0.00
+        self.cruise_accl_arm = 20
+        self.cruise_velocity_arm = 10
 
-            SmartDashboard.putNumber("kP_IntakeArm", 0.01)
-            SmartDashboard.putNumber("kI_IntakeArm", 0.0)
-            SmartDashboard.putNumber("kD_IntakeArm", 0.0)
-            SmartDashboard.putNumber("kV_IntakeArm", 0.59)
-            SmartDashboard.putNumber("kG_IntakeArm", -0.11)
-            SmartDashboard.putNumber("kS_IntakeArm", 0.00)
-            SmartDashboard.putNumber("arm_rot", 3.2)
-            SmartDashboard.putNumber("roller_speed", 22.0)
-            SmartDashboard.putNumber("cruise_velocity_arm", 10)
-            SmartDashboard.putNumber("cruise_accl_arm", 20)
-            SmartDashboard.putNumber("cruise_velocity_roller", 20)
-            SmartDashboard.putNumber("cruise_accl_roller", 600)
+        self.roller_speed = 22.0
+        self.arm_distance = 3.2
+
+
+
+        
+
+        if not init2 and RobotFeatures.SmartDashboardTuning:
+            SmartDashboard.putNumber("kP_Roller", self.kP_roller)
+            SmartDashboard.putNumber("kI_Roller", self.kI_roller)
+            SmartDashboard.putNumber("kD_Roller", self.kD_roller)
+            SmartDashboard.putNumber("kV_Roller", self.kV_roller)
+            SmartDashboard.putNumber("kG_Roller", self.kG_roller)
+            SmartDashboard.putNumber("kS_Roller", self.kS_roller)
+
+            SmartDashboard.putNumber("kP_IntakeArm", self.kP_arm)
+            SmartDashboard.putNumber("kI_IntakeArm", self.kI_arm)
+            SmartDashboard.putNumber("kD_IntakeArm", self.kD_arm)
+            SmartDashboard.putNumber("kV_IntakeArm", self.kV_arm)
+            SmartDashboard.putNumber("kG_IntakeArm", self.kG_arm)
+            SmartDashboard.putNumber("kS_IntakeArm", self.kS_arm)
+            SmartDashboard.putNumber("arm_rot", self.arm_distance)
+            SmartDashboard.putNumber("roller_speed", self.roller_speed)
+            SmartDashboard.putNumber("cruise_velocity_arm", self.cruise_velocity_arm)
+            SmartDashboard.putNumber("cruise_accl_arm", self.cruise_accl_arm)
+            SmartDashboard.putNumber("cruise_velocity_roller", self.cruise_velocity_roller)
+            SmartDashboard.putNumber("cruise_accl_roller", self.cruise_accl_roller)
 
         self.reinitMotors()
 
@@ -117,37 +141,63 @@ class Intake(commands2.Subsystem):
         )
 
     def reinitMotors(self):
-        INTAKE_ROLLER = TalonConfigFX(
-            kP=SmartDashboard.getNumber("kP_Roller", 0.0),
-            kI=SmartDashboard.getNumber("kI_Roller", 0.0),
-            kD=SmartDashboard.getNumber("kD_Roller", 0.0),
-            kV=SmartDashboard.getNumber("kV_Roller", 0.00),
-            kG=SmartDashboard.getNumber("kG_Roller", 0.00),
-            kS=SmartDashboard.getNumber("kS_Roller", 0.00),
-            brake_mode=False,
-            gear_ratio=IntakeConstants.ROLLER_GEARING,
-            motion_magic_cruise_velocity=SmartDashboard.getNumber(
-                "cruise_velocity_roller", 20
-            ),
-            motion_magic_acceleration=SmartDashboard.getNumber(
-                "cruise_accl_roller", 600
-            ),
-        )
+        if RobotFeatures.SmartDashboardTuning:
+            INTAKE_ROLLER = TalonConfigFX(
+                kP=SmartDashboard.getNumber("kP_Roller", 0.0),
+                kI=SmartDashboard.getNumber("kI_Roller", 0.0),
+                kD=SmartDashboard.getNumber("kD_Roller", 0.0),
+                kV=SmartDashboard.getNumber("kV_Roller", 0.00),
+                kG=SmartDashboard.getNumber("kG_Roller", 0.00),
+                kS=SmartDashboard.getNumber("kS_Roller", 0.00),
+                brake_mode=False,
+                gear_ratio=IntakeConstants.ROLLER_GEARING,
+                motion_magic_cruise_velocity=SmartDashboard.getNumber(
+                    "cruise_velocity_roller", 20
+                ),
+                motion_magic_acceleration=SmartDashboard.getNumber(
+                    "cruise_accl_roller", 600
+                ),
+            )
 
-        INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
-            kP=SmartDashboard.getNumber("kP_IntakeArm", 0.0),
-            kI=SmartDashboard.getNumber("kI_IntakeArm", 0.0),
-            kD=SmartDashboard.getNumber("kD_IntakeArm", 0.0),
-            kV=SmartDashboard.getNumber("kV_IntakeArm", 0.00),
-            kG=SmartDashboard.getNumber("kG_IntakeArm", 0.00),
-            kS=SmartDashboard.getNumber("kS_IntakeArm", 0.00),
-            brake_mode=True,
-            gear_ratio=IntakeConstants.ARM_GEARING,
-            motion_magic_cruise_velocity=SmartDashboard.getNumber(
-                "cruise_velocity_arm", 1
-            ),
-            motion_magic_acceleration=SmartDashboard.getNumber("cruise_accl_arm", 2),
-        )
+            INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
+                kP=SmartDashboard.getNumber("kP_IntakeArm", 0.0),
+                kI=SmartDashboard.getNumber("kI_IntakeArm", 0.0),
+                kD=SmartDashboard.getNumber("kD_IntakeArm", 0.0),
+                kV=SmartDashboard.getNumber("kV_IntakeArm", 0.00),
+                kG=SmartDashboard.getNumber("kG_IntakeArm", 0.00),
+                kS=SmartDashboard.getNumber("kS_IntakeArm", 0.00),
+                brake_mode=True,
+                gear_ratio=IntakeConstants.ARM_GEARING,
+                motion_magic_cruise_velocity=SmartDashboard.getNumber(
+                    "cruise_velocity_arm", 1
+                ),
+                motion_magic_acceleration=SmartDashboard.getNumber("cruise_accl_arm", 2),
+            )
+        else:
+            INTAKE_ROLLER = TalonConfigFX(
+                kP=self.kP_roller,
+                kI=self.kI_roller,
+                kD=self.kD_roller,
+                kV=self.kV_roller,
+                kG=self.kG_roller,
+                kS=self.kS_roller,
+                brake_mode=False,
+                gear_ratio=IntakeConstants.ROLLER_GEARING,
+                motion_magic_cruise_velocity=self.cruise_velocity_roller,
+                motion_magic_acceleration=self.cruise_accl_roller,
+            )
+            INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
+                kP=self.kP_arm,
+                kI=self.kI_arm,
+                kD=self.kD_arm,
+                kV=self.kV_arm,
+                kG=self.kG_arm,
+                kS=self.kS_arm,
+                brake_mode=True,
+                gear_ratio=IntakeConstants.ARM_GEARING,
+                motion_magic_cruise_velocity=self.cruise_velocity_arm,
+                motion_magic_acceleration=self.cruise_accl_arm,
+            )
 
         INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=False)
         INTAKE_CONFIG_ARM_RIGHT._apply_settings(self.motor_arm_leader, inverted=False)

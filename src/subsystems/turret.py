@@ -36,57 +36,41 @@ class Turret(Subsystem):
         self._loop_timer = LoopTimer("Turret")
         self.driveSub = driveSub
         self.actual_velocity_to_go = 15.5
-        if not init2:
+        if not init2 and RobotFeatures.SmartDashboardTuning:
             SmartDashboard.putNumber("kV", 1.8)
             SmartDashboard.putNumber("kD", 1.5)
             SmartDashboard.putNumber("kI", 0.0)
             SmartDashboard.putNumber("kP", 0.0)
             SmartDashboard.putNumber("kS", 0.43)
             SmartDashboard.putNumber("kG", 0.0)
-
-            SmartDashboard.putNumber("motion_magic_cruise_velocity", 0.0)
-
-        HOOD_MOTOR_CONFIG = TalonConfigFXS(
-            kP=SmartDashboard.getNumber("kP", 0.0),
-            kI=SmartDashboard.getNumber("kI", 0.0),
-            kD=SmartDashboard.getNumber("kD", 1.5),
-            kV=SmartDashboard.getNumber("kV", 1.8),
-            kS=SmartDashboard.getNumber("kS", 0.43),
-            kG=SmartDashboard.getNumber("kG", 0.0),
-            brake_mode=True,
-            # gear_ratio=TurretConstants.HOOD_GEARING,
-        )
-        if not RobotBase.isReal():
+        else:
+            self.kV = 1.8
+            self.kD = 1.5
+            self.kI = 0.0
+            self.kP = 0.0
+            self.kS = 0.43
+            self.kG = 0.0
+        
+        if RobotFeatures.SmartDashboardTuning:
             HOOD_MOTOR_CONFIG = TalonConfigFXS(
-                kP=10,
-                kI=0,
-                kD=6,
-                kV=0,
+                kP=SmartDashboard.getNumber("kP", 0.0),
+                kI=SmartDashboard.getNumber("kI", 0.0),
+                kD=SmartDashboard.getNumber("kD", 1.5),
+                kV=SmartDashboard.getNumber("kV", 1.8),
+                kS=SmartDashboard.getNumber("kS", 0.43),
+                kG=SmartDashboard.getNumber("kG", 0.0),
                 brake_mode=True,
-                # gear_ratio=TurretConstants.HOOD_GEARING,
-                motion_magic_cruise_velocity=0.1,
             )
-
-        # if not RobotBase.isReal():
-        #     TURRET_MOTOR_CONFIG = TalonConfigFXS(
-        #         kP=0.85,
-        #         kI=0,
-        #         kD=0.6,
-        #         kV=0,
-        #         brake_mode=True,
-        #         motion_magic_cruise_velocity=8,
-        #         motion_magic_acceleration=30,
-        #         gear_ratio=TurretConstants.TURRET_GEARING,
-        #     )
-        # else:
-        #     TURRET_MOTOR_CONFIG = TalonConfigFXS(
-        #         kP=0.2,
-        #         kI=0,
-        #         kD=0,
-        #         kV=0,
-        #         brake_mode=True,
-        #         gear_ratio=TurretConstants.TURRET_GEARING,
-        #     )
+        else:
+            HOOD_MOTOR_CONFIG = TalonConfigFXS(
+                kP=self.kP,
+                kI=self.kI,
+                kD=self.kD,
+                kV=self.kV,
+                kS=self.kS,
+                kG=self.kG,
+                brake_mode=True,
+            )
 
         self.hood_motor = TalonFXS(MotorIDs.motor_id_hood, "*")
         # self.turret_motor = TalonFX(MotorIDs.motor_id_turret, "*")
