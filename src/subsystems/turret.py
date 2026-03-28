@@ -526,12 +526,24 @@ class Turret(Subsystem):
                 target_pose = Hub.TOP_CENTER_POINT
             else:
                 pose = self.driveSub.get_pose()
-                target_pose = pose.nearest(
-                    [
-                        CustomPoints.TARGET_POSE_SHOOT,
-                        CustomPoints.TARGET_POSE_SHOOT_OTHER_SIDE,
-                    ]
-                )
+                if DriverStation.Alliance.kRed == DriverStation.getAlliance():
+                    target_pose = pose.nearest(
+                        [
+                            CustomPoints.TARGET_POSE_SHOOT_BLUE,
+                            CustomPoints.TARGET_POSE_SHOOT_BLUE_OTHER_SIDE,
+                        ]
+                    )
+                    if target_pose == CustomPoints.TARGET_POSE_SHOOT_BLUE:
+                        target_pose = CustomPoints.TARGET_POSE_SHOOT_BLUE_OTHER_SIDE
+                    else:
+                        target_pose = CustomPoints.TARGET_POSE_SHOOT_BLUE                    
+                else:
+                    target_pose = pose.nearest(
+                        [
+                            CustomPoints.TARGET_POSE_SHOOT_BLUE,
+                            CustomPoints.TARGET_POSE_SHOOT_BLUE_OTHER_SIDE,
+                        ]
+                    )
                 target_pose = Translation3d(target_pose.X(), target_pose.Y(), 0)
                 self.set_target_hood_and_turret(
                     shooting_location=target_pose, vision_on=vision_on

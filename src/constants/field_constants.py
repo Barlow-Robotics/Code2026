@@ -302,12 +302,21 @@ class Outpost:
 
 
 class CustomPoints:
-    TARGET_POSE_SHOOT = Pose2d(
+    TARGET_POSE_SHOOT_RED = Pose2d(
+        Translation3d(FIELD_LENGTH- 1, 7.460, 0.0).toTranslation2d(), Rotation2d(180)
+    )
+    TARGET_POSE_SHOOT_RED_OTHER_SIDE = Pose2d(
+        Translation3d(FIELD_LENGTH - 1, FIELD_WIDTH - 7.460, 0.0).toTranslation2d(), Rotation2d(180)
+    )
+
+    TARGET_POSE_SHOOT_BLUE = Pose2d(
         Translation3d(1, 7.460, 0.0).toTranslation2d(), Rotation2d(180)
     )
-    TARGET_POSE_SHOOT_OTHER_SIDE = Pose2d(
+
+    TARGET_POSE_SHOOT_BLUE_OTHER_SIDE = Pose2d(
         Translation3d(1, FIELD_WIDTH - 7.460, 0.0).toTranslation2d(), Rotation2d(180)
     )
+
     BLUE_DISABLED_VISION_POSE = Pose2d(
         1.7926054000854492, 4.008056640625, Rotation2d(0)
     )

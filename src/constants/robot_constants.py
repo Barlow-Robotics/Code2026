@@ -64,7 +64,7 @@ class RobotFeatures:
             cls.LOGGING_DRIVETRAIN = True
             cls.LOGGING_VISION = False
             cls.LOGGING_SHOOTER = False
-            cls.LOGGING_TURRET = False
+            cls.LOGGING_TURRET = True
             cls.LOGGING_INTAKE = False
             cls.LOGGING_SPINDEX = False
             cls.LOGGING_FEEDER = False
