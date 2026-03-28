@@ -8,6 +8,7 @@ from commands2 import cmd
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import RobotConfig
 from pathplannerlib.controller import PPHolonomicDriveController
+from commands.reverse_command_slow import ReverseCommandSlow
 from commands.shoot_command import ShootCommand
 from constants import TunerConstants, DriveConstants, AutoConstants, RobotFeatures
 from utils import SwerveTelemetry
@@ -208,6 +209,10 @@ class RobotContainer:
             self.shoot_command_factory = lambda: ShootCommand(
                 self.drivetrain, self.shooter, self.feeder, self.spindex, self.turret
             )
+            self.reverse_command_factory = lambda: ReverseCommandSlow(
+                    self.feeder,
+                    self.spindex,
+            ), 
         else:
             self.shoot_command_factory = lambda: cmd.none()
 

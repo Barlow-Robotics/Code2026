@@ -11,6 +11,7 @@ from phoenix6 import swerve
 from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
 from commands import IntakePositionCommand, ShootCommand, ReverseCommand
+from commands.reverse_command_slow import ReverseCommandSlow
 from commands.throw_feeder_command import ThrowFeederCommand
 from constants import DriveConstants, RobotFeatures
 from subsystems.intake import IntakePositions
@@ -94,20 +95,33 @@ class Controller:
         )
 
         if RobotFeatures.TESTING:
-            self._test_controller.leftBumper().onTrue(
-                cmd.runOnce(lambda: container.intake.set_velocity(0))
-            ).onFalse(cmd.runOnce(lambda: container.intake.stop()))
+            self._test_controller.button(1).whileTrue(ShootCommand(
+                        container.drivetrain,
+                        container.shooter,
+                        container.feeder,
+                        container.spindex,
+                        container.turret,
+                    )
+                ).whileFalse(
+                    ReverseCommandSlow(
+                        container.feeder,
+                        container.spindex,
+                    )
+                )
+            # self._test_controller.leftBumper().onTrue(
+            #     cmd.runOnce(lambda: container.intake.set_velocity(0))
+            # ).onFalse(cmd.runOnce(lambda: container.intake.stop()))
 
-            self._test_controller.rightTrigger().onTrue(
-                cmd.runOnce(
-                    lambda: container.intake.go_to_position(IntakePositions.DEPLOYED)
-                )
-            )
-            self._test_controller.leftTrigger().onTrue(
-                cmd.runOnce(
-                    lambda: container.intake.go_to_position(IntakePositions.HOME)
-                )
-            )
+            # self._test_controller.rightTrigger().onTrue(
+            #     cmd.runOnce(
+            #         lambda: container.intake.go_to_position(IntakePositions.DEPLOYED)
+            #     )
+            # )
+            # self._test_controller.leftTrigger().onTrue(
+            #     cmd.runOnce(
+            #         lambda: container.intake.go_to_position(IntakePositions.HOME)
+            #     )
+            # )
 
             # self._test_controller.y().onTrue(
             #     cmd.runOnce(lambda: container.feeder.move(9))
@@ -231,6 +245,11 @@ class Controller:
                         container.feeder,
                         container.spindex,
                         container.turret,
+                    )
+                ).whileFalse(
+                    ReverseCommandSlow(
+                        container.feeder,
+                        container.spindex,
                     )
                 )
                 controller.b().whileTrue(

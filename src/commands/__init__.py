@@ -13,3 +13,6 @@ from .throw_feeder_command import (
 from .reverse_command import (
     ReverseCommand as ReverseCommand,
 )
+from .reverse_command_slow import (
+    ReverseCommandSlow as ReverseCommandSlow,
+)
