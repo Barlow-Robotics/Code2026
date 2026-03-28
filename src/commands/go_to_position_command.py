@@ -1,5 +1,6 @@
 from commands2.command import Command
 import typing
+from constants.robot_constants import RobotFeatures
 from utils import IntakePositions
 
 if typing.TYPE_CHECKING:
@@ -26,7 +27,8 @@ class IntakePositionCommand(Command):
     def initialize(self):
         # current_speeds = self.drive_sub.get_speeds()
         # overall_velocity = (current_speeds.vx**2 + current_speeds.vy**2) ** 0.5
-        self.intake_sub.go_to_position(self.position, 0)
+        if self.position != IntakePositions.HOME or not self.auto:
+            self.intake_sub.go_to_position(self.position, 0)
 
     def execute(self):
         if self.auto:

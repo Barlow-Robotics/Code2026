@@ -111,7 +111,8 @@ class Turret(Subsystem):
         self.target_hood_angle = 0.0
         self.target_turret_yaw = 0.0
         self.turret_yaw_deg = 0.0
-        SmartDashboard.putNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", 0)
+        if RobotFeatures.SmartDashboardTuning:
+            SmartDashboard.putNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", 0)
         # Mechanism2d — top-down view: base = robot heading, turret = yaw, length = hood
         if RobotFeatures.LOGGING_ROBOT:
             self.mechanism = Mechanism2d(3, 3)

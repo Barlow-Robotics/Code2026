@@ -63,12 +63,9 @@ should these be tuned?
 auto_translation_pid = PIDConstants(4, 0.0, 0)
 auto_rotation_pid = PIDConstants(5.0, 0.0, 0.0)
 8. I would recommend an actual PID to the stop point’s pose so you can be cleaning up any residual path error during the shooting pause
-9. TEST shooting back to our side of the field. 
 10. Hood gittering at 0 
-11. Cut polycarbinate in front of cameras. 
-12. Fix camera out of focus. (need to bring other camera to comp.)
 13. Add vision onto other orin nano. 
-14. Figure out uv run frc deploypy/deploy.
+14. Figure out uv run frc debugpy/debug.
 
 
 

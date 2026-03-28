@@ -80,7 +80,7 @@ class Intake(commands2.Subsystem):
         self.kP_arm = 0.8
         self.kI_arm = 0.0
         self.kD_arm = 0.0
-        self.kV_arm = 0.592
+        self.kV_arm = 0.63
         self.kG_arm = -0.11
         self.kS_arm = 0.00
         self.cruise_accl_arm = 20
@@ -89,11 +89,14 @@ class Intake(commands2.Subsystem):
         self.roller_speed = 22.0
         self.arm_distance = 3.28
 
+        self.stator_current_limit_arm = 40
+        self.supply_current_limit_arm = 40
 
-
-        
 
         if not init2 and RobotFeatures.SmartDashboardTuning:
+            SmartDashboard.putNumber("stator_current_limit_arm", 40)
+            SmartDashboard.putNumber("supply_current_limit_arm", 40)
+
             SmartDashboard.putNumber("kP_Roller", self.kP_roller)
             SmartDashboard.putNumber("kI_Roller", self.kI_roller)
             SmartDashboard.putNumber("kD_Roller", self.kD_roller)
@@ -172,6 +175,9 @@ class Intake(commands2.Subsystem):
                     "cruise_velocity_arm", 1
                 ),
                 motion_magic_acceleration=SmartDashboard.getNumber("cruise_accl_arm", 2),
+                current_limit=SmartDashboard.getNumber("stator_current_limit_arm", 40),
+                supply_current_limit=SmartDashboard.getNumber("supply_current_limit_arm", 40),
+
             )
         else:
             INTAKE_ROLLER = TalonConfigFX(
@@ -197,6 +203,8 @@ class Intake(commands2.Subsystem):
                 gear_ratio=IntakeConstants.ARM_GEARING,
                 motion_magic_cruise_velocity=self.cruise_velocity_arm,
                 motion_magic_acceleration=self.cruise_accl_arm,
+                current_limit=self.stator_current_limit_arm,
+                supply_current_limit=self.supply_current_limit_arm,
             )
 
         INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=False)
@@ -321,8 +329,16 @@ class Intake(commands2.Subsystem):
 
         if RobotFeatures.LOGGING_INTAKE:
             PyKitLogger.recordOutput(
-                "Intake/Actual_Arm_Position",
-                float(self.motor_arm_leader.get_position().value),
+                "Intake/Stator_Current_Limit_Arm",
+                float(self.motor_arm_leader.get_stator_current().value),
+            )
+            PyKitLogger.recordOutput(
+                'Intake/Closed_Loop_Refrence_Arm',
+                float(self.motor_arm_leader.get_closed_loop_reference().value),
+            )
+            PyKitLogger.recordOutput(
+                'Intake/Closed_Loop_Refrence_Slope_Arm',
+                float(self.motor_arm_leader.get_closed_loop_reference_slope().value),
             )
             PyKitLogger.recordOutput(
                 "Intake/Target_Arm_State", self._target_position_name

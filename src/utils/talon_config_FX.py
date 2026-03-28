@@ -19,6 +19,7 @@ class TalonConfigFX:
         motion_magic_acceleration=600,
         motion_magic_jerk=6000,
         gear_ratio=1,
+        supply_current_limit=70,
     ):
         self.kP = kP
         self.kI = kI
@@ -28,6 +29,7 @@ class TalonConfigFX:
         self.kS = kS
         self.kG = kG
         self.current_limit = current_limit
+        self.supply_current_limit = supply_current_limit
         self.brake_mode = brake_mode
         self.output_range = output_range
         self.motion_magic_cruise_velocity = motion_magic_cruise_velocity
@@ -52,8 +54,12 @@ class TalonConfigFX:
         # current limits
         current_limits_config = talon_config.current_limits
         current_limits_config.stator_current_limit = self.current_limit
+        current_limits_config.supply_current_limit = self.supply_current_limit
         current_limits_config.stator_current_limit_enable = (
             True if self.current_limit > 0 else False
+        )
+        current_limits_config.supply_current_limit_enable = (
+            True if self.supply_current_limit > 0 else False
         )
 
         # brake mode

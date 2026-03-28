@@ -42,7 +42,7 @@ class Robot(
         #     SignalLogger.set_path("/home/lvuser/logs")
         # else:
         #     SignalLogger.set_path("logs")
-        self.useTiming = configure_pykit(type(self).__name__)
+        # self.useTiming = configure_pykit(type(self).__name__)
         # SignalLogger.start()
 
     def robotInit(self) -> None:
