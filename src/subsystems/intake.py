@@ -52,7 +52,7 @@ class Intake(commands2.Subsystem):
         self._stop_requested = False
         self._target_position_name = "NONE"
         self._target_position = IntakePositions.HOME
-        self.target_rot: float = -1.0
+        self.target_rot: float = 0.0
 
         # Mechanism2d
         if RobotFeatures.LOGGING_ROBOT:
@@ -90,8 +90,6 @@ class Intake(commands2.Subsystem):
             SmartDashboard.putNumber("cruise_velocity_roller", 20)
             SmartDashboard.putNumber("cruise_accl_roller", 600)
 
-
-
         self.reinitMotors()
 
         self._motion_magic_velocity_voltage_roller = (
@@ -128,8 +126,12 @@ class Intake(commands2.Subsystem):
             kS=SmartDashboard.getNumber("kS_Roller", 0.00),
             brake_mode=False,
             gear_ratio=IntakeConstants.ROLLER_GEARING,
-            motion_magic_cruise_velocity=SmartDashboard.getNumber("cruise_velocity_roller", 20),
-            motion_magic_acceleration=SmartDashboard.getNumber("cruise_accl_roller", 600),
+            motion_magic_cruise_velocity=SmartDashboard.getNumber(
+                "cruise_velocity_roller", 20
+            ),
+            motion_magic_acceleration=SmartDashboard.getNumber(
+                "cruise_accl_roller", 600
+            ),
         )
 
         INTAKE_CONFIG_ARM_RIGHT = TalonConfigFX(
@@ -141,7 +143,9 @@ class Intake(commands2.Subsystem):
             kS=SmartDashboard.getNumber("kS_IntakeArm", 0.00),
             brake_mode=True,
             gear_ratio=IntakeConstants.ARM_GEARING,
-            motion_magic_cruise_velocity=SmartDashboard.getNumber("cruise_velocity_arm", 1),
+            motion_magic_cruise_velocity=SmartDashboard.getNumber(
+                "cruise_velocity_arm", 1
+            ),
             motion_magic_acceleration=SmartDashboard.getNumber("cruise_accl_arm", 2),
         )
 
@@ -203,7 +207,9 @@ class Intake(commands2.Subsystem):
         if position == IntakePositions.HOME:
             target_position = 0
             self.motor_arm_leader.set_control(
-                self._motion_magic_position_voltage_arm_leader.with_position(target_position)
+                self._motion_magic_position_voltage_arm_leader.with_position(
+                    target_position
+                )
             )
         else:
             target_position = SmartDashboard.getNumber("arm_rot", 4.0)
@@ -241,7 +247,7 @@ class Intake(commands2.Subsystem):
         if not RobotBase.isReal() and RobotFeatures.LOGGING_ROBOT:
             arm_degrees = self.motor_arm_leader.get_position().value * 360
             self.arm_ligament.setAngle(75 + arm_degrees)
-        if RobotFeatures.LOGGING_INTAKE:
+        if RobotFeatures.LOW_LOGGING:
             PyKitLogger.recordOutput(
                 "Intake/Actual_Arm_Position",
                 float(self.motor_arm_leader.get_position().value),
@@ -256,6 +262,8 @@ class Intake(commands2.Subsystem):
             PyKitLogger.recordOutput(
                 "Intake/Target_Roller_Velocity", float(self.target_velocity)
             )
+
+        if RobotFeatures.LOGGING_INTAKE:
             PyKitLogger.recordOutput(
                 "Intake/Actual_Arm_Position",
                 float(self.motor_arm_leader.get_position().value),

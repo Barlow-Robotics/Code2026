@@ -17,6 +17,7 @@ class RobotFeatures:
     HAS_SPINDEX = True
     HAS_FEEDER = True
     HAS_CPROFILE = False
+    LOW_LOGGING = False
 
     @classmethod
     def configure(cls):
@@ -32,7 +33,7 @@ class RobotFeatures:
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
             cls.HAS_CPROFILE = False
-            cls.TESTING = True
+            cls.TESTING = False
             cls.HAS_TURRET_ANGLE = False
             cls.LOGGING = False
             cls.LOGGING_ROBOT = False
@@ -40,9 +41,10 @@ class RobotFeatures:
             cls.LOGGING_VISION = False
             cls.LOGGING_SHOOTER = False
             cls.LOGGING_TURRET = False
-            cls.LOGGING_INTAKE = True
+            cls.LOGGING_INTAKE = False
             cls.LOGGING_SPINDEX = False
             cls.LOGGING_FEEDER = False
+            cls.LOW_LOGGING = True
         else:
             cls.HAS_DRIVETRAIN = True
             cls.vision_camera_count = 4
@@ -61,9 +63,11 @@ class RobotFeatures:
             cls.LOGGING_VISION = False
             cls.LOGGING_SHOOTER = False
             cls.LOGGING_TURRET = False
-            cls.LOGGING_INTAKE = True
+            cls.LOGGING_INTAKE = False
             cls.LOGGING_SPINDEX = False
             cls.LOGGING_FEEDER = False
+            cls.LOW_LOGGING = True
+
 
 
 class MotorIDs:
@@ -100,7 +104,7 @@ class IntakeConstants:
     )  # BW: REAL CIRCUMFRENCE IS 2IN * PI
 
     ARM_MOTOR = DCMotor.krakenX44(1)
-    ARM_GEARING = 58 / 14 
+    ARM_GEARING = 58 / 14
     ARM_MOI = 0.01
     ARM_HOME_ROTATIONS = 0
     ARM_DEPLOYED_LENGTH_IN = 4

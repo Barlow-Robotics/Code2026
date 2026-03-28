@@ -17,6 +17,8 @@ from wpilib import RobotBase
 
 from pykit.logger import Logger as PyKitLogger
 
+from constants.robot_constants import RobotFeatures
+
 
 class LoopTimer:
     """Allocation-free statistical timer for one named section.
@@ -62,10 +64,14 @@ class LoopTimer:
             else:
                 avg_ms = 0.0
                 max_ms = 0.0
-
-            PyKitLogger.recordOutput(f"{self._prefix}/avg_ms", avg_ms)
-            PyKitLogger.recordOutput(f"{self._prefix}/max_ms", max_ms)
-            PyKitLogger.recordOutput(f"{self._prefix}/count", float(self._count))
+            if self._prefix == 'Profiling/Scheduler' and RobotFeatures.LOW_LOGGING:
+                PyKitLogger.recordOutput(f"{self._prefix}/avg_ms", avg_ms)
+                # PyKitLogger.recordOutput(f"{self._prefix}/max_ms", max_ms)
+                # PyKitLogger.recordOutput(f"{self._prefix}/count", float(self._count))
+            # elif not RobotFeatures.LOW_LOGGING:
+            #     PyKitLogger.recordOutput(f"{self._prefix}/avg_ms", avg_ms)
+            #     PyKitLogger.recordOutput(f"{self._prefix}/max_ms", max_ms)
+            #     PyKitLogger.recordOutput(f"{self._prefix}/count", float(self._count))
 
             self._sum_us = 0.0
             self._max_us = 0.0

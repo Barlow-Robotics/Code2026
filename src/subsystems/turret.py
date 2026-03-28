@@ -126,7 +126,7 @@ class Turret(Subsystem):
 
         self.target_hood_angle = 0.0
         self.target_turret_yaw = 0.0
-        self.turret_yaw_deg = Rotation2d(0)
+        self.turret_yaw_deg = 0.0
         SmartDashboard.putNumber("Turret/SHOOTER_SET_VELOCITY_CONSTANT", 0)
         # Mechanism2d — top-down view: base = robot heading, turret = yaw, length = hood
         if RobotFeatures.LOGGING_ROBOT:
@@ -215,7 +215,7 @@ class Turret(Subsystem):
     def set_target_hood_and_turret(
         self, shooting_location=Hub.TOP_CENTER_POINT, vision_on=True
     ):
-        self.turret_yaw_deg = Rotation2d(0)
+        self.turret_yaw_deg = 0.0
         v_fixed, hood_angle_deg, turret_yaw_deg, changeState = self._optimal_angle_calc(
             TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location, vision_on
         )
@@ -225,7 +225,7 @@ class Turret(Subsystem):
         else:
             pass
         self.turret_yaw_deg = turret_yaw_deg
-        print(v_fixed, hood_angle_deg, self.turret_yaw_deg)
+        # print(v_fixed, hood_angle_deg, self.turret_yaw_deg)
         # if hood_angle_deg > 80:
         #     hood_angle_deg = 80
         # elif hood_angle_deg < -80:
@@ -243,14 +243,11 @@ class Turret(Subsystem):
         # actual_turret_yaw = (
         #     float(self.turret_motor.get_position().value) * SI.rotations_to_degrees
         # )
-        actual_hood_angle = (
-            float(self.hood_motor.get_position().value) * SI.rotations_to_degrees
-        )
-        PyKitLogger.recordOutput(
-            "Turret/actual_hood_angle_cancoder",
-            self.get_actual_hood_angle_cancoder(),
-        )
-        if self.turret_yaw_deg != Rotation2d(0):
+        if RobotFeatures.LOW_LOGGING:
+            PyKitLogger.recordOutput(
+                "Turret/actual_hood_angle_cancoder",
+                self.get_actual_hood_angle_cancoder(),
+            )
             PyKitLogger.recordOutput(
                 "Turret/turret_yaw_deg", float(self.turret_yaw_deg)
             )
@@ -260,6 +257,9 @@ class Turret(Subsystem):
             robot_pose = self.driveSub.get_pose()
             if robot_pose is not None:
                 self.base_ligament.setAngle(robot_pose.rotation().degrees())
+            actual_hood_angle = (
+                float(self.hood_motor.get_position().value) * SI.rotations_to_degrees
+            )
             # self.turret_ligament.setAngle(actual_turret_yaw)
             # Hood angle controls turret length — 0° = min length, 90° = max length
             hood_fraction = max(0, min(actual_hood_angle, 90)) / 90.0
@@ -553,13 +553,14 @@ class Turret(Subsystem):
                     shooting_location=target_pose, vision_on=vision_on
                 )
 
-            if self.turret_yaw_deg == Rotation2d(0):
+            if self.turret_yaw_deg == 0.0:
                 self.driveSub.changeAngTelop = False
             self.driveSub.changeAngTelop = enable
-            PyKitLogger.recordOutput(
-                "Turret/target_pose",
-                Pose2d(target_pose.toTranslation2d(), Rotation2d(0)),
-            )
+            if RobotFeatures.LOGGING_TURRET:
+                PyKitLogger.recordOutput(
+                    "Turret/target_pose",
+                    Pose2d(target_pose.toTranslation2d(), Rotation2d(0)),
+                )
         else:
             self.reset_target_hood_and_turret()
             self.driveSub.changeAngTelop = enable

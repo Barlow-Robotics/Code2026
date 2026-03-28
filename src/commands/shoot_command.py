@@ -60,4 +60,3 @@ class ShootCommand(Command):
         self.spindex.stop()
         if RobotState.isAutonomous():
             self.turret.reset_target_hood_and_turret()
-

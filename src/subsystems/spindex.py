@@ -38,7 +38,7 @@ class Spindex(commands2.Subsystem):
             self, self.motor_spindex, name="Spindex"
         )
 
-    def move(self, velocity: float = 1):
+    def move(self, velocity: float = 1.0):
         """
         Args:
             velocity (float): rotations per second. Defaults to 1.
@@ -51,7 +51,7 @@ class Spindex(commands2.Subsystem):
         )
 
     def stop(self):
-        self.target_velocity_spindex = 0
+        self.target_velocity_spindex = 0.0
         self.motor_spindex.set_control(
             self._motion_magic_velocity_voltage.with_velocity(0).with_acceleration(0.1)
         )
@@ -62,11 +62,13 @@ class Spindex(commands2.Subsystem):
         self._loop_timer.stop()
 
     def log_motor(self, motor: TalonFX, prefix: str, target_velocity: float):
-        if RobotFeatures.LOGGING_SPINDEX:
-            PyKitLogger.recordOutput(f"{prefix}/target_velocity", target_velocity)
+        if RobotFeatures.LOW_LOGGING:
+            PyKitLogger.recordOutput(f"{prefix}/target_RPS", float(target_velocity))
             PyKitLogger.recordOutput(
-                f"{prefix}/current_velocity", float(motor.get_velocity().value)
+                f"{prefix}/current_RPS", float(motor.get_velocity().value)
             )
+
+        if RobotFeatures.LOGGING_SPINDEX:
             PyKitLogger.recordOutput(
                 f"{prefix}/current_supply_current",
                 float(motor.get_supply_current().value),

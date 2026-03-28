@@ -186,7 +186,7 @@ class Controller:
                 ).whileFalse(cmd.runOnce(lambda: container.intake.stop()))
 
                 controller.leftTrigger().whileTrue(
-                    cmd.runOnce(lambda: container.intake.set_velocity(-1))
+                    cmd.runOnce(lambda: container.intake.reverse_velocity(-1))
                 ).whileFalse(cmd.runOnce(lambda: container.intake.stop()))
 
         for controller in [self._driver]:

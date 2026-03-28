@@ -112,6 +112,7 @@ class RobotContainer:
     def reinitialize_subsystems(self):
         # from subsystems import Intake
         self.intake.reinitMotors()
+        # pass
         # if RobotFeatures.HAS_VISION:
         #     self.vision = Vision(drive_sub=self.drivetrain)
         # if RobotFeatures.HAS_SHOOTER:

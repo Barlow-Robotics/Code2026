@@ -60,7 +60,7 @@ def configure_pykit(robot_name: str):
                 )
             PyKitLogger.addDataReciever(NT4Publisher(True))
             PyKitLogger.addDataReciever(
-                WPILOGWriter(f"/home/lvuser/logs2/{ddatetime_obj}/sim.wpilog")
+                WPILOGWriter(f"/u/{ddatetime_obj}/real.wpilog")
             )
         case RobotModes.SIMULATION:
             PyKitLogger.addDataReciever(

@@ -57,8 +57,8 @@ class Feeder(commands2.Subsystem):
             0, enable_foc=MotorIDs.foc_active
         )
 
-        self.target_velocity_feeder_constant = -1.0
-        self.target_velocity_feeder_alternating = -1.0
+        self.target_velocity_feeder_constant = 0.0
+        self.target_velocity_feeder_alternating = 0.0
 
         self.sys_id_routine_feeder_constant = generateSysIdProfile(
             self, self.motor_feeder_constant, name="Feeder_Constant"
@@ -73,9 +73,9 @@ class Feeder(commands2.Subsystem):
             velocity (float): rotations per second. Defaults to 1.
             invert (bool): if True, reverses the alternating motor.
         """
+        velocity = 31.25 * 2  # rotations/sec
         self.target_velocity_feeder_constant = velocity
         self.target_velocity_feeder_alternating = velocity
-        velocity = 31.25 * 2  # rotations/sec
         self.motor_feeder_constant.set_control(
             self._velocity_voltage.with_velocity(velocity)
         )
@@ -110,17 +110,14 @@ class Feeder(commands2.Subsystem):
         self._loop_timer.stop()
 
     def log_motor(self, motor: TalonFXS, prefix: str, target_velocity: float):
-        if RobotFeatures.LOGGING_FEEDER:
+        if RobotFeatures.LOW_LOGGING:
             PyKitLogger.recordOutput(
-                f"{prefix}/target_velocity", float(target_velocity)
+                f"{prefix}/target_RPS", float(target_velocity)
             )
             PyKitLogger.recordOutput(
                 f"{prefix}/current_RPS", float(motor.get_velocity().value)
             )
-            PyKitLogger.recordOutput(
-                f"{prefix}/current_RPM", float(motor.get_velocity().value * 60)
-            )
-
+        if RobotFeatures.LOGGING_FEEDER:
             PyKitLogger.recordOutput(
                 f"{prefix}/current_supply_current",
                 float(motor.get_supply_current().value),
