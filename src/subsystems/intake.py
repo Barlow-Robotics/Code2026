@@ -7,7 +7,7 @@ from commands2.sysid import SysIdRoutine
 from phoenix6 import controls
 from phoenix6.hardware import TalonFX
 import wpilib
-from wpilib import RobotBase, Mechanism2d, Color8Bit, SmartDashboard
+from wpilib import DriverStation, RobotBase, Mechanism2d, Color8Bit, SmartDashboard
 from pykit.logger import Logger as PyKitLogger
 
 from constants.robot_constants import RobotFeatures
@@ -211,12 +211,14 @@ class Intake(commands2.Subsystem):
         INTAKE_CONFIG_ARM_RIGHT._apply_settings(self.motor_arm_leader, inverted=False)
 
     def set_velocity(self, current_velocity: float):
-        if current_velocity < 1:
+        if DriverStation.isAutonomous():
+            current_velocity = 2
+        else:
             current_velocity = 1
         if RobotFeatures.SmartDashboardTuning:
             commanded_velocity = SmartDashboard.getNumber("roller_speed", self.roller_speed)
         else:
-            commanded_velocity = self.roller_speed
+            commanded_velocity = self.roller_speed * current_velocity
         self._commanded_velocity_ft_per_sec = float(commanded_velocity)
         self._stop_requested = False
 
@@ -228,7 +230,7 @@ class Intake(commands2.Subsystem):
                 commanded_velocity
             ).with_acceleration(0.1)
         )
-        self.target_velocity = commanded_velocity
+        self.target_velocity = commanded_velocity 
 
     def reverse_velocity(self, current_velocity: float):
         if current_velocity < 1:
