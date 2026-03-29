@@ -105,6 +105,17 @@ class Feeder(commands2.Subsystem):
                 self._velocity_voltage.with_velocity(velocity)
             )
 
+    def reverse(self, velocity=62.5):
+        self.motor_feeder_constant.set_control(
+            self._velocity_voltage.with_velocity(-velocity)
+        )
+        self.motor_feeder_alternating.set_control(
+            self._velocity_voltage.with_velocity(-velocity)
+        )
+        self.target_velocity_feeder_alternating = -velocity
+        self.target_velocity_feeder_constant = -velocity
+
+
     def stop(self):
         self.target_velocity_feeder_constant = 0.0
         self.target_velocity_feeder_alternating = 0.0
