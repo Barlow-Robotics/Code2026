@@ -322,7 +322,8 @@ class Turret(Subsystem):
         dx = hub_pose.X() - robot_pose.X()
         dy = hub_pose.Y() - robot_pose.Y()
         distance = math.sqrt(dx * dx + dy * dy)
-        PyKitLogger.recordOutput("Turret/initial_distance_to_hub", float(distance))
+        if RobotFeatures.LOGGING_TURRET:
+            PyKitLogger.recordOutput("Turret/initial_distance_to_hub", float(distance))
 
         VELOCITY_SLOPE = 2.0
         VELOCITY_INTERCEPT = 10.0

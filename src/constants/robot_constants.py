@@ -57,11 +57,11 @@ class RobotFeatures:
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
             cls.HAS_CPROFILE = False
-            cls.TESTING = True
+            cls.TESTING = False
             cls.HAS_TURRET_ANGLE = False
-            cls.LOGGING = True
-            cls.LOGGING_ROBOT = True
-            cls.LOGGING_DRIVETRAIN = True
+            cls.LOGGING = False
+            cls.LOGGING_ROBOT = False
+            cls.LOGGING_DRIVETRAIN = False
             cls.LOGGING_VISION = False
             cls.LOGGING_SHOOTER = False
             cls.LOGGING_TURRET = True
@@ -69,7 +69,7 @@ class RobotFeatures:
             cls.LOGGING_SPINDEX = False
             cls.LOGGING_FEEDER = False
             cls.LOW_LOGGING = True
-            cls.SmartDashboardTuning = True
+            cls.SmartDashboardTuning = False
 
 
 

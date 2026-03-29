@@ -36,8 +36,8 @@ class ReverseCommand(Command):
 
     def execute(self):
         # self.shooter.set_velocity(-self.target_velocity)
-        self.feeder.move(-9 * 3)
-        self.spindex.move(-9)
+        self.feeder.reverse(9)
+        self.spindex.move(-9 *3 )
         # current_speeds = self.driveSub.get_speeds()
         # overall_velocity = (current_speeds.vx**2 + current_speeds.vy**2) ** 0.5
         # self.intake.reverse_velocity(overall_velocity)
