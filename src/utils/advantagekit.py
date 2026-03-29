@@ -59,9 +59,9 @@ def configure_pykit(robot_name: str):
                     "Git Description", deploy_config.get("git-desc", "")
                 )
             PyKitLogger.addDataReciever(NT4Publisher(True))
-            # PyKitLogger.addDataReciever(
-            #     WPILOGWriter(f"/u/{ddatetime_obj}/real.wpilog")
-            # )
+            PyKitLogger.addDataReciever(
+                WPILOGWriter(f"/u/{ddatetime_obj}/real.wpilog")
+            )
         case RobotModes.SIMULATION:
             PyKitLogger.addDataReciever(
                 WPILOGWriter(f"logs/{ddatetime_obj}/sim.wpilog")

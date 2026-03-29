@@ -234,7 +234,7 @@ class Intake(commands2.Subsystem):
         if current_velocity < 1:
             current_velocity = 1
         if RobotFeatures.SmartDashboardTuning:
-            commanded_velocity = SmartDashboard.getNumber("roller_speed", self.roller_speed)
+            commanded_velocity = SmartDashboard.getNumber("roller_speed", self.roller_speed * 2.5)
         else:
             commanded_velocity = self.roller_speed * 2.5
         self._commanded_velocity_ft_per_sec = float(commanded_velocity)
