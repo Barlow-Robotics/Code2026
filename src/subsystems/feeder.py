@@ -92,15 +92,18 @@ class Feeder(commands2.Subsystem):
         velocity = 31.25 * 2  # rotations/sec
         self.target_velocity_feeder_constant = velocity
         self.target_velocity_feeder_alternating = velocity
-        self.motor_feeder_constant.set_control(
-            self._velocity_voltage.with_velocity(velocity)
-        )
         if invert:
             self.target_velocity_feeder_alternating = -velocity
+            self.motor_feeder_constant.set_control(
+                self._velocity_voltage.with_velocity(velocity * 4)
+            )
             self.motor_feeder_alternating.set_control(
                 self._velocity_voltage.with_velocity(-velocity * 4)
             )
         else:
+            self.motor_feeder_constant.set_control(
+                self._velocity_voltage.with_velocity(velocity)
+            )
             self.motor_feeder_alternating.set_control(
                 self._velocity_voltage.with_velocity(velocity)
             )
