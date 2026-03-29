@@ -78,6 +78,13 @@ class Controller:
             )
         )
 
+        container.feeder.setDefaultCommand(
+            ReverseCommandSlow(
+                container.feeder,
+                container.spindex,
+            )
+        )
+
         for controller in [self._driver]:
             controller.rightBumper().onTrue(
                 cmd.runOnce(lambda: self.update_driver(sub=False))
@@ -245,11 +252,6 @@ class Controller:
                         container.feeder,
                         container.spindex,
                         container.turret,
-                    )
-                ).whileFalse(
-                    ReverseCommandSlow(
-                        container.feeder,
-                        container.spindex,
                     )
                 )
                 controller.b().whileTrue(
