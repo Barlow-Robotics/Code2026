@@ -123,6 +123,11 @@ class Robot(
             self._cprofile.enable()
 
         self.container.turret.set_angle_hood(0)
+        self.container.intake.stop()
+        self.container.feeder.stop()
+        self.container.shooter.stop_flywheel()
+        self.container.spindex.stop()
+
         # This makes sure that the autonomous stops running when
         # teleop starts running. If you want the autonomous to
         # continue until interrupted by another command, remove

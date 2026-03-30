@@ -5,7 +5,7 @@ from constants import ShooterConstants
 from subsystems.drivetrain import Drivetrain
 
 if TYPE_CHECKING:
-    from subsystems import Spindex, Turret, Feeder, Shooter
+    from subsystems import Spindex, Turret, Feeder, Shooter, Intake
 
 
 class ShootCommand(Command):
@@ -16,6 +16,7 @@ class ShootCommand(Command):
         feeder: "Feeder",
         spindex: "Spindex",
         turret: "Turret",
+        intake: "Intake"
     ):
         super().__init__()
         self.driveSub = driveSub
@@ -23,6 +24,7 @@ class ShootCommand(Command):
         self.feeder = feeder
         self.spindex = spindex
         self.turret = turret
+        self.intake = intake
         self._feeding = False
         self.addRequirements(self.shooter, self.feeder, self.spindex)
 
@@ -49,6 +51,7 @@ class ShootCommand(Command):
         ):
             self.feeder.move(9)
             self.spindex.move(9 * 3)
+            self.intake.set_velocity(1)
             self._feeding = True
 
     def isFinished(self):
@@ -58,5 +61,6 @@ class ShootCommand(Command):
         self.shooter.stop_flywheel()
         self.feeder.stop()
         self.spindex.stop()
+        self.intake.stop()
         if RobotState.isAutonomous():
             self.turret.reset_target_hood_and_turret()

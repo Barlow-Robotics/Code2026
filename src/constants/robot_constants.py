@@ -34,9 +34,9 @@ class RobotFeatures:
             cls.HAS_SPINDEX = True
             cls.HAS_FEEDER = True
             cls.HAS_CPROFILE = False
-            cls.TESTING = False
+            cls.TESTING = True
             cls.HAS_TURRET_ANGLE = False
-            cls.LOGGING = False
+            cls.LOGGING = True
             cls.LOGGING_ROBOT = False
             cls.LOGGING_DRIVETRAIN = False
             cls.LOGGING_VISION = False
@@ -46,7 +46,7 @@ class RobotFeatures:
             cls.LOGGING_SPINDEX = False
             cls.LOGGING_FEEDER = False
             cls.LOW_LOGGING = True
-            cls.SmartDashboardTuning = False
+            cls.SmartDashboardTuning = True
         else:
             cls.HAS_DRIVETRAIN = True
             cls.vision_camera_count = 4
@@ -60,7 +60,7 @@ class RobotFeatures:
             cls.TESTING = False
             cls.HAS_TURRET_ANGLE = False
             cls.LOGGING = False
-            cls.LOGGING_ROBOT = False
+            cls.LOGGING_ROBOT = True
             cls.LOGGING_DRIVETRAIN = False
             cls.LOGGING_VISION = False
             cls.LOGGING_SHOOTER = False
@@ -147,7 +147,7 @@ class TurretConstants:
 
 class SpindexConstants:
     MOTOR = DCMotor.krakenX44(1)
-    GEARING = 42 / 24
+    GEARING = 24 / 42
     MOI = 0.005  # TODO: calculate from mechanism mass/geometry (kg*m^2)
 
     PID = {"kP": 0.11, "kI": 0, "kD": 0, "kF": 0, "kA": 0}  # TODO: tune PID

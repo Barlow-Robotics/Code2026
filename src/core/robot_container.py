@@ -112,6 +112,7 @@ class RobotContainer:
     def reinitialize_subsystems(self):
         # from subsystems import Intake
         self.intake.reinitMotors()
+        self.spindex.initMotors()
         # pass
         # if RobotFeatures.HAS_VISION:
         #     self.vision = Vision(drive_sub=self.drivetrain)
@@ -206,7 +207,7 @@ class RobotContainer:
             and RobotFeatures.HAS_SPINDEX
         ):
             self.shoot_command_factory = lambda: ShootCommand(
-                self.drivetrain, self.shooter, self.feeder, self.spindex, self.turret
+                self.drivetrain, self.shooter, self.feeder, self.spindex, self.turret, self.intake
             )
         else:
             self.shoot_command_factory = lambda: cmd.none()

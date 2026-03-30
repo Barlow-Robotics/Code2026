@@ -1,6 +1,7 @@
 from phoenix6.hardware import TalonFX
 from phoenix6 import controls
 import commands2
+from wpilib import SmartDashboard
 from constants.robot_constants import RobotFeatures
 from utils import TalonConfigFX
 from constants import MotorIDs
@@ -15,22 +16,23 @@ class Spindex(commands2.Subsystem):
     def __init__(self):
         super().__init__()
         self._loop_timer = LoopTimer("Spindex")
-        SPINDEX_CONFIG = TalonConfigFX(
-            kP=0.16,
-            kI=0,
-            kD=0,
-            kV=0.16,
-            brake_mode=True,
-            gear_ratio=SpindexConstants.GEARING,
-        )
+        self.kP_spindex = 0.4
+        self.kI_spindex = 0
+        self.kD_spindex = 0.0005
+        self.kV_spindex = 0.3
+        SmartDashboard.putNumber("Spindex kP", self.kP_spindex)
+        SmartDashboard.putNumber("Spindex kI", self.kI_spindex)
+        SmartDashboard.putNumber("Spindex kD", self.kD_spindex)
+        SmartDashboard.putNumber("Spindex kV", self.kV_spindex)
+        self.motor_spindex: TalonFX = TalonFX(MotorIDs.motor_id_motor_spindex, "*")
+        
+        self.initMotors()        
+
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
             0, enable_foc=MotorIDs.foc_active
         )
 
-        self.motor_spindex: TalonFX = TalonFX(MotorIDs.motor_id_motor_spindex, "*")
-
-        SPINDEX_CONFIG._apply_settings(self.motor_spindex, inverted=True)
 
         self.target_velocity_spindex = -1.0
 
@@ -55,6 +57,25 @@ class Spindex(commands2.Subsystem):
         self.motor_spindex.set_control(
             self._motion_magic_velocity_voltage.with_velocity(0).with_acceleration(0.1)
         )
+
+
+    def initMotors(self):
+        if RobotFeatures.SmartDashboardTuning:
+            self.kP_spindex = SmartDashboard.getNumber("Spindex kP", 0.16)
+            self.kI_spindex = SmartDashboard.getNumber("Spindex kI", 0)
+            self.kD_spindex = SmartDashboard.getNumber("Spindex kD", 0)
+            self.kV_spindex = SmartDashboard.getNumber("Spindex kV", 0.16)
+
+
+        SPINDEX_CONFIG = TalonConfigFX(
+            kP=self.kP_spindex,
+            kI=self.kI_spindex,
+            kD=self.kD_spindex,
+            kV=self.kV_spindex,
+            brake_mode=True,
+            gear_ratio=SpindexConstants.GEARING,
+        )
+        SPINDEX_CONFIG._apply_settings(self.motor_spindex, inverted=True)
 
     def periodic(self):
         self._loop_timer.start()
