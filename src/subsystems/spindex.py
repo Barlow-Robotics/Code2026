@@ -16,9 +16,9 @@ class Spindex(commands2.Subsystem):
     def __init__(self):
         super().__init__()
         self._loop_timer = LoopTimer("Spindex")
-        self.kP_spindex = 0.4
+        self.kP_spindex = 0.35
         self.kI_spindex = 0
-        self.kD_spindex = 0.0005
+        self.kD_spindex = 0.0000
         self.kV_spindex = 0.3
         SmartDashboard.putNumber("Spindex kP", self.kP_spindex)
         SmartDashboard.putNumber("Spindex kI", self.kI_spindex)
