@@ -43,6 +43,14 @@ class Turret(Subsystem):
             SmartDashboard.putNumber("kP", 0.0)
             SmartDashboard.putNumber("kS", 0.43)
             SmartDashboard.putNumber("kG", 0.0)
+            SmartDashboard.putNumber("Turret/VELOCITY_SLOPE", 2.0)
+            SmartDashboard.putNumber("Turret/VELOCITY_INTERCEPT", 10.0)
+            SmartDashboard.putNumber("Turret/VELOCITY_MIN", 12.0)
+            SmartDashboard.putNumber("Turret/VELOCITY_DISTANCE_THRESHOLD", 2.6)
+
+
+
+
         else:
             self.kV = 1.8
             self.kD = 1.5
@@ -204,8 +212,8 @@ class Turret(Subsystem):
         v_fixed, hood_angle_deg, turret_yaw_deg, changeState = self._optimal_angle_calc(
             TurretConstants.SHOOTER_SET_VELOCITY_CONSTANT, shooting_location, vision_on
         )
-        # print(v_fixed, hood_angle_deg, self.turret_yaw_deg)
-        if v_fixed < 0:
+        # print()
+        if v_fixed < 0 or hood_angle_deg > 25:
             return -1, -1, 0
         else:
             pass
@@ -234,7 +242,7 @@ class Turret(Subsystem):
                 self.get_actual_hood_angle_cancoder(),
             )
             PyKitLogger.recordOutput(
-                "Turret/turret_yaw_deg", float(self.turret_yaw_deg)
+                "Turret/target_hood_angle", float(self.target_hood_angle)
             )
 
         # Update Mechanism2d
@@ -254,13 +262,13 @@ class Turret(Subsystem):
                 "Turret/hood_motor_voltage",
                 float(self.hood_motor.get_motor_voltage().value_as_double),
             )
-            PyKitLogger.recordOutput(
-                "Turret/target_hood_angle", float(self.target_hood_angle)
-            )
-            PyKitLogger.recordOutput(
-                "Turret/actual_hood_angle_motor",
-                float(self.hood_motor.get_position().value) * SI.rotations_to_degrees,
-            )
+            # PyKitLogger.recordOutput(
+            #     "Turret/target_hood_angle", float(self.target_hood_angle)
+            # )
+            # PyKitLogger.recordOutput(
+            #     "Turret/actual_hood_angle_motor",
+            #     float(self.hood_motor.get_position().value) * SI.rotations_to_degrees,
+            # )
 
         self._loop_timer.stop()
 
@@ -325,10 +333,17 @@ class Turret(Subsystem):
         if RobotFeatures.LOGGING_TURRET:
             PyKitLogger.recordOutput("Turret/initial_distance_to_hub", float(distance))
 
-        VELOCITY_SLOPE = 2.0
-        VELOCITY_INTERCEPT = 10.0
-        VELOCITY_MIN = 12.0
-        VELOCITY_DISTANCE_THRESHOLD = 2.6
+
+        if RobotFeatures.SmartDashboardTuning:
+            VELOCITY_SLOPE = SmartDashboard.getNumber("Turret/VELOCITY_SLOPE", 2.0)
+            VELOCITY_INTERCEPT = SmartDashboard.getNumber("Turret/VELOCITY_INTERCEPT", 10.0)
+            VELOCITY_MIN = SmartDashboard.getNumber("Turret/VELOCITY_MIN", 12.0)
+            VELOCITY_DISTANCE_THRESHOLD = SmartDashboard.getNumber("Turret/VELOCITY_DISTANCE_THRESHOLD", 2.6)
+        else:
+            VELOCITY_SLOPE = 2.0
+            VELOCITY_INTERCEPT = 10.0
+            VELOCITY_MIN = 12.0
+            VELOCITY_DISTANCE_THRESHOLD = 2.6
 
         v_fixed = 10
         if distance >= VELOCITY_DISTANCE_THRESHOLD:
