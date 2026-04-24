@@ -30,7 +30,7 @@ class Spindex(commands2.Subsystem):
 
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
-            0, enable_foc=MotorIDs.foc_active
+            0, enable_foc=MotorIDs.foc_enabled()
         )
 
 

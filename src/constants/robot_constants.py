@@ -65,16 +65,27 @@ class RobotFeatures:
             cls.LOGGING_VISION = False
             cls.LOGGING_SHOOTER = False
             cls.LOGGING_TURRET = True
-            cls.LOGGING_INTAKE = False
+            cls.LOGGING_INTAKE = True
             cls.LOGGING_SPINDEX = False
             cls.LOGGING_FEEDER = False
             cls.LOW_LOGGING = True
             cls.SmartDashboardTuning = False
 
 
-
 class MotorIDs:
-    foc_active = True
+    _foc_requested = True
+
+    @classmethod
+    def foc_enabled(cls) -> bool:
+        """FOC flag for Phoenix 6 control requests, forced off in sim.
+
+        Phoenix 6's sim scales sim_state.motor_voltage when FOC is enabled,
+        which breaks DCMotorSim-backed closed loops (Motion Magic rails and
+        diverges). See memory: project_foc_sim_gotcha.
+        """
+        from wpilib import RobotBase
+
+        return cls._foc_requested and not RobotBase.isSimulation()
 
     # INTAKE
     motor_id_arm_leader_left = 51
@@ -109,6 +120,11 @@ class IntakeConstants:
     ARM_MOTOR = DCMotor.krakenX44(1)
     ARM_GEARING = 58 / 14
     ARM_MOI = 0.01
+    # Sim-only: stand in for friction DCMotorSim doesn't model.
+    # Static holds the mechanism at rest (must exceed |kG| + any other
+    # bias, or gravity wins). Viscous mirrors real-robot kV calibration.
+    ARM_STATIC_FRICTION = 0.12
+    ARM_VISCOUS_DAMPING = 0.26
     ARM_HOME_ROTATIONS = 0
     ARM_DEPLOYED_LENGTH_IN = 4
     ARM_DEPLOYED_ROTATIONS = 4

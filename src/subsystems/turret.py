@@ -109,11 +109,11 @@ class Turret(Subsystem):
         # TURRET_MOTOR_CONFIG._apply_settings(self.turret_motor, inverted=False)
 
         self._motion_magic_position_voltage_hood = controls.MotionMagicVoltage(
-            0, enable_foc=MotorIDs.foc_active
+            0, enable_foc=MotorIDs.foc_enabled()
         )
 
         self._motion_magic_position_voltage_turret = controls.MotionMagicVoltage(
-            0, enable_foc=MotorIDs.foc_active
+            0, enable_foc=MotorIDs.foc_enabled()
         )
 
         self.target_hood_angle = 0.0

@@ -52,7 +52,7 @@ class Feeder(commands2.Subsystem):
         )
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
-            0, enable_foc=MotorIDs.foc_active
+            0, enable_foc=MotorIDs.foc_enabled()
         )
 
         self.motor_feeder_constant: TalonFXS = TalonFXS(
@@ -68,9 +68,9 @@ class Feeder(commands2.Subsystem):
         FEEDER_CONFIG_ALTERNATING._apply_settings(
             self.motor_feeder_alternating, inverted=True
         )
-        self._duty_cycle_out = controls.DutyCycleOut(0, enable_foc=MotorIDs.foc_active)
+        self._duty_cycle_out = controls.DutyCycleOut(0, enable_foc=MotorIDs.foc_enabled())
         self._velocity_voltage = controls.VelocityVoltage(
-            0, enable_foc=MotorIDs.foc_active
+            0, enable_foc=MotorIDs.foc_enabled()
         )
 
         self.target_velocity_feeder_constant = 0.0

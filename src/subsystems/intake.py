@@ -77,11 +77,11 @@ class Intake(commands2.Subsystem):
         self.kS_roller = 0.00
         self.cruise_velocity_roller = 20
         self.cruise_accl_roller = 600
-        self.kP_arm = 0.8
+        self.kP_arm = 0.8  # 0.8
         self.kI_arm = 0.0
         self.kD_arm = 0.0
         self.kV_arm = 0.63
-        self.kG_arm = -0.11
+        self.kG_arm = -0.11  # -0.11
         self.kS_arm = 0.00
         self.cruise_accl_arm = 20
         self.cruise_velocity_arm = 10
@@ -91,7 +91,6 @@ class Intake(commands2.Subsystem):
 
         self.stator_current_limit_arm = 40
         self.supply_current_limit_arm = 40
-
 
         if not init2 and RobotFeatures.SmartDashboardTuning:
             SmartDashboard.putNumber("stator_current_limit_arm", 40)
@@ -114,19 +113,21 @@ class Intake(commands2.Subsystem):
             SmartDashboard.putNumber("roller_speed", self.roller_speed)
             SmartDashboard.putNumber("cruise_velocity_arm", self.cruise_velocity_arm)
             SmartDashboard.putNumber("cruise_accl_arm", self.cruise_accl_arm)
-            SmartDashboard.putNumber("cruise_velocity_roller", self.cruise_velocity_roller)
+            SmartDashboard.putNumber(
+                "cruise_velocity_roller", self.cruise_velocity_roller
+            )
             SmartDashboard.putNumber("cruise_accl_roller", self.cruise_accl_roller)
 
         self.reinitMotors()
 
         self._motion_magic_velocity_voltage_roller = (
-            controls.MotionMagicVelocityVoltage(0, enable_foc=MotorIDs.foc_active)
+            controls.MotionMagicVelocityVoltage(0, enable_foc=MotorIDs.foc_enabled())
         )
         self._motion_magic_position_voltage_arm_leader = controls.MotionMagicVoltage(
-            0, enable_foc=MotorIDs.foc_active
+            0, enable_foc=MotorIDs.foc_enabled()
         )
         self._motion_magic_position_voltage_arm_follower = controls.MotionMagicVoltage(
-            0, enable_foc=MotorIDs.foc_active
+            0, enable_foc=MotorIDs.foc_enabled()
         )
 
         self.sys_id_routine_roller = generateSysIdProfile(
@@ -174,10 +175,13 @@ class Intake(commands2.Subsystem):
                 motion_magic_cruise_velocity=SmartDashboard.getNumber(
                     "cruise_velocity_arm", 1
                 ),
-                motion_magic_acceleration=SmartDashboard.getNumber("cruise_accl_arm", 2),
+                motion_magic_acceleration=SmartDashboard.getNumber(
+                    "cruise_accl_arm", 2
+                ),
                 current_limit=SmartDashboard.getNumber("stator_current_limit_arm", 40),
-                supply_current_limit=SmartDashboard.getNumber("supply_current_limit_arm", 40),
-
+                supply_current_limit=SmartDashboard.getNumber(
+                    "supply_current_limit_arm", 40
+                ),
             )
         else:
             INTAKE_ROLLER = TalonConfigFX(
@@ -216,7 +220,9 @@ class Intake(commands2.Subsystem):
         else:
             current_velocity = 1
         if RobotFeatures.SmartDashboardTuning:
-            commanded_velocity = SmartDashboard.getNumber("roller_speed", self.roller_speed)
+            commanded_velocity = SmartDashboard.getNumber(
+                "roller_speed", self.roller_speed
+            )
         else:
             commanded_velocity = self.roller_speed * current_velocity
         self._commanded_velocity_ft_per_sec = float(commanded_velocity)
@@ -230,13 +236,15 @@ class Intake(commands2.Subsystem):
                 commanded_velocity
             ).with_acceleration(0.1)
         )
-        self.target_velocity = commanded_velocity 
+        self.target_velocity = commanded_velocity
 
     def reverse_velocity(self, current_velocity: float):
         if current_velocity < 1:
             current_velocity = 1
         if RobotFeatures.SmartDashboardTuning:
-            commanded_velocity = SmartDashboard.getNumber("roller_speed", self.roller_speed)
+            commanded_velocity = SmartDashboard.getNumber(
+                "roller_speed", self.roller_speed
+            )
         else:
             commanded_velocity = self.roller_speed * 2.5
         self._commanded_velocity_ft_per_sec = float(commanded_velocity)
@@ -319,6 +327,10 @@ class Intake(commands2.Subsystem):
                 float(self.motor_arm_leader.get_position().value),
             )
             PyKitLogger.recordOutput(
+                "Intake/Actual_Arm_Error",
+                float(self.motor_arm_leader.get_closed_loop_error().value),
+            )
+            PyKitLogger.recordOutput(
                 "Intake/Target_Arm_Position", float(self.target_rot)
             )
             PyKitLogger.recordOutput(
@@ -331,15 +343,15 @@ class Intake(commands2.Subsystem):
 
         if RobotFeatures.LOGGING_INTAKE:
             PyKitLogger.recordOutput(
-                "Intake/Stator_Current_Limit_Arm",
+                "Intake/Stator_Current_Arm",
                 float(self.motor_arm_leader.get_stator_current().value),
             )
             PyKitLogger.recordOutput(
-                'Intake/Closed_Loop_Refrence_Arm',
+                "Intake/Closed_Loop_Refrence_Arm",
                 float(self.motor_arm_leader.get_closed_loop_reference().value),
             )
             PyKitLogger.recordOutput(
-                'Intake/Closed_Loop_Refrence_Slope_Arm',
+                "Intake/Closed_Loop_Refrence_Slope_Arm",
                 float(self.motor_arm_leader.get_closed_loop_reference_slope().value),
             )
             PyKitLogger.recordOutput(
