@@ -238,7 +238,7 @@ class Intake(commands2.Subsystem):
     # ---- Public actions: each just sets the next state. The state
     # machine in advance_state_machine() picks them up on the next tick. ----
 
-    def deploy(self):
+    def go_to_deployed(self):
         """Move the arm toward DEPLOYED. The state machine forces the
         transition to DEPLOYED after ``ARM_DEPLOY_TIMEOUT`` seconds even
         if Motion Magic hasn't reported the trajectory as complete
@@ -246,7 +246,7 @@ class Intake(commands2.Subsystem):
         self._arm_state = _ArmState.DEPLOYING
         self._set_trajectory_deadline(IntakeConstants.ARM_DEPLOY_TIMEOUT)
 
-    def retract(self):
+    def go_to_home(self):
         """Move the arm toward HOME. Backstopped by
         ``ARM_RETRACT_TIMEOUT`` the same way ``deploy()`` is."""
         self._arm_state = _ArmState.GOING_HOME

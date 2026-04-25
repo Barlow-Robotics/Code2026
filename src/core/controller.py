@@ -99,10 +99,10 @@ class Controller:
             ).onFalse(cmd.runOnce(container.intake.stop_rollers))
 
             self._test_controller.rightTrigger().onTrue(
-                cmd.runOnce(container.intake.deploy)
+                cmd.runOnce(container.intake.go_to_deployed)
             )
             self._test_controller.leftTrigger().onTrue(
-                cmd.runOnce(container.intake.retract)
+                cmd.runOnce(container.intake.go_to_home)
             )
 
             # self._test_controller.y().onTrue(

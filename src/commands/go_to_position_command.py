@@ -32,9 +32,9 @@ class IntakePositionCommand(Command):
 
     def initialize(self):
         if self.position == IntakePositions.HOME:
-            self.intake_sub.retract()
+            self.intake_sub.go_to_home()
         elif self.position == IntakePositions.DEPLOYED:
-            self.intake_sub.deploy()
+            self.intake_sub.go_to_deployed()
 
         if self.activate_rollers is True:
             self.intake_sub.activate_roller()
