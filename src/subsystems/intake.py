@@ -249,6 +249,10 @@ class Intake(commands2.Subsystem):
     def go_to_home(self):
         """Move the arm toward HOME. Backstopped by
         ``ARM_RETRACT_TIMEOUT`` the same way ``deploy()`` is."""
+        # Safety precaution. Going home during auto was breaking the intake.
+        is_auto = DriverStation.isAutonomous()
+        if is_auto:
+            return
         self._arm_state = _ArmState.GOING_HOME
         self._set_trajectory_deadline(IntakeConstants.ARM_RETRACT_TIMEOUT)
 
