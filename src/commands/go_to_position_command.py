@@ -8,21 +8,19 @@ if typing.TYPE_CHECKING:
 
 
 class IntakePositionCommand(Command):
-    """Requests an arm position, optionally controlling the rollers.
+    """One-shot: requests an arm position (and optionally toggles the
+    rollers), then immediately finishes. The intake subsystem's state
+    machine drives the actual motion to completion in the background.
 
     The ``activate_rollers`` parameter is trinary:
-        - ``True``  → start the rollers in initialize()
-        - ``False`` → stop the rollers in initialize()
+        - ``True``  → start the rollers
+        - ``False`` → stop the rollers
         - ``None``  → leave the rollers alone (default)
 
     The ``arm_timeout`` is forwarded to ``intake.deploy()`` /
-    ``intake.retract()`` and tells the state machine to declare the
-    move complete after that many seconds even if Motion Magic hasn't
-    finished its profile (covers stuck-arm cases).
-
-    Long-running: never finishes on its own; runs until interrupted by
-    another command requiring the intake. ``end()`` is intentionally a
-    no-op — roller state changes only happen on explicit request.
+    ``intake.retract()``: the SM forces the transition out of
+    DEPLOYING / GOING_HOME after that many seconds even if Motion Magic
+    hasn't finished its profile (covers stuck-arm cases).
     """
 
     def __init__(
@@ -51,4 +49,4 @@ class IntakePositionCommand(Command):
             self.intake_sub.stop_rollers()
 
     def isFinished(self):
-        return False
+        return True

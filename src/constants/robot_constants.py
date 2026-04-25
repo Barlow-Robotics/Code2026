@@ -135,7 +135,12 @@ class IntakeConstants:
 
     ARM_MOTOR = DCMotor.krakenX44(1)
     ARM_GEARING = 58 / 14
-    ARM_MOI = 0.01
+    # Effective MOI at the pinion shaft. Physical estimate: ~2 kg carriage
+    # on a 0.5"-radius pinion → m·r² ≈ 3e-4, plus motor rotor MOI reflected
+    # through 58:14 (~2e-4). Total ≈ 5e-4 kg·m². 0.001 sits a bit above
+    # that as a margin; tune down if halt() still overshoots, up if the
+    # arm feels twitchy.
+    ARM_MOI = 0.001
     # Sim-only: stand in for friction DCMotorSim doesn't model.
     # Static holds the mechanism at rest (must exceed |kG| + any other
     # bias, or gravity wins). Viscous mirrors real-robot kV calibration.
