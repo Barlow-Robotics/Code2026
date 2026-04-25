@@ -10,6 +10,7 @@ class IntakeSim:
             IntakeConstants.ROLLER_MOTOR,
             IntakeConstants.ROLLER_GEARING,
             IntakeConstants.ROLLER_MOI,
+            viscous_damping=IntakeConstants.ROLLER_VISCOUS_DAMPING,
         )
         self._arm = MotorPositionSim(
             intake.motor_arm_leader,

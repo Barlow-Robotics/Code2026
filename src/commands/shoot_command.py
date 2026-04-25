@@ -51,7 +51,7 @@ class ShootCommand(Command):
         ):
             self.feeder.move(9)
             self.spindex.move(9 * 3)
-            self.intake.set_velocity(1)
+            self.intake.activate_roller()
             self._feeding = True
 
     def isFinished(self):

@@ -95,7 +95,7 @@ class Controller:
 
         if RobotFeatures.TESTING:
             self._test_controller.leftBumper().onTrue(
-                cmd.runOnce(lambda: container.intake.set_velocity(0))
+                cmd.runOnce(container.intake.activate_roller)
             ).onFalse(cmd.runOnce(lambda: container.intake.stop()))
 
             self._test_controller.rightTrigger().onTrue(
@@ -182,12 +182,12 @@ class Controller:
                 )
                 # A → Retract intake
                 controller.rightTrigger().whileTrue(
-                    cmd.runOnce(lambda: container.intake.set_velocity(1))
-                ).whileFalse(cmd.runOnce(lambda: container.intake.stop()))
+                    cmd.runOnce(container.intake.activate_roller)
+                ).whileFalse(cmd.runOnce(container.intake.stop))
 
                 controller.leftTrigger().whileTrue(
-                    cmd.runOnce(lambda: container.intake.reverse_velocity(-1))
-                ).whileFalse(cmd.runOnce(lambda: container.intake.stop()))
+                    cmd.runOnce(container.intake.reverse_roller)
+                ).whileFalse(cmd.runOnce(container.intake.stop))
 
         for controller in [self._driver]:
             controller.button(8).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))

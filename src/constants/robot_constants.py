@@ -109,13 +109,29 @@ class MotorIDs:
 
 class IntakeConstants:
     ROLLER_MOTOR = DCMotor.krakenX44(1)
+    # NOTE: this is the inverse of Phoenix's sensor_to_mechanism_ratio
+    # convention (it should be motor:mechanism, i.e. >1 for a reduction).
+    # The roller's gains and target velocities below are tuned around this
+    # backwards value, so flipping to 58/30 means re-tuning all of them
+    # together. Post-flip values are listed in commented-out form so that
+    # change can be made atomically when ready.
     ROLLER_GEARING = 30 / 58
-    ROLLER_MOI = 0.01  # TODO: calculate from roller mass/geometry (kg*m^2)
-    # Diamater is 2in
-    ROLLER_CIRCUMFERENCE_IN = 2 * math.pi  # BW: REAL CIRCUMFRENCE IS 2IN * PI
-    ROLLER_CIRCUMFERENCE_M = (
-        2 * math.pi * SI.inches_to_meters
-    )  # BW: REAL CIRCUMFRENCE IS 2IN * PI
+    # ROLLER_GEARING = 58 / 30  # post-flip (correct convention)
+    ROLLER_MOI = 0.001  # TODO: calculate from roller mass/geometry (kg*m^2)
+
+    # Roller target velocities, in mechanism rotations/second.
+    ROLLER_RPS_INTAKE = 137.9
+    ROLLER_RPS_INTAKE_AUTO = 275.7
+    ROLLER_RPS_REVERSE = -344.7
+    # Post-gearing-flip values (use with ROLLER_GEARING = 58/30):
+    # ROLLER_RPS_INTAKE = 36.9
+    # ROLLER_RPS_INTAKE_AUTO = 73.8
+    # ROLLER_RPS_REVERSE = -92.2
+
+    # Sim-only: viscous drag (V per output rps). Lowers the sim's effective
+    # free speed and adds braking, so unreachable targets don't rail the
+    # motor and stops are crisp.
+    ROLLER_VISCOUS_DAMPING = 0.05
 
     ARM_MOTOR = DCMotor.krakenX44(1)
     ARM_GEARING = 58 / 14

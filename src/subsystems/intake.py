@@ -1,8 +1,4 @@
-from dataclasses import dataclass
-import dataclasses
-
 import commands2
-from commands2 import cmd
 from commands2.sysid import SysIdRoutine
 from phoenix6 import controls
 from phoenix6.hardware import TalonFX
@@ -16,40 +12,11 @@ from constants import IntakeConstants, MotorIDs
 from utils import TalonConfigFX, generateSysIdProfile, IntakePositions
 
 
-@dataclass
-class IntakeCommandTelemetry:
-    target_position: str
-
-    commanded_velocity_ft_per_sec: float
-    converted_velocity_rps: float
-    stop_requested: bool
-
-
-@dataclass
-class IntakeTelemetry:
-    arm_position: float
-    # arm_position_follower: float
-    arm_target_position: float
-    # follower_voltage: float
-    # leader_voltage: float
-    # # arm_supply_current: float
-    # arm_stator_current: float
-    roller_velocity: float
-    # roller_supply_current: float
-    # roller_stator_current: float
-    # roller_motor_voltage: float
-    # roller_device_temp: float
-    target_velocity: float
-
-
 class Intake(commands2.Subsystem):
     def __init__(self, init2=False):
         super().__init__()
         self._loop_timer = LoopTimer("Intake")
         self.target_velocity = 0.0
-        self._commanded_velocity_ft_per_sec = 0.0
-        self._converted_velocity_rps = 0.0
-        self._stop_requested = False
         self._target_position_name = "NONE"
         self._target_position = IntakePositions.HOME
         self.target_rot: float = 0.0
@@ -57,26 +24,35 @@ class Intake(commands2.Subsystem):
         # Mechanism2d
         if RobotFeatures.LOGGING_ROBOT:
             self.mechanism = Mechanism2d(4, 3)
-            root = self.mechanism.getRoot("IntakeRoot", 2.5, 0.3)
+            root = self.mechanism.getRoot("IntakeRoot", 0.5, 2.5)
+            # Arm extends forward-and-down at ~20° below horizontal.
+            # Length is set dynamically in periodic() based on motor position.
             self.arm_ligament = root.appendLigament(
-                "Arm", 1.2, 75, 8, Color8Bit(0, 200, 0)
+                "Arm", 0.2, -20, 8, Color8Bit(0, 200, 0)
             )
-            self.head_ligament = self.arm_ligament.appendLigament(
-                "Head", 0.4, -90, 10, Color8Bit(0, 150, 0)
+            self.roller_ligament = self.arm_ligament.appendLigament(
+                "Roller", 0.2, 0, 10, Color8Bit(0, 150, 0)
             )
             wpilib.SmartDashboard.putData("Intake/Mechanism2d", self.mechanism)
 
         self.motor_roller: TalonFX = TalonFX(MotorIDs.motor_id_roller, "*")
         self.motor_arm_leader: TalonFX = TalonFX(MotorIDs.motor_id_arm_leader_left, "*")
         # self.motor_arm_follower: TalonFX = TalonFX(MotorIDs.motor_id_arm_follower_right, "*")
+        # Roller gains are tuned around the backwards ROLLER_GEARING value
+        # (see IntakeConstants). Post-flip values (use together with
+        # ROLLER_GEARING = 58/30) are listed in commented-out form.
         self.kP_roller = 0.01
+        # self.kP_roller = 0.037
         self.kI_roller = 0.0
         self.kD_roller = 0.0
         self.kV_roller = 0.06
+        # self.kV_roller = 0.224
         self.kG_roller = 0.00
         self.kS_roller = 0.00
         self.cruise_velocity_roller = 20
+        # self.cruise_velocity_roller = 5.35
         self.cruise_accl_roller = 600
+        # self.cruise_accl_roller = 160
         self.kP_arm = 0.8  # 0.8
         self.kI_arm = 0.0
         self.kD_arm = 0.0
@@ -85,8 +61,6 @@ class Intake(commands2.Subsystem):
         self.kS_arm = 0.00
         self.cruise_accl_arm = 20
         self.cruise_velocity_arm = 10
-
-        self.roller_speed = 22.0
         self.arm_distance = 3.28
 
         self.stator_current_limit_arm = 40
@@ -110,7 +84,6 @@ class Intake(commands2.Subsystem):
             SmartDashboard.putNumber("kG_IntakeArm", self.kG_arm)
             SmartDashboard.putNumber("kS_IntakeArm", self.kS_arm)
             SmartDashboard.putNumber("arm_rot", self.arm_distance)
-            SmartDashboard.putNumber("roller_speed", self.roller_speed)
             SmartDashboard.putNumber("cruise_velocity_arm", self.cruise_velocity_arm)
             SmartDashboard.putNumber("cruise_accl_arm", self.cruise_accl_arm)
             SmartDashboard.putNumber(
@@ -139,10 +112,6 @@ class Intake(commands2.Subsystem):
             IntakePositions.REVERSE: IntakeConstants.ARM_DEPLOYED_ROTATIONS,
             IntakePositions.DEPLOYED: IntakeConstants.ARM_DEPLOYED_ROTATIONS,
         }
-
-        self.go_to_velocity_command_factory = lambda velocity: cmd.runOnce(
-            lambda: self.set_velocity(velocity)
-        )
 
     def reinitMotors(self):
         if RobotFeatures.SmartDashboardTuning:
@@ -214,58 +183,30 @@ class Intake(commands2.Subsystem):
         INTAKE_ROLLER._apply_settings(self.motor_roller, inverted=False)
         INTAKE_CONFIG_ARM_RIGHT._apply_settings(self.motor_arm_leader, inverted=False)
 
-    def set_velocity(self, current_velocity: float):
-        if DriverStation.isAutonomous():
-            current_velocity = 2
-        else:
-            current_velocity = 1
-        if RobotFeatures.SmartDashboardTuning:
-            commanded_velocity = SmartDashboard.getNumber(
-                "roller_speed", self.roller_speed
-            )
-        else:
-            commanded_velocity = self.roller_speed * current_velocity
-        self._commanded_velocity_ft_per_sec = float(commanded_velocity)
-        self._stop_requested = False
-
-        commanded_velocity /= IntakeConstants.ROLLER_CIRCUMFERENCE_M
-        self._converted_velocity_rps = float(commanded_velocity)
-
+    def activate_roller(self):
+        rps = (
+            IntakeConstants.ROLLER_RPS_INTAKE_AUTO
+            if DriverStation.isAutonomous()
+            else IntakeConstants.ROLLER_RPS_INTAKE
+        )
+        self.target_velocity = rps
         self.motor_roller.set_control(
             self._motion_magic_velocity_voltage_roller.with_velocity(
-                commanded_velocity
+                rps
             ).with_acceleration(0.1)
         )
-        self.target_velocity = commanded_velocity
 
-    def reverse_velocity(self, current_velocity: float):
-        if current_velocity < 1:
-            current_velocity = 1
-        if RobotFeatures.SmartDashboardTuning:
-            commanded_velocity = SmartDashboard.getNumber(
-                "roller_speed", self.roller_speed
-            )
-        else:
-            commanded_velocity = self.roller_speed * 2.5
-        self._commanded_velocity_ft_per_sec = float(commanded_velocity)
-        self._stop_requested = False
-
-        commanded_velocity /= IntakeConstants.ROLLER_CIRCUMFERENCE_M
-        self._converted_velocity_rps = float(commanded_velocity)
-
+    def reverse_roller(self):
+        rps = IntakeConstants.ROLLER_RPS_REVERSE
+        self.target_velocity = rps
         self.motor_roller.set_control(
             self._motion_magic_velocity_voltage_roller.with_velocity(
-                -commanded_velocity
+                rps
             ).with_acceleration(0.1)
         )
-        self.target_velocity = -commanded_velocity
 
     def stop(self):
-        self._stop_requested = True
-        self._commanded_velocity_ft_per_sec = 0.0
-        self._converted_velocity_rps = 0.0
         self.target_velocity = 0.0
-
         self.motor_roller.set_control(
             self._motion_magic_velocity_voltage_roller.with_velocity(
                 0
@@ -304,23 +245,14 @@ class Intake(commands2.Subsystem):
         #     self.stop()
         self.target_rot: float = target_position
 
-    def _log_dataclass(self, prefix: str, data: object):
-        for field in dataclasses.fields(data):
-            value = getattr(data, field.name)
-            if value is None:
-                continue
-            key = f"{prefix}/{field.name}"
-            if dataclasses.is_dataclass(value):
-                self._log_dataclass(key, value)
-            else:
-                PyKitLogger.recordOutput(key, value)
-
     def periodic(self):
         self._loop_timer.start()
 
         if not RobotBase.isReal() and RobotFeatures.LOGGING_ROBOT:
-            arm_degrees = self.motor_arm_leader.get_position().value * 360
-            self.arm_ligament.setAngle(75 + arm_degrees)
+            position_rot = self.motor_arm_leader.get_position().value
+            self.arm_ligament.setLength(0.2 + position_rot * 0.3)
+            roller_rot = self.motor_roller.get_position().value
+            self.roller_ligament.setAngle((roller_rot * 360.0) % 360.0)
         if RobotFeatures.LOW_LOGGING:
             PyKitLogger.recordOutput(
                 "Intake/Actual_Arm_Position",

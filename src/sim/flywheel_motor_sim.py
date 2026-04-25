@@ -10,17 +10,31 @@ class FlywheelMotorSim:
     """Simulates a single TalonFX-driven flywheel (motor + gearbox + inertia)."""
 
     def __init__(
-        self, motor: TalonFX, motor_model: DCMotor, gearing: float, moi: float
+        self,
+        motor: TalonFX,
+        motor_model: DCMotor,
+        gearing: float,
+        moi: float,
+        viscous_damping: float = 0.0,
     ):
+        """
+        viscous_damping: volts per (output rps) of opposing input. Lowers the
+            sim's effective free speed and provides braking — useful for
+            mechanisms that would otherwise rail at unreachable target
+            velocities. Default 0 preserves old behavior.
+        """
         self._sim_state = motor.sim_state
         self._gearing = gearing
+        self._viscous_damping = viscous_damping
         plant = LinearSystemId.flywheelSystem(motor_model, moi, gearing)
         self._flywheel = FlywheelSim(plant, motor_model)
         self._position_rot = 0.0
 
     def update(self, tm_diff: float) -> None:
         self._sim_state.set_supply_voltage(12.0)
-        self._flywheel.setInputVoltage(self._sim_state.motor_voltage)
+        velocity_rps = radiansToRotations(self._flywheel.getAngularVelocity())
+        damping_v = -self._viscous_damping * velocity_rps
+        self._flywheel.setInputVoltage(self._sim_state.motor_voltage + damping_v)
         self._flywheel.update(tm_diff)
 
         velocity_rps = radiansToRotations(self._flywheel.getAngularVelocity())
