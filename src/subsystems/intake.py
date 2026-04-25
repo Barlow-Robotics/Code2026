@@ -238,22 +238,25 @@ class Intake(commands2.Subsystem):
     # ---- Public actions: each just sets the next state. The state
     # machine in advance_state_machine() picks them up on the next tick. ----
 
-    def deploy(self, timeout: float | None = IntakeConstants.ARM_DEPLOY_TIMEOUT):
-        """Move the arm toward DEPLOYED. If ``timeout`` is set, force the
-        transition to DEPLOYED after that many seconds even if Motion
-        Magic hasn't reported the trajectory as complete (e.g. arm
-        stuck against an obstacle). Pass ``None`` to wait forever."""
+    def deploy(self):
+        """Move the arm toward DEPLOYED. The state machine forces the
+        transition to DEPLOYED after ``ARM_DEPLOY_TIMEOUT`` seconds even
+        if Motion Magic hasn't reported the trajectory as complete
+        (covers the stuck-arm case)."""
         self._arm_state = _ArmState.DEPLOYING
-        self._set_trajectory_deadline(timeout)
+        self._set_trajectory_deadline(IntakeConstants.ARM_DEPLOY_TIMEOUT)
 
-    def retract(self, timeout: float | None = IntakeConstants.ARM_RETRACT_TIMEOUT):
-        """Move the arm toward HOME. ``timeout`` works the same way as
-        in :meth:`deploy`."""
+    def retract(self):
+        """Move the arm toward HOME. Backstopped by
+        ``ARM_RETRACT_TIMEOUT`` the same way ``deploy()`` is."""
         self._arm_state = _ArmState.GOING_HOME
-        self._set_trajectory_deadline(timeout)
+        self._set_trajectory_deadline(IntakeConstants.ARM_RETRACT_TIMEOUT)
 
     def halt(self):
-        """Stop wherever we are right now and hold position with brake."""
+        """Stop driving the arm — motor output off, brake disengaged.
+        The arm freewheels to wherever physics takes it. Use this for
+        an emergency-stop-shaped 'just stop trying' rather than as a
+        precise pause-in-place."""
         self._arm_state = _ArmState.PAUSED
         self._trajectory_deadline = None
 
@@ -336,7 +339,7 @@ class Intake(commands2.Subsystem):
             case _ArmState.GOING_HOME:
                 self._drive_to(0.0)
             case _ArmState.PAUSED:
-                self._brake_and_hold()
+                self._coast_and_release()
 
         # Pass 2: transitions out of transient states.
         match self._arm_state:

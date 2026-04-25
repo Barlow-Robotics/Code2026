@@ -16,11 +16,6 @@ class IntakePositionCommand(Command):
         - ``True``  → start the rollers
         - ``False`` → stop the rollers
         - ``None``  → leave the rollers alone (default)
-
-    The ``arm_timeout`` is forwarded to ``intake.deploy()`` /
-    ``intake.retract()``: the SM forces the transition out of
-    DEPLOYING / GOING_HOME after that many seconds even if Motion Magic
-    hasn't finished its profile (covers stuck-arm cases).
     """
 
     def __init__(
@@ -28,20 +23,18 @@ class IntakePositionCommand(Command):
         intake_sub: "Intake",
         position: IntakePositions,
         activate_rollers: bool | None = None,
-        arm_timeout: float | None = None,
     ):
         super().__init__()
         self.intake_sub = intake_sub
         self.position = position
         self.activate_rollers = activate_rollers
-        self.arm_timeout = arm_timeout
         self.addRequirements(intake_sub)
 
     def initialize(self):
         if self.position == IntakePositions.HOME:
-            self.intake_sub.retract(self.arm_timeout)
+            self.intake_sub.retract()
         elif self.position == IntakePositions.DEPLOYED:
-            self.intake_sub.deploy(self.arm_timeout)
+            self.intake_sub.deploy()
 
         if self.activate_rollers is True:
             self.intake_sub.activate_roller()
