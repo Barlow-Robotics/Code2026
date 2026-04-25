@@ -13,7 +13,7 @@ from utils import TalonConfigFX, generateSysIdProfile, IntakePositions
 
 
 class Intake(commands2.Subsystem):
-    def __init__(self, init2=False):
+    def __init__(self):
         super().__init__()
         self._loop_timer = LoopTimer("Intake")
         self.target_velocity = 0.0
@@ -66,7 +66,7 @@ class Intake(commands2.Subsystem):
         self.stator_current_limit_arm = 40
         self.supply_current_limit_arm = 40
 
-        if not init2 and RobotFeatures.SmartDashboardTuning:
+        if RobotFeatures.SmartDashboardTuning:
             SmartDashboard.putNumber("stator_current_limit_arm", 40)
             SmartDashboard.putNumber("supply_current_limit_arm", 40)
 

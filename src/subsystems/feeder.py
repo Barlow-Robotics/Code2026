@@ -12,7 +12,7 @@ from utils.profiler import LoopTimer
 
 
 class Feeder(commands2.Subsystem):
-    def __init__(self, init2=False):
+    def __init__(self):
         super().__init__()
         self._loop_timer = LoopTimer("Feeder")
         self.kP_feeder = 0.1
@@ -21,7 +21,7 @@ class Feeder(commands2.Subsystem):
         self.kV_feeder = 0.118
         self.kS_feeder = 0.0
 
-        if not init2 and RobotFeatures.SmartDashboardTuning:
+        if RobotFeatures.SmartDashboardTuning:
             SmartDashboard.putNumber("kP_Feeder", 0.1)
             SmartDashboard.putNumber("kI_Feeder", 0.0)
             SmartDashboard.putNumber("kD_Feeder", 0.0)

@@ -31,12 +31,12 @@ from phoenix6.signals import FeedbackSensorSourceValue
 
 
 class Turret(Subsystem):
-    def __init__(self, driveSub: Drivetrain, init2: bool = False):
+    def __init__(self, driveSub: Drivetrain):
         super().__init__()
         self._loop_timer = LoopTimer("Turret")
         self.driveSub = driveSub
         self.actual_velocity_to_go = 15.5
-        if not init2 and RobotFeatures.SmartDashboardTuning:
+        if RobotFeatures.SmartDashboardTuning:
             SmartDashboard.putNumber("kV", 1.8)
             SmartDashboard.putNumber("kD", 1.5)
             SmartDashboard.putNumber("kI", 0.0)
@@ -93,8 +93,7 @@ class Turret(Subsystem):
         self.hood_cancoder.configurator.apply(hood_cancoder_config, 0.2)
         # hood_cancoder_config.magnet_sensor.magnet_offset = -self.hood_cancoder.get_absolute_position().value
         # self.hood_cancoder.configurator.apply(hood_cancoder_config, 0.4)
-        if not init2:
-            self.hood_cancoder.set_position(0, 0.2)
+        self.hood_cancoder.set_position(0, 0.2)
 
         feedback_cfg = FeedbackConfigs()
 
