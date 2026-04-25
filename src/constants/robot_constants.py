@@ -141,6 +141,31 @@ class IntakeConstants:
     # bias, or gravity wins). Viscous mirrors real-robot kV calibration.
     ARM_STATIC_FRICTION = 0.12
     ARM_VISCOUS_DAMPING = 0.26
+    # Default timeouts (seconds) for the arm state machine. If a Motion
+    # Magic trajectory hasn't completed within this window the SM forces
+    # the transition out of DEPLOYING / GOING_HOME — covers the
+    # stuck-arm case so the rest of the robot doesn't wait forever.
+    ARM_DEPLOY_TIMEOUT = 2.0
+    ARM_RETRACT_TIMEOUT = 2.0
+
+    # Tolerances for declaring a Motion Magic trajectory complete. All
+    # three must hold simultaneously:
+    #   |reference - target_rot| < POSITION_TOL  → generator reached target
+    #   |closed-loop error|      < ERROR_TOL     → actual caught up to ref
+    #   |actual velocity|        < VELOCITY_TOL  → mechanism has stopped
+    # All units are mechanism rotations / mech rps.
+    ARM_TRAJECTORY_REF_TOL = 0.001
+    ARM_TRAJECTORY_ERROR_TOL = 0.05
+    ARM_TRAJECTORY_VELOCITY_TOL = 0.01
+
+    # Sim-only mechanical hard stops (output rotations). The sim's
+    # coordinate frame is inverted relative to the controller's — the
+    # mechanism's simulated position moves negative as the arm deploys
+    # — so "deployed" is at ~-3.28 and "home" is at ~0 in sim units.
+    # Stops are slightly past each to leave operating room.
+    ARM_SIM_MIN_ROTATIONS = -3.3
+    ARM_SIM_MAX_ROTATIONS = 0.05
+
     ARM_HOME_ROTATIONS = 0
     ARM_DEPLOYED_LENGTH_IN = 4
     ARM_DEPLOYED_ROTATIONS = 4

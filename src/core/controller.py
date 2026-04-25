@@ -96,17 +96,13 @@ class Controller:
         if RobotFeatures.TESTING:
             self._test_controller.leftBumper().onTrue(
                 cmd.runOnce(container.intake.activate_roller)
-            ).onFalse(cmd.runOnce(lambda: container.intake.stop()))
+            ).onFalse(cmd.runOnce(container.intake.stop_rollers))
 
             self._test_controller.rightTrigger().onTrue(
-                cmd.runOnce(
-                    lambda: container.intake.go_to_position(IntakePositions.DEPLOYED)
-                )
+                cmd.runOnce(container.intake.deploy)
             )
             self._test_controller.leftTrigger().onTrue(
-                cmd.runOnce(
-                    lambda: container.intake.go_to_position(IntakePositions.HOME)
-                )
+                cmd.runOnce(container.intake.retract)
             )
 
             # self._test_controller.y().onTrue(
@@ -168,14 +164,12 @@ class Controller:
                 # Y → Deploy intake
                 controller.y().onTrue(
                     IntakePositionCommand(
-                        drive_sub=container.drivetrain,
                         intake_sub=container.intake,
                         position=IntakePositions.DEPLOYED,
                     )
                 )
                 controller.a().onTrue(
                     IntakePositionCommand(
-                        drive_sub=container.drivetrain,
                         intake_sub=container.intake,
                         position=IntakePositions.HOME,
                     )
@@ -183,11 +177,11 @@ class Controller:
                 # A → Retract intake
                 controller.rightTrigger().whileTrue(
                     cmd.runOnce(container.intake.activate_roller)
-                ).whileFalse(cmd.runOnce(container.intake.stop))
+                ).whileFalse(cmd.runOnce(container.intake.stop_rollers))
 
                 controller.leftTrigger().whileTrue(
                     cmd.runOnce(container.intake.reverse_roller)
-                ).whileFalse(cmd.runOnce(container.intake.stop))
+                ).whileFalse(cmd.runOnce(container.intake.stop_rollers))
 
         for controller in [self._driver]:
             controller.button(8).onTrue(cmd.runOnce(container.drivetrain.reset_gyro))

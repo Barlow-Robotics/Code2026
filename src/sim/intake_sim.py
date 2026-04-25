@@ -20,6 +20,8 @@ class IntakeSim:
             viscous_damping=IntakeConstants.ARM_VISCOUS_DAMPING,
             static_friction=IntakeConstants.ARM_STATIC_FRICTION,
             load_voltage=intake.kG_arm,
+            min_position=IntakeConstants.ARM_SIM_MIN_ROTATIONS,
+            max_position=IntakeConstants.ARM_SIM_MAX_ROTATIONS,
         )
 
     def update_sim(self, now: float, tm_diff: float) -> None:

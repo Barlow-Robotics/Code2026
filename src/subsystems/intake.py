@@ -1,9 +1,18 @@
+from enum import Enum, auto
+
 import commands2
 from commands2.sysid import SysIdRoutine
 from phoenix6 import controls
 from phoenix6.hardware import TalonFX
 import wpilib
-from wpilib import DriverStation, RobotBase, Mechanism2d, Color8Bit, SmartDashboard
+from wpilib import (
+    Color8Bit,
+    DriverStation,
+    Mechanism2d,
+    RobotBase,
+    SmartDashboard,
+    Timer,
+)
 from pykit.logger import Logger as PyKitLogger
 
 from constants.robot_constants import RobotFeatures
@@ -12,13 +21,19 @@ from constants import IntakeConstants, MotorIDs
 from utils import TalonConfigFX, generateSysIdProfile, IntakePositions
 
 
+class _ArmState(Enum):
+    HOME = auto()
+    DEPLOYING = auto()
+    DEPLOYED = auto()
+    GOING_HOME = auto()
+    PAUSED = auto()
+
+
 class Intake(commands2.Subsystem):
     def __init__(self):
         super().__init__()
         self._loop_timer = LoopTimer("Intake")
         self.target_velocity = 0.0
-        self._target_position_name = "NONE"
-        self._target_position = IntakePositions.HOME
         self.target_rot: float = 0.0
 
         # Mechanism2d
@@ -107,11 +122,15 @@ class Intake(commands2.Subsystem):
             self, self.motor_roller, name="Roller"
         )
 
-        self._POSITION_MAP = {
-            IntakePositions.HOME: IntakeConstants.ARM_HOME_ROTATIONS,
-            IntakePositions.REVERSE: IntakeConstants.ARM_DEPLOYED_ROTATIONS,
-            IntakePositions.DEPLOYED: IntakeConstants.ARM_DEPLOYED_ROTATIONS,
-        }
+        # Arm state machine. The motor's configured neutral mode is BRAKE
+        # (see reinitMotors), so MM commands inherit brake-on-neutral.
+        # CoastOut is a control request that overrides neutral mode at
+        # control time — preferred over setNeutralMode() which is a
+        # configurator call (slow, blocks for confirmation).
+        self._arm_state = _ArmState.HOME
+        self._trajectory_deadline: float | None = None
+        self._held_position: float | None = None
+        self._coast_out = controls.CoastOut()
 
     def reinitMotors(self):
         if RobotFeatures.SmartDashboardTuning:
@@ -205,7 +224,7 @@ class Intake(commands2.Subsystem):
             ).with_acceleration(0.1)
         )
 
-    def stop(self):
+    def stop_rollers(self):
         self.target_velocity = 0.0
         self.motor_roller.set_control(
             self._motion_magic_velocity_voltage_roller.with_velocity(
@@ -213,40 +232,127 @@ class Intake(commands2.Subsystem):
             ).with_acceleration(0.1)
         )
 
-    def get_target_position(self):
-        return self._target_position
+    def get_arm_state(self) -> _ArmState:
+        return self._arm_state
 
-    def go_to_position(self, position: IntakePositions, current_velocity: float = 0.0):
-        self._target_position_name = position.name
-        self._target_position = position
-        if position == IntakePositions.HOME:
-            target_position = 0
-            self.motor_arm_leader.set_control(
-                self._motion_magic_position_voltage_arm_leader.with_position(
-                    target_position
-                )
+    # ---- Public actions: each just sets the next state. The state
+    # machine in advance_state_machine() picks them up on the next tick. ----
+
+    def deploy(self, timeout: float | None = IntakeConstants.ARM_DEPLOY_TIMEOUT):
+        """Move the arm toward DEPLOYED. If ``timeout`` is set, force the
+        transition to DEPLOYED after that many seconds even if Motion
+        Magic hasn't reported the trajectory as complete (e.g. arm
+        stuck against an obstacle). Pass ``None`` to wait forever."""
+        self._arm_state = _ArmState.DEPLOYING
+        self._set_trajectory_deadline(timeout)
+
+    def retract(self, timeout: float | None = IntakeConstants.ARM_RETRACT_TIMEOUT):
+        """Move the arm toward HOME. ``timeout`` works the same way as
+        in :meth:`deploy`."""
+        self._arm_state = _ArmState.GOING_HOME
+        self._set_trajectory_deadline(timeout)
+
+    def halt(self):
+        """Stop wherever we are right now and hold position with brake."""
+        self._arm_state = _ArmState.PAUSED
+        self._trajectory_deadline = None
+
+    def _set_trajectory_deadline(self, timeout: float | None):
+        self._trajectory_deadline = (
+            Timer.getFPGATimestamp() + timeout if timeout is not None else None
+        )
+
+    def _trajectory_deadline_passed(self) -> bool:
+        return (
+            self._trajectory_deadline is not None
+            and Timer.getFPGATimestamp() >= self._trajectory_deadline
+        )
+
+    def _drive_to(self, position: float):
+        """Active Motion Magic toward ``position``. Used for transient
+        states where we're moving the arm to a new spot. Invalidates any
+        previously captured hold position so the next ``_brake_and_hold``
+        re-captures fresh."""
+        self._held_position = None
+        self.target_rot = position
+        self.motor_arm_leader.set_control(
+            self._motion_magic_position_voltage_arm_leader.with_position(position)
+        )
+
+    def _brake_and_hold(self):
+        """Hold the arm at a captured-on-first-call position. Re-issues
+        every tick with the same fixed target so PID corrects any drift
+        back to the lock point. Cleared by ``_drive_to`` /
+        ``_coast_and_release`` so the next time we enter a hold state
+        we capture afresh."""
+        if self._held_position is None:
+            self._held_position = float(self.motor_arm_leader.get_position().value)
+        self.target_rot = self._held_position
+        self.motor_arm_leader.set_control(
+            self._motion_magic_position_voltage_arm_leader.with_position(
+                self._held_position
             )
-        else:
-            target_position = self.arm_distance
-            self.motor_arm_leader.set_control(
-                self._motion_magic_position_voltage_arm_leader.with_position(
-                    target_position
-                )
-            )
+        )
 
-        # self.motor_arm_follower.set_control(
-        #     self._motion_magic_position_voltage_arm_follower.with_position(arm_rot)
-        # )
+    def _coast_and_release(self):
+        """Free the arm — motor output off, brake disengaged regardless
+        of configured neutral mode."""
+        self._held_position = None
+        self.motor_arm_leader.set_control(self._coast_out)
 
-        # if position == IntakePositions.DEPLOYED:
-        #     print("SET VELOCITY")
-        #     self.set_velocity(current_velocity)
-        # else:
-        #     self.stop()
-        self.target_rot: float = target_position
+    def _trajectory_complete(self) -> bool:
+        """Three conditions, all required:
+        1. Trajectory generator reached target.
+        2. Actual mechanism caught up to the reference (tracking error
+           within tolerance) — checks we're physically AT the target,
+           not just that the trajectory finished planning.
+        3. Mechanism has stopped (velocity below threshold).
+        """
+        ref = self.motor_arm_leader.get_closed_loop_reference().value
+        err = self.motor_arm_leader.get_closed_loop_error().value
+        vel = self.motor_arm_leader.get_velocity().value
+        return (
+            abs(ref - self.target_rot) < IntakeConstants.ARM_TRAJECTORY_REF_TOL
+            and abs(err) < IntakeConstants.ARM_TRAJECTORY_ERROR_TOL
+            and abs(vel) < IntakeConstants.ARM_TRAJECTORY_VELOCITY_TOL
+        )
+
+    def advance_state_machine(self):
+        """Per-tick state machine. Two passes:
+        1. Apply the action for whatever state we're in. All actions
+           are idempotent so it's safe to re-apply every tick. This
+           also brings target_rot in sync with the current state.
+        2. Auto-transitions: decide whether we should move to a
+           different state next tick (based on the now-current target).
+        """
+        # Pass 1: apply per-state action.
+        match self._arm_state:
+            case _ArmState.HOME:
+                self._brake_and_hold()
+            case _ArmState.DEPLOYING:
+                self._drive_to(self.arm_distance)
+            case _ArmState.DEPLOYED:
+                self._coast_and_release()
+            case _ArmState.GOING_HOME:
+                self._drive_to(0.0)
+            case _ArmState.PAUSED:
+                self._brake_and_hold()
+
+        # Pass 2: transitions out of transient states.
+        match self._arm_state:
+            case _ArmState.DEPLOYING:
+                if self._trajectory_complete() or self._trajectory_deadline_passed():
+                    self._arm_state = _ArmState.DEPLOYED
+                    self._trajectory_deadline = None
+            case _ArmState.GOING_HOME:
+                if self._trajectory_complete() or self._trajectory_deadline_passed():
+                    self._arm_state = _ArmState.HOME
+                    self._trajectory_deadline = None
 
     def periodic(self):
         self._loop_timer.start()
+
+        self.advance_state_machine()
 
         if not RobotBase.isReal() and RobotFeatures.LOGGING_ROBOT:
             position_rot = self.motor_arm_leader.get_position().value
@@ -265,6 +371,7 @@ class Intake(commands2.Subsystem):
             PyKitLogger.recordOutput(
                 "Intake/Target_Arm_Position", float(self.target_rot)
             )
+            PyKitLogger.recordOutput("Intake/Arm_State", self._arm_state.name)
             PyKitLogger.recordOutput(
                 "Intake/Actual_Roller_Velocity",
                 float(self.motor_roller.get_velocity().value),
@@ -285,9 +392,6 @@ class Intake(commands2.Subsystem):
             PyKitLogger.recordOutput(
                 "Intake/Closed_Loop_Refrence_Slope_Arm",
                 float(self.motor_arm_leader.get_closed_loop_reference_slope().value),
-            )
-            PyKitLogger.recordOutput(
-                "Intake/Target_Arm_State", self._target_position_name
             )
             PyKitLogger.recordOutput(
                 "Intake/Arm_Volt",

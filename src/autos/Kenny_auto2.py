@@ -36,17 +36,17 @@ class Kenny_auto2:
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[1]),
                 IntakePositionCommand(
-                    self.container.drivetrain,
                     self.container.intake,
                     IntakePositions.DEPLOYED,
+                    activate_rollers=True,
                 ).withTimeout(3),
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[2]),
                 IntakePositionCommand(
-                    self.container.drivetrain,
                     self.container.intake,
                     IntakePositions.HOME,
+                    activate_rollers=False,
                 ).withTimeout(3),
             ),
             ParallelCommandGroup(
@@ -55,17 +55,17 @@ class Kenny_auto2:
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[4]),
                 IntakePositionCommand(
-                    self.container.drivetrain,
                     self.container.intake,
                     IntakePositions.DEPLOYED,
+                    activate_rollers=True,
                 ).withTimeout(3),
             ),
             ParallelCommandGroup(
                 AutoBuilder.followPath(self.paths[5]),
                 IntakePositionCommand(
-                    self.container.drivetrain,
                     self.container.intake,
                     IntakePositions.HOME,
+                    activate_rollers=False,
                 ).withTimeout(3),
             ),
             ParallelDeadlineGroup(

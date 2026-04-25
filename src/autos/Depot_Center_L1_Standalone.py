@@ -32,19 +32,17 @@ class Depot_Center_L1_Standalone:
             ParallelDeadlineGroup(
                 AutoBuilder.followPath(self.paths[1]),
                 IntakePositionCommand(
-                    self.container.drivetrain,
                     self.container.intake,
                     IntakePositions.DEPLOYED,
-                    auto=True,
+                    activate_rollers=True,
                 ).withTimeout(3),
             ),
             ParallelDeadlineGroup(
                 AutoBuilder.followPath(self.paths[2]),
                 IntakePositionCommand(
-                    self.container.drivetrain,
                     self.container.intake,
                     IntakePositions.HOME,
-                    auto=True,
+                    activate_rollers=False,
                 ).withTimeout(3),
             ),
             ParallelDeadlineGroup(

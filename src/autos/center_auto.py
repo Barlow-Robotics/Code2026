@@ -36,19 +36,17 @@ class Depot_Side_Balls:
             ParallelDeadlineGroup(
                 AutoBuilder.followPath(self.paths[1]),
                 IntakePositionCommand(
-                    self.container.drivetrain,
                     self.container.intake,
                     IntakePositions.DEPLOYED,
-                    auto=True,
+                    activate_rollers=True,
                 ).withTimeout(5),
             ),
             ParallelDeadlineGroup(
                 AutoBuilder.followPath(self.paths[2]),
                 IntakePositionCommand(
-                    self.container.drivetrain,
                     self.container.intake,
                     IntakePositions.HOME,
-                    auto=True,
+                    activate_rollers=False,
                 ).withTimeout(3),
             ),
             ParallelDeadlineGroup(

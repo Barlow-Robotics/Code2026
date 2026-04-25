@@ -30,13 +30,14 @@ class HP_Intake_Center_Pieces:
             from subsystems import IntakePositions
 
             deploy_cmd = IntakePositionCommand(
-                self.container.drivetrain,
                 self.container.intake,
                 IntakePositions.DEPLOYED,
-                auto=True,
+                activate_rollers=True,
             ).withTimeout(3)
             home_cmd = IntakePositionCommand(
-                self.container.drivetrain, self.container.intake, IntakePositions.HOME, auto=True
+                self.container.intake,
+                IntakePositions.HOME,
+                activate_rollers=False,
             ).withTimeout(3)
         else:
             deploy_cmd = cmd.none()

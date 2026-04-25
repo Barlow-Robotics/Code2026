@@ -3,7 +3,7 @@ from phoenix6.hardware import TalonFX
 from rev import SparkFlex, SparkFlexSim
 from wpilib.simulation import DCMotorSim, FlywheelSim, SingleJointedArmSim
 from wpimath.system.plant import DCMotor, LinearSystemId
-from wpimath.units import radiansToRotations
+from wpimath.units import radiansToRotations, rotationsToRadians
 
 
 class FlywheelMotorSim:
@@ -104,6 +104,8 @@ class MotorPositionSim:
         viscous_damping: float = 0.0,
         static_friction: float = 0.0,
         load_voltage: float = 0.0,
+        min_position: float | None = None,
+        max_position: float | None = None,
     ):
         """
         viscous_damping: volts per (output rps) of opposing input, linear in
@@ -116,12 +118,18 @@ class MotorPositionSim:
             simulate a directional external load like gravity. For a
             mechanism with kG tuned on the real robot, pass ``kG`` so the
             controller's kG output cancels this bias at rest.
+        min_position, max_position: optional hard mechanical stops in
+            output rotations. If the integrator steps past either limit
+            the simulated position is clamped and velocity zeroed —
+            models an infinitely rigid stop.
         """
         self._sim_state = motor.sim_state
         self._gearing = gearing
         self._viscous_damping = viscous_damping
         self._static_friction = static_friction
         self._load_voltage = load_voltage
+        self._min_position = min_position
+        self._max_position = max_position
         plant = LinearSystemId.DCMotorSystem(motor_model, moi, gearing)
         self._motor_sim = DCMotorSim(plant, motor_model)
 
@@ -140,6 +148,14 @@ class MotorPositionSim:
 
         self._motor_sim.setInputVoltage(external_v + viscous_v + friction_v)
         self._motor_sim.update(tm_diff)
+
+        # Hard mechanical stops: clamp position + zero velocity.
+        if self._min_position is not None or self._max_position is not None:
+            pos_rot = radiansToRotations(self._motor_sim.getAngularPosition())
+            if self._min_position is not None and pos_rot < self._min_position:
+                self._motor_sim.setState(rotationsToRadians(self._min_position), 0.0)
+            elif self._max_position is not None and pos_rot > self._max_position:
+                self._motor_sim.setState(rotationsToRadians(self._max_position), 0.0)
 
         position_rot = radiansToRotations(self._motor_sim.getAngularPosition())
         velocity_rps = radiansToRotations(self._motor_sim.getAngularVelocity())
