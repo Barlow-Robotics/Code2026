@@ -68,7 +68,9 @@ class Feeder(commands2.Subsystem):
         FEEDER_CONFIG_ALTERNATING._apply_settings(
             self.motor_feeder_alternating, inverted=True
         )
-        self._duty_cycle_out = controls.DutyCycleOut(0, enable_foc=MotorIDs.foc_enabled())
+        self._duty_cycle_out = controls.DutyCycleOut(
+            0, enable_foc=MotorIDs.foc_enabled()
+        )
         self._velocity_voltage = controls.VelocityVoltage(
             0, enable_foc=MotorIDs.foc_enabled()
         )
@@ -118,7 +120,6 @@ class Feeder(commands2.Subsystem):
         self.target_velocity_feeder_alternating = -velocity
         self.target_velocity_feeder_constant = -velocity
 
-
     def stop(self):
         self.target_velocity_feeder_constant = 0.0
         self.target_velocity_feeder_alternating = 0.0
@@ -141,9 +142,7 @@ class Feeder(commands2.Subsystem):
 
     def log_motor(self, motor: TalonFXS, prefix: str, target_velocity: float):
         if RobotFeatures.LOW_LOGGING:
-            PyKitLogger.recordOutput(
-                f"{prefix}/target_RPS", float(target_velocity)
-            )
+            PyKitLogger.recordOutput(f"{prefix}/target_RPS", float(target_velocity))
             PyKitLogger.recordOutput(
                 f"{prefix}/current_RPS", float(motor.get_velocity().value)
             )

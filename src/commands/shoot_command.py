@@ -16,7 +16,7 @@ class ShootCommand(Command):
         feeder: "Feeder",
         spindex: "Spindex",
         turret: "Turret",
-        intake: "Intake"
+        intake: "Intake",
     ):
         super().__init__()
         self.driveSub = driveSub

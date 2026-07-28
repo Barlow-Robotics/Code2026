@@ -60,11 +60,11 @@ class LoopTimer:
 
             if self._count > 0:
                 avg_ms = (self._sum_us / self._count) / 1000.0
-                max_ms = self._max_us / 1000.0
+                # max_ms = self._max_us / 1000.0
             else:
                 avg_ms = 0.0
-                max_ms = 0.0
-            if self._prefix == 'Profiling/Scheduler' and RobotFeatures.LOW_LOGGING:
+                # max_ms = 0.0
+            if self._prefix == "Profiling/Scheduler" and RobotFeatures.LOW_LOGGING:
                 PyKitLogger.recordOutput(f"{self._prefix}/avg_ms", avg_ms)
                 # PyKitLogger.recordOutput(f"{self._prefix}/max_ms", max_ms)
                 # PyKitLogger.recordOutput(f"{self._prefix}/count", float(self._count))

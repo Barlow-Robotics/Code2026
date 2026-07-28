@@ -225,7 +225,7 @@ class Controller:
                         container.feeder,
                         container.spindex,
                         container.turret,
-                        container.intake
+                        container.intake,
                     )
                 )
                 controller.b().whileTrue(

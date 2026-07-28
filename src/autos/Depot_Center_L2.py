@@ -20,7 +20,8 @@ path_name = "HP_Center_2L"
 class Depot_Center_L2:
     def __init__(self, container: "RobotContainer"):
         self.paths = [
-            PathPlannerPath.fromChoreoTrajectory(path_name, i).mirrorPath() for i in range(6)
+            PathPlannerPath.fromChoreoTrajectory(path_name, i).mirrorPath()
+            for i in range(6)
         ]
         self.container = container
 

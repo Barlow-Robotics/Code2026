@@ -277,7 +277,9 @@ class Drivetrain(Subsystem, TunerSwerveDrivetrain):
                         (
                             # output is actually radians per second, but SysId only supports "volts"
                             self.set_control(
-                                self._rotation_characterization.with_rotational_rate(output)
+                                self._rotation_characterization.with_rotational_rate(
+                                    output
+                                )
                             ),
                             # also log the requested output for SysId
                             SignalLogger.write_double("Rotational_Rate", output),

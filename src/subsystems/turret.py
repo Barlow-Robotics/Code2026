@@ -5,7 +5,6 @@ from wpilib import (
     DriverStation,
     Mechanism2d,
     Color8Bit,
-    RobotBase,
     SmartDashboard,
 )
 from wpimath.geometry import Translation3d, Pose2d
@@ -48,9 +47,6 @@ class Turret(Subsystem):
             SmartDashboard.putNumber("Turret/VELOCITY_MIN", 12.0)
             SmartDashboard.putNumber("Turret/VELOCITY_DISTANCE_THRESHOLD", 2.6)
 
-
-
-
         else:
             self.kV = 1.8
             self.kD = 1.5
@@ -58,7 +54,7 @@ class Turret(Subsystem):
             self.kP = 0.0
             self.kS = 0.43
             self.kG = 0.0
-        
+
         if RobotFeatures.SmartDashboardTuning:
             HOOD_MOTOR_CONFIG = TalonConfigFXS(
                 kP=SmartDashboard.getNumber("kP", 0.0),
@@ -332,12 +328,15 @@ class Turret(Subsystem):
         if RobotFeatures.LOGGING_TURRET:
             PyKitLogger.recordOutput("Turret/initial_distance_to_hub", float(distance))
 
-
         if RobotFeatures.SmartDashboardTuning:
             VELOCITY_SLOPE = SmartDashboard.getNumber("Turret/VELOCITY_SLOPE", 2.0)
-            VELOCITY_INTERCEPT = SmartDashboard.getNumber("Turret/VELOCITY_INTERCEPT", 10.0)
+            VELOCITY_INTERCEPT = SmartDashboard.getNumber(
+                "Turret/VELOCITY_INTERCEPT", 10.0
+            )
             VELOCITY_MIN = SmartDashboard.getNumber("Turret/VELOCITY_MIN", 12.0)
-            VELOCITY_DISTANCE_THRESHOLD = SmartDashboard.getNumber("Turret/VELOCITY_DISTANCE_THRESHOLD", 2.6)
+            VELOCITY_DISTANCE_THRESHOLD = SmartDashboard.getNumber(
+                "Turret/VELOCITY_DISTANCE_THRESHOLD", 2.6
+            )
         else:
             VELOCITY_SLOPE = 2.0
             VELOCITY_INTERCEPT = 10.0
@@ -552,7 +551,7 @@ class Turret(Subsystem):
                     if target_pose == CustomPoints.TARGET_POSE_SHOOT_BLUE:
                         target_pose = CustomPoints.TARGET_POSE_SHOOT_BLUE_OTHER_SIDE
                     else:
-                        target_pose = CustomPoints.TARGET_POSE_SHOOT_BLUE                    
+                        target_pose = CustomPoints.TARGET_POSE_SHOOT_BLUE
                 else:
                     target_pose = pose.nearest(
                         [

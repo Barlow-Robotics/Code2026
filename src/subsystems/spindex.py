@@ -25,14 +25,12 @@ class Spindex(commands2.Subsystem):
         SmartDashboard.putNumber("Spindex kD", self.kD_spindex)
         SmartDashboard.putNumber("Spindex kV", self.kV_spindex)
         self.motor_spindex: TalonFX = TalonFX(MotorIDs.motor_id_motor_spindex, "*")
-        
-        self.initMotors()        
 
+        self.initMotors()
 
         self._motion_magic_velocity_voltage = controls.MotionMagicVelocityVoltage(
             0, enable_foc=MotorIDs.foc_enabled()
         )
-
 
         self.target_velocity_spindex = -1.0
 
@@ -58,14 +56,12 @@ class Spindex(commands2.Subsystem):
             self._motion_magic_velocity_voltage.with_velocity(0).with_acceleration(0.1)
         )
 
-
     def initMotors(self):
         if RobotFeatures.SmartDashboardTuning:
             self.kP_spindex = SmartDashboard.getNumber("Spindex kP", 0.16)
             self.kI_spindex = SmartDashboard.getNumber("Spindex kI", 0)
             self.kD_spindex = SmartDashboard.getNumber("Spindex kD", 0)
             self.kV_spindex = SmartDashboard.getNumber("Spindex kV", 0.16)
-
 
         SPINDEX_CONFIG = TalonConfigFX(
             kP=self.kP_spindex,

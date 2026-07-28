@@ -18,7 +18,7 @@ from pykit.logger import Logger as PyKitLogger
 from constants.robot_constants import RobotFeatures
 from utils.profiler import LoopTimer
 from constants import IntakeConstants, MotorIDs
-from utils import TalonConfigFX, generateSysIdProfile, IntakePositions
+from utils import TalonConfigFX, generateSysIdProfile
 
 
 class _ArmState(Enum):

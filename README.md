@@ -1,34 +1,42 @@
 # Code2026
 
 ## Installation
+
 All dependencies are managed via [uv](https://docs.astral.sh/uv/).
+
 - Please follow the [installation instructions](https://docs.astral.sh/uv/getting-started/installation/#standalone-installer)
 
 Once you have uv installed, you only need to run:
+
 ```
 uv run frc sync
 ```
 
 ## Best Practices
+
 We use ruff for formatting code. This ensures consistency and minimizes white-space-related conflicts.
- - VS Code should be set up to install the `charliemarsh.ruff` extension and will format-on-save.
- - Before pushing code always format using ruff:
-    ```
-    uv run ruff format
-    uv run ruff check
-    ```
+
+- VS Code should be set up to install the `charliemarsh.ruff` extension and will format-on-save.
+- Before pushing code always format using ruff:
+  ```
+  uv run ruff format
+  uv run ruff check
+  ```
 
 ## To simulate the robot
+
 ```
 uv run frc sim
 ```
 
 ## To deploy to the robot
+
 ```
 uv run frc deploy
 ```
 
 If you want to skip running the tests
+
 ```
 uv run frc deploy --skip-tests
 ```
@@ -47,37 +55,30 @@ For replay watch, do the following:
 LOG_PATH=/path/to/log/file.wpilog uv run -- robotpy --main src watch
 ```
 
-
 Notes:
-We use L1 swerve. 
+We use L1 swerve.
 USB: 172.22.11.2
 Radio: 10.45.72.1
 RoboRIO: 10.45.72.2
 Vision: 10.45.72.201
 SSH into RoboRIO: admin@roboRIO-4572-frc.local
-AndyMark field at districts and regionals. 
+AndyMark field at districts and regionals.
 
 TODO at comp:
+
 1. Need to update deploy/pathplanner/settings.json
-should these be tuned?
-auto_translation_pid = PIDConstants(4, 0.0, 0)
-auto_rotation_pid = PIDConstants(5.0, 0.0, 0.0)
-8. I would recommend an actual PID to the stop point’s pose so you can be cleaning up any residual path error during the shooting pause
-10. Hood gittering at 0 
-13. Add vision onto other orin nano. 
-14. Figure out uv run frc debugpy/debug.
-
-
-
-
-
-
-
-
+   should these be tuned?
+   auto_translation_pid = PIDConstants(4, 0.0, 0)
+   auto_rotation_pid = PIDConstants(5.0, 0.0, 0.0)
+2. I would recommend an actual PID to the stop point’s pose so you can be cleaning up any residual path error during the shooting pause
+3. Hood gittering at 0
+4. Add vision onto other orin nano.
+5. Figure out uv run frc debugpy/debug.
 
 VISION
+
 1) Usew command to usb memlory buffer: sudo sh -c 'echo 256 > /sys/module/usbcore/parameters/usbfs_memory_mb'
 2) try 512 mb
-2) check active usb, performance
-2) attempt to put each camera into 1 usb port and see if that works
-3) set fps to 15fps
+3) check active usb, performance
+4) attempt to put each camera into 1 usb port and see if that works
+5) set fps to 15fps

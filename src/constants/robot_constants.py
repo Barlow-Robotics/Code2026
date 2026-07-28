@@ -5,7 +5,6 @@ from wpimath.system.plant import DCMotor
 from constants.tuner_constants import TunerConstants
 from constants import SI
 from pathplannerlib.config import PIDConstants
-import math
 
 
 class RobotFeatures:
