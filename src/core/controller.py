@@ -13,7 +13,7 @@ from wpimath.geometry import Rotation2d
 from commands import IntakePositionCommand, ShootCommand, ReverseCommand
 from commands.throw_feeder_command import ThrowFeederCommand
 from constants import DriveConstants, RobotFeatures
-from subsystems.intake import IntakePositions
+from utils import IntakePositions
 
 if TYPE_CHECKING:
     from core import RobotContainer
