@@ -97,10 +97,10 @@ class Feeder(commands2.Subsystem):
         if invert:
             self.target_velocity_feeder_alternating = -velocity
             self.motor_feeder_constant.set_control(
-                self._velocity_voltage.with_velocity(velocity * 4)
+                self._velocity_voltage.with_velocity(velocity * 1)
             )
             self.motor_feeder_alternating.set_control(
-                self._velocity_voltage.with_velocity(-velocity * 4)
+                self._velocity_voltage.with_velocity(-velocity * 1)
             )
         else:
             self.motor_feeder_constant.set_control(

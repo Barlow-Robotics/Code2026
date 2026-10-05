@@ -34,7 +34,7 @@ class Controller:
         self._driver = CommandXboxController(self._DRIVER_PORT)
         self._test_controller = CommandXboxController(3)
 
-        self._current_state = StartingState.NORMAL.value
+        self._current_state = StartingState.SLOW.value
         container.drivetrain.setDefaultCommand(
             container.drivetrain.apply_request(
                 lambda: (
@@ -76,15 +76,6 @@ class Controller:
                 )
             )
         )
-
-        for controller in [self._driver]:
-            controller.rightBumper().onTrue(
-                cmd.runOnce(lambda: self.update_driver(sub=False))
-            )
-
-            controller.leftBumper().onTrue(
-                cmd.runOnce(lambda: self.update_driver(sub=True))
-            )
 
         # Idle while the robot is disabled. This ensures the configured
         # neutral mode is applied to the drive motors while disabled.
@@ -160,7 +151,7 @@ class Controller:
             )
         # Subsystem button bindings
         if RobotFeatures.HAS_INTAKE:
-            for controller in [self._operator]:
+            for controller in [self._driver]:
                 # Y → Deploy intake
                 controller.y().onTrue(
                     IntakePositionCommand(
@@ -175,12 +166,8 @@ class Controller:
                     )
                 )
                 # A → Retract intake
-                controller.rightTrigger().whileTrue(
+                controller.rightBumper().whileTrue(
                     cmd.runOnce(container.intake.activate_roller)
-                ).whileFalse(cmd.runOnce(container.intake.stop_rollers))
-
-                controller.leftTrigger().whileTrue(
-                    cmd.runOnce(container.intake.reverse_roller)
                 ).whileFalse(cmd.runOnce(container.intake.stop_rollers))
 
         for controller in [self._driver]:
@@ -228,7 +215,7 @@ class Controller:
                         container.intake,
                     )
                 )
-                controller.b().whileTrue(
+                controller.leftTrigger().whileTrue(  # eject
                     ThrowFeederCommand(container.feeder, container.spindex)
                 )
 
@@ -238,7 +225,7 @@ class Controller:
             and RobotFeatures.HAS_SPINDEX
             and RobotFeatures.HAS_INTAKE
         ):
-            for controller in [self._operator]:
+            for controller in [self._driver]:
                 controller.leftBumper().whileTrue(  # reverse intake
                     ReverseCommand(
                         container.drivetrain,

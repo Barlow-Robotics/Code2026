@@ -34,7 +34,7 @@ class Turret(Subsystem):
         super().__init__()
         self._loop_timer = LoopTimer("Turret")
         self.driveSub = driveSub
-        self.actual_velocity_to_go = 15.5
+        self.actual_velocity_to_go = 13
         if RobotFeatures.SmartDashboardTuning:
             SmartDashboard.putNumber("kV", 1.8)
             SmartDashboard.putNumber("kD", 1.5)
