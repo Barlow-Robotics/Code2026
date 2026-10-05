@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robot Controls</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #5f6368;
+    --line: #9aa0a6;
+    --body: #e8eaed;
+    --body-stroke: #3c4043;
+    --part: #ffffff;
+    --unused: #f1f3f4;
+    --accent: #1a73e8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.4;
+  }
+  main { max-width: 1000px; margin: 0 auto; }
+  h1 { margin: 0 0 4px; font-size: 28px; }
+  .sub { margin: 0 0 16px; color: var(--muted); }
+  svg { width: 100%; height: auto; display: block; }
+  svg text { font-family: inherit; fill: var(--fg); }
+  .lbl { font-size: 16px; font-weight: 700; }
+  .desc { font-size: 14px; fill: var(--muted); }
+  .lead { stroke: var(--line); stroke-width: 1.5; fill: none; }
+  .dot { fill: var(--accent); }
+  .body { fill: var(--body); stroke: var(--body-stroke); stroke-width: 3; }
+  .part { fill: var(--part); stroke: var(--body-stroke); stroke-width: 2; }
+  .unused { fill: var(--unused); stroke: var(--line); stroke-width: 1.5; }
+  .glyph { font-size: 14px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 15px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--unused); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  td:first-child { white-space: nowrap; font-weight: 600; }
+  .notes { margin-top: 16px; font-size: 14px; color: var(--muted); }
+  .notes li { margin-bottom: 4px; }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: 0.95em; }
+  @media print {
+    body { padding: 0; }
+    @page { size: landscape; margin: 0.4in; }
+    table, .notes { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Robot Controls &mdash; Demo Configuration</h1>
+  <p class="sub">One Xbox controller on Driver Station <strong>port 0</strong>. Drive speed is fixed at half.</p>
+
+  <svg viewBox="-60 70 1120 560" role="img" aria-label="Xbox controller with each robot control labeled">
+    <!-- Triggers -->
+    <rect class="part" x="295" y="138" width="80" height="42" rx="12"/>
+    <rect class="part" x="625" y="138" width="80" height="42" rx="12"/>
+    <text class="glyph" x="335" y="159">LT</text>
+    <text class="glyph" x="665" y="159">RT</text>
+
+    <!-- Bumpers -->
+    <rect class="part" x="280" y="186" width="110" height="22" rx="10"/>
+    <rect class="part" x="610" y="186" width="110" height="22" rx="10"/>
+    <text class="glyph" x="335" y="197">LB</text>
+    <text class="glyph" x="665" y="197">RB</text>
+
+    <!-- Body -->
+    <path class="body" d="M 360 212 C 420 197, 580 197, 640 212 C 690 222, 720 252, 735 302
+      C 755 372, 770 442, 750 482 C 730 517, 685 512, 660 472 C 640 442, 620 422, 590 422
+      L 410 422 C 380 422, 360 442, 340 472 C 315 512, 270 517, 250 482
+      C 230 442, 245 372, 265 302 C 280 252, 310 222, 360 212 Z"/>
+
+    <!-- Left stick -->
+    <circle class="part" cx="360" cy="290" r="32"/>
+    <circle class="unused" cx="360" cy="290" r="20"/>
+    <text class="glyph" x="360" y="290">L</text>
+
+    <!-- D-pad (unused) -->
+    <path class="unused" d="M 420 352 h 20 v 18 h 18 v 20 h -18 v 18 h -20 v -18 h -18 v -20 h 18 Z"/>
+
+    <!-- Right stick -->
+    <circle class="part" cx="570" cy="380" r="32"/>
+    <circle class="unused" cx="570" cy="380" r="20"/>
+    <text class="glyph" x="570" y="380">R</text>
+
+    <!-- Xbox, View (unused), Menu -->
+    <circle class="unused" cx="500" cy="248" r="16"/>
+    <circle class="unused" cx="465" cy="292" r="10"/>
+    <circle class="part" cx="535" cy="292" r="10"/>
+    <text class="glyph" x="535" y="292" style="font-size:11px">&#8801;</text>
+
+    <!-- Face buttons -->
+    <circle cx="640" cy="255" r="16" fill="#f9ab00" stroke="#3c4043" stroke-width="2"/>
+    <circle cx="640" cy="325" r="16" fill="#34a853" stroke="#3c4043" stroke-width="2"/>
+    <circle class="unused" cx="675" cy="290" r="16"/>
+    <circle class="unused" cx="605" cy="290" r="16"/>
+    <text class="glyph" x="640" y="255">Y</text>
+    <text class="glyph" x="640" y="325">A</text>
+    <text class="glyph" x="675" y="290" style="fill:#9aa0a6">B</text>
+    <text class="glyph" x="605" y="290" style="fill:#9aa0a6">X</text>
+
+    <!-- Left callouts -->
+    <polyline class="lead" points="230,110 300,110 318,140"/>
+    <circle class="dot" cx="318" cy="140" r="4"/>
+    <text class="lbl" x="225" y="106" text-anchor="end">LT &mdash; Eject</text>
+    <text class="desc" x="225" y="125" text-anchor="end">Hold: feeder in eject mode</text>
+
+    <polyline class="lead" points="230,197 282,197"/>
+    <circle class="dot" cx="282" cy="197" r="4"/>
+    <text class="lbl" x="225" y="193" text-anchor="end">LB &mdash; Reverse</text>
+    <text class="desc" x="225" y="212" text-anchor="end">Hold: feeder + spindex backwards</text>
+
+    <polyline class="lead" points="230,300 328,295"/>
+    <circle class="dot" cx="328" cy="295" r="4"/>
+    <text class="lbl" x="225" y="296" text-anchor="end">Left stick &mdash; Drive</text>
+    <text class="desc" x="225" y="315" text-anchor="end">Field-relative translation</text>
+
+    <!-- Right callouts -->
+    <polyline class="lead" points="770,110 700,110 682,140"/>
+    <circle class="dot" cx="682" cy="140" r="4"/>
+    <text class="lbl" x="775" y="106">RT &mdash; Shoot</text>
+    <text class="desc" x="775" y="125">Hold: spin up, then feed</text>
+
+    <polyline class="lead" points="770,197 718,197"/>
+    <circle class="dot" cx="718" cy="197" r="4"/>
+    <text class="lbl" x="775" y="193">RB &mdash; Intake roller</text>
+    <text class="desc" x="775" y="212">Hold to run</text>
+
+    <polyline class="lead" points="770,255 656,255"/>
+    <circle class="dot" cx="656" cy="255" r="4"/>
+    <text class="lbl" x="775" y="251">Y &mdash; Deploy arm</text>
+    <text class="desc" x="775" y="270">Press</text>
+
+    <polyline class="lead" points="770,330 656,325"/>
+    <circle class="dot" cx="656" cy="325" r="4"/>
+    <text class="lbl" x="775" y="326">A &mdash; Retract arm</text>
+    <text class="desc" x="775" y="345">Press</text>
+
+    <polyline class="lead" points="770,415 600,388"/>
+    <circle class="dot" cx="600" cy="388" r="4"/>
+    <text class="lbl" x="775" y="411">Right stick &mdash; Rotate</text>
+    <text class="desc" x="775" y="430">Left / right only</text>
+
+    <!-- Bottom callout: Menu -->
+    <polyline class="lead" points="535,302 535,560"/>
+    <circle class="dot" cx="535" cy="302" r="4"/>
+    <text class="lbl" x="545" y="575">Menu (&#8801;) &mdash; Reset gyro</text>
+    <text class="desc" x="545" y="594">Point the robot straight away from you first</text>
+  </svg>
+
+  <table>
+    <thead><tr><th>Control</th><th>Action</th><th>How</th></tr></thead>
+    <tbody>
+      <tr><td>Left stick</td><td>Drive (field-relative)</td><td>Half speed, fixed</td></tr>
+      <tr><td>Right stick X</td><td>Rotate</td><td>Half speed, fixed</td></tr>
+      <tr><td>Right trigger</td><td>Shoot</td><td>Hold. Flywheel spins up, then the feeder, spindex and intake run.</td></tr>
+      <tr><td>Left trigger</td><td>Eject</td><td>Hold. Feeder runs in eject mode with the spindex.</td></tr>
+      <tr><td>Right bumper</td><td>Intake roller</td><td>Hold to run, release to stop.</td></tr>
+      <tr><td>Left bumper</td><td>Reverse</td><td>Hold. Feeder and spindex run backwards.</td></tr>
+      <tr><td>Y</td><td>Deploy intake arm</td><td>Press</td></tr>
+      <tr><td>A</td><td>Retract intake arm</td><td>Press</td></tr>
+      <tr><td>Menu (&#8801;, button 8)</td><td>Reset gyro</td><td>Press</td></tr>
+    </tbody>
+  </table>
+
+  <ul class="notes">
+    <li>B, X, the D-pad and View are not used. The operator controller (port 1) is not used either.</li>
+    <li><strong>Don't plug a controller into port 3.</strong> It's the testing controller, and its buttons 1 and 2 crash the robot code while vision is off.</li>
+    <li>Vision is off (<code>HAS_VISION = False</code>), so there is no turret auto-aim.</li>
+    <li>Bindings are defined in <code>src/core/controller.py</code>. Update this page when they change.</li>
+  </ul>
+</main>
+</body>
+</html>
